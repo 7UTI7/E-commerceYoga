@@ -1,0 +1,28 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build
+dist/
+build/
+public/css/tailwind.css
+
+# Env
+.env
+.env.local
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Dependency locks (opcional)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
