@@ -3,15 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cadastro - Namaste Yoga</title>
+  <title>Cadastro</title>
   <link rel="stylesheet" href="/public/css/tailwind.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- CDN do Tailwind para liberar classes arbitrárias (w-[...]) sem rebuild -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-dvh bg-white text-gray-900 antialiased">
   <div class="login-page grid md:grid-cols-2 min-h-dvh">
     <!-- imagem -->
     <div class="hidden md:block relative">
-      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center" class="absolute inset-0 h-full w-full object-cover" alt="">
+      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center"
+           class="absolute inset-0 h-full w-full object-cover" alt="">
       <div class="image-overlay absolute inset-0 bg-purple-600/20"></div>
     </div>
 
@@ -19,7 +22,12 @@
     <div class="flex items-center justify-center p-6">
       <div class="w-full max-w-md">
         <div class="text-center mb-6">
-          <a href="index.html" class="logo-link inline-block text-3xl font-serif font-bold text-purple-700">Namaste Yoga</a>
+          <!-- AJUSTE AQUI: mude só o número em !w-[140px] -->
+          <img
+            src="/public/assets/logo.jpg"
+            alt="Logo Namaste Yoga"
+            class="block mx-auto h-auto object-contain !w-[140px] sm:!w-[160px] md:!w-[180px]"
+          />
           <h2 class="mt-6 text-2xl font-bold text-gray-900">Crie sua conta</h2>
           <p class="mt-1 text-sm text-gray-600">Junte-se à nossa comunidade e inicie sua jornada.</p>
         </div>
@@ -116,6 +124,20 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    function togglePassword(id) {
+      const input = document.getElementById(id);
+      const icon = document.getElementById(id + '-eye');
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        input.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    }
+  </script>
 </body>
 </html>
