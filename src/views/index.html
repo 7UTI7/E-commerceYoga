@@ -1,515 +1,532 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Namaste Yoga - Página Principal</title>
-  <link rel="stylesheet" href="/public/css/tailwind.css">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Namaste Yoga - Página Principal</title>
 
-</head>
-<body class="min-h-dvh bg-gray-50 text-gray-900 antialiased">
- <!-- ================= HEADER INDEX ================= -->
-<header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="h-[72px] flex items-center justify-between gap-3">
+    <!-- CSS/Ícones -->
+    <link rel="stylesheet" href="/public/css/tailwind.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
 
-      <!-- ESQUERDA: logo + telefone -->
-      <div class="flex items-center gap-3 min-w-0">
-        <a href="index.html" class="flex items-center gap-2 shrink-0">
-          <img src="/public/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" class="h-10 w-10 rounded">
-          <span class="text-xl font-serif font-bold text-purple-700 whitespace-nowrap">Karla Rodrigues Yoga</span>
-        </a>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
 
-        <!-- telefone encostado na marca -->
-        <div class="hidden sm:flex items-center gap-2 pl-3 ml-1 border-l border-gray-200 text-sm text-gray-600 whitespace-nowrap">
-          <i class="fas fa-phone text-[18px] text-purple-600"></i>
-          <span>(11) 99999-9999</span>
+  <body class="min-h-dvh bg-gray-50 text-gray-900 antialiased">
+    <!-- =========================================================
+         HEADER
+         ========================================================= -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="h-[72px] flex items-center justify-between gap-3">
+          <!-- ESQUERDA: logo + telefone -->
+          <div class="flex items-center gap-3 min-w-0">
+            <a href="index.html" class="flex items-center gap-2 shrink-0">
+              <img src="/public/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" class="h-10 w-10 rounded" />
+              <span class="text-xl font-serif font-bold text-purple-700 whitespace-nowrap">Karla Rodrigues Yoga</span>
+            </a>
+
+            <!-- telefone encostado na marca -->
+            <div class="hidden sm:flex items-center gap-2 pl-3 ml-1 border-l border-gray-200 text-sm text-gray-600 whitespace-nowrap">
+              <i class="fas fa-phone text-[18px] text-purple-600"></i>
+              <span>(11) 99999-9999</span>
+            </div>
+          </div>
+
+          <!-- CENTRO: endereço (clicável → Google Maps) -->
+          <div class="hidden lg:flex items-center gap-2 flex-1 justify-center min-w-0 text-sm">
+            <i class="fas fa-map-marker-alt text-[18px] text-purple-600 shrink-0"></i>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=R.%20Navajas%2C%20632%20-%20sala%203%20-%20Shangai%2C%20Mogi%20das%20Cruzes%20-%20SP%2C%2008745-200"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-gray-700 hover:text-purple-700 transition-colors block max-w-[700px] truncate"
+              title="R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200"
+            >
+              R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200
+            </a>
+          </div>
+
+          <!-- DIREITA: redes + ENTRAR + CADASTRAR -->
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="hidden md:flex items-center gap-3 text-purple-600">
+              <a href="https://www.instagram.com/karlarodriguesyoga/" target="_blank" rel="noopener" aria-label="Instagram" class="hover:text-purple-800">
+                <i class="fab fa-instagram text-[20px]"></i>
+              </a>
+              <a href="https://www.facebook.com/KarlaRodriguesYoga" target="_blank" rel="noopener" aria-label="Facebook" class="hover:text-purple-800">
+                <i class="fab fa-facebook text-[20px]"></i>
+              </a>
+            </div>
+
+            <!-- ENTRAR -->
+            <a
+              href="login.html"
+              class="px-4 py-2 rounded-lg border-2 border-purple-600 text-purple-600 font-medium hover:bg-purple-600 hover:text-white transition"
+            >
+              Entrar
+            </a>
+
+            <!-- CADASTRAR -->
+            <a href="cadastro.html" class="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition">
+              Cadastrar
+            </a>
+          </div>
         </div>
       </div>
+    </header>
 
-      <!-- CENTRO: endereço (clicável → Google Maps) -->
-      <div class="hidden lg:flex items-center gap-2 flex-1 justify-center min-w-0 text-sm">
-        <i class="fas fa-map-marker-alt text-[18px] text-purple-600 shrink-0"></i>
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+    <section class="relative h-[90vh] min-h-[560px] flex items-center justify-center text-center">
+      <img src="/public/assets/yogatelainicial2.jpg" alt="" class="absolute inset-0 h-full w-full object-cover" />
+      <div class="absolute inset-0 bg-black/40"></div>
+
+      <div class="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
+        <img
+          src="/public/assets/ChatGPT Image 7 de out. de 2025, 23_30_26.png"
+          alt="Logo Karla Rodrigues Yoga"
+          class="px-60 mx-auto mt-0 rounded-lg"
+        />
+        <h2 class="text-4xl sm:text-5xl font-bold leading-tight text-white font-serif">Encontre seu equilíbrio interior</h2>
+        <p class="mt-6 text-lg sm:text-xl text-white/90">
+          Descubra a paz e harmonia através da prática do yoga. Transforme corpo, mente e espírito.
+        </p>
         <a
-          href="https://www.google.com/maps/search/?api=1&query=R.%20Navajas%2C%20632%20-%20sala%203%20-%20Shangai%2C%20Mogi%20das%20Cruzes%20-%20SP%2C%2008745-200"
-          target="_blank" rel="noopener noreferrer"
-          class="text-gray-700 hover:text-purple-700 transition-colors block max-w-[700px] truncate"
-          title="R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200">
-          R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200
+          href="cadastro.html"
+          class="cta-button mt-8 inline-flex items-center rounded-xl bg-purple-600 px-6 py-3 text-white text-lg font-semibold hover:bg-purple-700 hover:scale-[1.02] transition"
+        >
+          Comece sua jornada
         </a>
       </div>
+    </section>
 
-      <!-- DIREITA: redes + ENTRAR + CADASTRAR -->
-      <div class="flex items-center gap-3 shrink-0">
-        <div class="hidden md:flex items-center gap-3 text-purple-600">
-          <a href="https://www.instagram.com/karlarodriguesyoga/" target="_blank" rel="noopener" aria-label="Instagram" class="hover:text-purple-800">
-            <i class="fab fa-instagram text-[20px]"></i>
-          </a>
-          <a href="https://www.facebook.com/KarlaRodriguesYoga" target="_blank" rel="noopener" aria-label="Facebook" class="hover:text-purple-800">
-            <i class="fab fa-facebook text-[20px]"></i>
-          </a>
-        </div>
-
-        <!-- ENTRAR -->
-        <a href="login.html"
-           class="px-4 py-2 rounded-lg border-2 border-purple-600 text-purple-600 font-medium hover:bg-purple-600 hover:text-white transition">
-          Entrar
-        </a>
-
-        <!-- CADASTRAR -->
-        <a href="cadastro.html"
-           class="px-4 py-2 rounded-lg bg-purple-600 text-white font-medium hover:bg-purple-700 transition">
-          Cadastrar
-        </a>
-      </div>
-    </div>
-  </div>
-</header>
-
-  <!-- Hero -->
-  <section class="relative h-[90vh] min-h-[560px] flex items-center justify-center text-center">
-    <img src="/public/assets/yogatelainicial2.jpg"
-         alt="" class="absolute inset-0 h-full w-full object-cover">
-    <div class="absolute inset-0 bg-black/40"></div>
-
-    <div class="relative z-10 mx-auto max-w-3xl px-4 sm:px-6">
-      <img src="/public/assets/ChatGPT Image 7 de out. de 2025, 23_30_26.png" alt="Logo Karla Rodrigues Yoga" class="px-60 mx-auto mt-0 rounded-lg">
-      <h2 class="text-4xl sm:text-5xl font-bold leading-tight text-white font-serif">Encontre seu equilíbrio interior</h2>
-      <p class="mt-6 text-lg sm:text-xl text-white/90">Descubra a paz e harmonia através da prática do yoga. Transforme corpo, mente e espírito.</p>
-      <a href="cadastro.html" class="cta-button mt-8 inline-flex items-center rounded-xl bg-purple-600 px-6 py-3 text-white text-lg font-semibold hover:bg-purple-700 hover:scale-[1.02] transition">
-        Comece sua jornada
-      </a>
-    </div>
-  </section>
-
-  <!-- About -->
-  <section id="sobre" class=" bg-red-100 py-20 bg-gray-50">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 gap-10 items-center">
-        <div class="overflow-hidden rounded-2xl shadow-xl max-h-[600px] max-w-[550px]">
-          <img class="h-[650px] w-[550px] object-cover"
-               src="/public/assets/karla.jpeg"
-               alt="Instrutora de Yoga">
-        </div>
-        <div class="bg-red-100">
-          <h3 class="text-3xl font-bold text-gray-900 font-serif">Sobre nossa instrutora</h3>
-          <h4 class="mt-2 text-xl font-semibold text-purple-700">Karla Rodrigues</h4>
-          <p class="mt-4 text-gray-600">Praticante de yoga há 20 anos. Facilitadora de Hatha Yoga, formada Hatha Yoga pelo IEPY, (Instituto de Pesquisas em Yoga) em parceria com o Instituto Kaivalyadhama (Índia).</p>
-          <p class="mt-4 text-gray-600">Também facilitadora de Yoga Restaurativo, Yoga Acessível para Trauma, Hatha Yoga sob a visão da Ayurveda, Yoga para Crianças e para Gestantes. Facilitadora em Atenção e Concentração nas Práticas Meditativas, pela Associação Palas Athena do Brasil.</p>
-          <p class="mt-4 text-gray-600">Doula, pelo Grupo de Apoio à Maternidade Ativa, Terapeuta em Ayurveda, Casa João de Barro, Fatec Paraná, Terapeuta em Reiki e Karuna, Mestre Cristine di Lorenzo, Terapeuta em Yoga Massagem Ayurvédica, Puja Punita.</p>
-          <p class="quote mt-6 italic border-l-4 border-purple-600 pl-4 text-gray-700">
-            "Em suas aulas e atendimentos aplica seus conhecimentos com um olhar terapêutico. Alunos são convidados a experienciar equilíbrio mental por meio da experiência física, da observação consciente do corpo e da respiração."
-          </p>
-          <div class="mt-6 flex flex-wrap gap-3">
-            <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Hatha Yoga</span>
-            <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Yoga Restaurativo</span>
-            <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Yoga Massagem Ayurvédica</span>
-            <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Reiki e Karuna</span>
+    <!-- =========================================================
+         ABOUT
+         ========================================================= -->
+    <section id="sobre" class="bg-red-100 py-20 bg-gray-50">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+          <div class="overflow-hidden rounded-2xl shadow-xl max-h-[600px] max-w-[550px]">
+            <img class="h-[650px] w-[550px] object-cover" src="/public/assets/karla.jpeg" alt="Instrutora de Yoga" />
+          </div>
+          <div class="bg-red-100">
+            <h3 class="text-3xl font-bold text-gray-900 font-serif">Sobre nossa instrutora</h3>
+            <h4 class="mt-2 text-xl font-semibold text-purple-700">Karla Rodrigues</h4>
+            <p class="mt-4 text-gray-600">
+              Praticante de yoga há 20 anos. Facilitadora de Hatha Yoga, formada Hatha Yoga pelo IEPY, (Instituto de Pesquisas em Yoga) em parceria com o Instituto
+              Kaivalyadhama (Índia).
+            </p>
+            <p class="mt-4 text-gray-600">
+              Também facilitadora de Yoga Restaurativo, Yoga Acessível para Trauma, Hatha Yoga sob a visão da Ayurveda, Yoga para Crianças e para Gestantes.
+              Facilitadora em Atenção e Concentração nas Práticas Meditativas, pela Associação Palas Athena do Brasil.
+            </p>
+            <p class="mt-4 text-gray-600">
+              Doula, pelo Grupo de Apoio à Maternidade Ativa, Terapeuta em Ayurveda, Casa João de Barro, Fatec Paraná, Terapeuta em Reiki e Karuna, Mestre Cristine di
+              Lorenzo, Terapeuta em Yoga Massagem Ayurvédica, Puja Punita.
+            </p>
+            <p class="quote mt-6 italic border-l-4 border-purple-600 pl-4 text-gray-700">
+              "Em suas aulas e atendimentos aplica seus conhecimentos com um olhar terapêutico. Alunos são convidados a experienciar equilíbrio mental por meio da
+              experiência física, da observação consciente do corpo e da respiração."
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Hatha Yoga</span>
+              <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Yoga Restaurativo</span>
+              <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Yoga Massagem Ayurvédica</span>
+              <span class="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800">Reiki e Karuna</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Services -->
-  <section class="services py-20 bg-white">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="text-center max-w-2xl mx-auto">
-      <h3 class="text-3xl font-bold font-serif text-gray-900">ESPECIALIDADES</h3>
-    </div>
-
-    <div class="services-grid mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-      <!-- Hatha Yoga -->
-      <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
-        <img src="/public/assets/especialidade1.jpg" alt="Hatha Yoga"
-             class="h-40 w-full object-cover rounded-2xl">
-        <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Hatha Yoga</h4>
-        <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
-          <li>Melhora <strong>força</strong>, <strong>flexibilidade</strong> e postura.</li>
-          <li>Aumenta <strong>mobilidade</strong> e <strong>consciência corporal</strong>.</li>
-          <li>Reduz <strong>estresse</strong> e <strong>ansiedade</strong>; melhora o foco.</li>
-          <li>Qualifica a <strong>respiração</strong> e o <strong>sono</strong>.</li>
-          <li>Alivia <strong>tensões</strong> e dores do dia a dia.</li>
-        </ul>
-      </div>
-
-      <!-- Reiki e Karuna -->
-      <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
-        <img src="/public/assets/especialidaed2.jpg" alt="Reiki e Karuna"
-             class="h-40 w-full object-cover rounded-2xl">
-        <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Reiki e Karuna</h4>
-        <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
-          <li>Induz <strong>relaxamento profundo</strong> e bem-estar.</li>
-          <li>Reduz <strong>ansiedade</strong> e tensão emocional.</li>
-          <li>Favorece <strong>sono</strong> mais reparador.</li>
-          <li>Equilibra a <strong>energia</strong> e recupera a disposição.</li>
-          <li>Desenvolve <strong>autocompaixão</strong> e libera padrões emocionais.</li>
-        </ul>
-      </div>
-
-      <!-- Yoga Restaurativo -->
-      <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
-        <img src="/public/assets/especialidade3.jpg" alt="Yoga Restaurativo"
-             class="h-40 w-full object-cover rounded-2xl">
-        <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Yoga Restaurativo</h4>
-        <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
-          <li>Acalma o <strong>sistema nervoso</strong>; reduz estresse e ansiedade.</li>
-          <li>Promove <strong>descanso profundo</strong> e melhora do sono.</li>
-          <li>Suaviza <strong>dores crônicas</strong> e fadiga.</li>
-          <li>Aumenta a <strong>consciência da respiração</strong> e a presença.</li>
-          <li>Excelente para <strong>recuperação</strong> física e mental.</li>
-        </ul>
-      </div>
-
-      <!-- Yoga Massagem Ayurvédica -->
-      <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
-        <img src="/public/assets/especilidade5.jpg" alt="Yoga Massagem Ayurvédica"
-             class="h-40 w-full object-cover rounded-2xl">
-        <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Yoga Massagem Ayurvédica</h4>
-        <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
-          <li>Desfaz <strong>tensões musculares</strong>; melhora a circulação.</li>
-          <li>Aumenta <strong>amplitude de movimento</strong> e flexibilidade.</li>
-          <li>Melhora <strong>postura</strong> e consciência corporal.</li>
-          <li>Alivia <strong>dores</strong> e cansaço.</li>
-          <li>Sensação de <strong>leveza</strong> e energia.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-  <section class="services py-20 bg-gray-100">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-2xl mx-auto">
-        <h3 class="text-3xl font-bold font-serif text-gray-900">EVENTOS</h3>
-        
-      </div>
-
-      <div class="services-grid mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-        <!-- card -->
-        <div class="service-card group text-center rounded-2xl bg-white p-6
-            shadow-md hover:shadow-xl transition
-            h-[600px] overflow-hidden flex flex-col">
-
-  <img src="/public/assets/sapo.jpg"
-       class="h-[px] w-[350px] object-cover mx-auto rounded-2xl" alt="">
-
-  <div class="py-2"></div>
-
-  <h4 class="text-xl font-bold text-gray-900">Aulão de Yoga Restaurativo</h4>
-  <h3 class="text-lg[] font-bold text-gray-900">Data: 18/10</h3>
-  <h3 class="text-lg[] font-bold text-gray-900">Horário: 9:15 - 11h30 </h3>
-
-
-  <!-- ÁREA DO TEXTO: ocupa o espaço livre e rola por dentro se precisar -->
-  <div class="mt-3 grow min-h-0">
-    <p class="text-gray-600 h-full overflow-y-auto pr-1 text-lg">
-      Uma prática suave e acolhedora para restaurar o corpo, mente e energia. Um momento de pausa para reconectar-se com você mesma(o).
-      <!-- pode crescer à vontade; vai rolar aqui sem empurrar o botão -->
-    </p>
-  </div>
-
-  <!-- BOTÃO FIXO NO FUNDO -->
-  <div class="pt-4 mt-auto flex justify-center">
-    <a href="cadastro.html"
-       class="inline-flex items-center justify-center px-14 py-2.5 rounded-lg
-              bg-green-600 text-white font-medium transition-colors duration-300 ease-in-out
-              hover:bg-green-700 focus:bg-green-700 active:scale-[0.98]">
-      <i class="fab fa-whatsapp text-2xl"></i>
-    </a>
-  </div>
-</div>
-
-
-        <div class="service-card group text-center rounded-2xl bg-white p-6
-            shadow-md hover:shadow-xl transition
-            h-[600px] overflow-hidden flex flex-col">
-
-  <img src="/public/assets/fatec.jpg"
-       class="h-[250px] w-[350px] object-cover mx-auto rounded-2xl" alt="">
-
-  <div class="py-2"></div>
-
-  <h4 class="text-xl font-bold text-gray-900">Cinco minutos pra mim</h4>
-  <h2 class="text-lg[] font-bold text-gray-900">Data: Sexta-feiras</h2>
-  <h2 class="text-lg[] font-bold text-gray-900">Horário: 11h</h2>
-  <h3 class="text-lg[] font-bold text-gray-900">Local: Auditório Fatec Zona Leste</h3>
-
-  <!-- ÁREA DO TEXTO: ocupa o espaço livre e rola por dentro se precisar -->
-<div class="mt-3 grow min-h-0 overflow-y-auto">
-  <div class="pr-1 space-y-3">
-    <p class="text-gray-600 text-lg leading-relaxed">
-      Vivências para você: movimentar seu corpo com suavidade, melhorar seu foco, equilíbrio e vitalidade,
-      dormir melhor, lidar melhor com a ansiedade, estresse e transtornos psicológicos, e relaxar num
-      ambiente descontraído.
-    </p>
-    <p class="text-gray-600 text-lg leading-relaxed">
-      SUA SAÚDE MENTAL TAMBÉM FAZ PARTE DO APRENDIZADO!!
-    </p>
-  </div>
-</div>
-
-  <!-- BOTÃO FIXO NO FUNDO -->
-  <div class="pt-4 mt-auto flex justify-center">
-    <a href="cadastro.html"
-       class="inline-flex items-center justify-center px-14 py-2.5 rounded-lg
-              bg-green-600 text-white font-medium transition-colors duration-300 ease-in-out
-              hover:bg-green-700 focus:bg-green-700 active:scale-[0.98]">
-      <i class="fab fa-whatsapp text-2xl"></i>
-    </a>
-  </div>
-</div>
-
-    </div>
-  </section>
-
-
-
-  <section id="sobre" class=" bg-red-100 py-20 bg-gray-50">
-     <div class="container mx-auto">
-    <h2 class="text-center text-2xl font-bold text-gray-800 mb-8">CONHEÇA NOSSA ESTRUTURA</h2>
-
-    <div class="flex flex-wrap justify-center gap-4">
-      <img src="/public/assets//estudio-yoga-1.jpg" alt="Foto 1" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-2.jpg" alt="Foto 2" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-3.jpg" alt="Foto 3" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-4.jpg" alt="Foto 4" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-5.jpg" alt="Foto 5" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-6.jpg" alt="Foto 6" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-7.jpg" alt="Foto 7" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-8.jpg" alt="Foto 8" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-9.jpg" alt="Foto 9" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-10.jpg" alt="Foto 10" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-11.jpg" alt="Foto 11" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-12.jpg" alt="Foto 12" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-13.jpg" alt="Foto 13" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-14.jpg" alt="Foto 14" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-15.jpg" alt="Foto 15" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-16.jpg" alt="Foto 16" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-17.jpg" alt="Foto 17" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-18.jpg" alt="Foto 18" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-19.jpg" alt="Foto 19" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-20.jpg" alt="Foto 20" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-21.jpg" alt="Foto 21" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-22.jpg" alt="Foto 22" class="w-64 h-40 object-cover rounded-lg shadow-md">
-      <img src="/public/assets/estudio-yoga-23.jpg" alt="Foto 23" class="w-64 h-40 object-cover rounded-lg shadow-md">
-
-      <!-- continue com todas as imagens que quiser -->
-    </div>
-  </div>
-  </section>
-
-  <section id="depoimentos" class="py-20 bg-white">
-  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <div class="text-center">
-      <h3 class="text-3xl font-bold font-serif text-gray-900">DEPOIMENTOS</h3>
-      <p class="mt-2 text-gray-600">Avaliação 5 estrelas no Google Meu Negócio</p>
-    </div>
-
-    <!-- Carrossel -->
-    <div class="mt-10">
-      <!-- Faixa rolável -->
-      <div id="testimonial-scroller"
-           class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4
-                  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-
-        <!-- Card 1 -->
-        <article
-          class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8
-                 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)]
-                 hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)]
-                 transition-shadow duration-300">
-          <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
-            <img src="/public/assets//maria helena.jpg" alt="Foto de Maria Helena Maia"
-                 class="h-full w-full object-cover">
-          </div>
-          <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Maria Helena Maia</h4>
-          <p class="mt-3 text-slate-600 text-center">
-            “A Karla é uma professora que só de chegar perto dela a gente já fica bem, ela toda inspira paz.
-            Suas aulas são maravilhosas, meu corpo ganhou muita flexibilidade depois que comecei a fazer yoga
-            com ela. Namastê.”
-          </p>
-        </article>
-
-        <!-- Card 2 -->
-        <article
-          class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8
-                 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)]
-                 hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)]
-                 transition-shadow duration-300">
-          <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
-            <img src="/public/assets/tamires.png" alt="Foto de Tamires Sevila"
-                 class="h-full w-full object-cover">
-          </div>
-          <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Tamires Sevila</h4>
-          <p class="mt-3 text-slate-600 text-center">
-            “Espaço maravilhoso!!!! Só de pisar na entrada do espaço já consegue sentir uma sensação
-            maravilhosa de relaxamento e calmaria para corpo e a mente, sem contar com a excelência da
-            profissional Karla Rodrigues que faz muito bem o seu trabalho. Maravilha, parabéns!!!!”
-          </p>
-        </article>
-
-        <!-- Card 3 -->
-        <article
-          class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8
-                 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)]
-                 hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)]
-                 transition-shadow duration-300">
-          <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
-            <img src="/public/assets/valeria.png" alt="Foto de Valquíria Zago"
-                 class="h-full w-full object-cover">
-          </div>
-          <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Valquíria Zago</h4>
-          <p class="mt-3 text-slate-600 text-center">
-            “Cliente da Yoga Massagem há mais de um ano! Ajuda a renovar as energias e recuperar o corpo do
-            stress diário. Super recomendo!”
-          </p>
-        </article>
-
-        <!-- Card 4 -->
-        <article
-          class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8
-                 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)]
-                 hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)]
-                 transition-shadow duration-300">
-          <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
-            <img src="/public/assets/flavia marcon.jpg" alt="Foto de Flavia Marcon"
-                 class="h-full w-full object-cover">
-          </div>
-          <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Flavia Marcon</h4>
-          <p class="mt-3 text-slate-600 text-center">
-            “Após algumas pesquisas o Estúdio da Karla foi muito bem recomendado. Ela é super consciente e
-            respeita os limites de cada aluna. Também abre as portas do seu espaço para palestras e vivências
-            bem legais de outros profissionais. Adoro seu estúdio e indico sempre.”
-          </p>
-        </article>
-
-      </div>
-
-      <!-- Dots (mantém o seu JS) -->
-      <div id="testimonial-dots" class="mt-6 flex justify-center gap-3"></div>
-    </div>
-  </div>
-</section>
-
-
-
-
-
-
-  <!-- Footer -->
-  <footer class="bg-purple-600 text-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div>
-          <h5 class="text-xl font-serif font-bold">Karla Rodrigues Yoga</h5>
-          <p class="mt-2 text-purple-100">Transforme sua vida através da prática do yoga.</p>
+    <!-- =========================================================
+         ESPECIALIDADES
+         ========================================================= -->
+    <section class="services py-20 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto">
+          <h3 class="text-3xl font-bold font-serif text-gray-900">ESPECIALIDADES</h3>
         </div>
-        <div>
-          <h6 class="text-lg font-semibold">Contato</h6>
-          <div class="mt-3 space-y-2 text-purple-100">
-            <div class="flex items-center gap-2"><i class="fas fa-phone"></i><span>(11) 99999-9999</span></div>
-            <div class="flex items-center gap-2"><i class="fas fa-envelope"></i><span>contato@namasteyoga.com</span></div>
-            <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt"></i><span>Rua das Flores, 123 - São Paulo</span></div>
+
+        <div class="services-grid mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          <!-- Hatha Yoga -->
+          <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
+            <img src="/public/assets/especialidade1.jpg" alt="Hatha Yoga" class="h-40 w-full object-cover rounded-2xl" />
+            <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Hatha Yoga</h4>
+            <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
+              <li>Melhora <strong>força</strong>, <strong>flexibilidade</strong> e postura.</li>
+              <li>Aumenta <strong>mobilidade</strong> e <strong>consciência corporal</strong>.</li>
+              <li>Reduz <strong>estresse</strong> e <strong>ansiedade</strong>; melhora o foco.</li>
+              <li>Qualifica a <strong>respiração</strong> e o <strong>sono</strong>.</li>
+              <li>Alivia <strong>tensões</strong> e dores do dia a dia.</li>
+            </ul>
+          </div>
+
+          <!-- Reiki e Karuna -->
+          <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
+            <img src="/public/assets/especialidaed2.jpg" alt="Reiki e Karuna" class="h-40 w-full object-cover rounded-2xl" />
+            <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Reiki e Karuna</h4>
+            <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
+              <li>Induz <strong>relaxamento profundo</strong> e bem-estar.</li>
+              <li>Reduz <strong>ansiedade</strong> e tensão emocional.</li>
+              <li>Favorece <strong>sono</strong> mais reparador.</li>
+              <li>Equilibra a <strong>energia</strong> e recupera a disposição.</li>
+              <li>Desenvolve <strong>autocompaixão</strong> e libera padrões emocionais.</li>
+            </ul>
+          </div>
+
+          <!-- Yoga Restaurativo -->
+          <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
+            <img src="/public/assets/especialidade3.jpg" alt="Yoga Restaurativo" class="h-40 w-full object-cover rounded-2xl" />
+            <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Yoga Restaurativo</h4>
+            <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
+              <li>Acalma o <strong>sistema nervoso</strong>; reduz estresse e ansiedade.</li>
+              <li>Promove <strong>descanso profundo</strong> e melhora do sono.</li>
+              <li>Suaviza <strong>dores crônicas</strong> e fadiga.</li>
+              <li>Aumenta a <strong>consciência da respiração</strong> e a presença.</li>
+              <li>Excelente para <strong>recuperação</strong> física e mental.</li>
+            </ul>
+          </div>
+
+          <!-- Yoga Massagem Ayurvédica -->
+          <div class="service-card group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
+            <img src="/public/assets/especilidade5.jpg" alt="Yoga Massagem Ayurvédica" class="h-40 w-full object-cover rounded-2xl" />
+            <h4 class="mt-4 text-xl font-bold text-gray-900 text-center">Yoga Massagem Ayurvédica</h4>
+            <ul class="mt-3 text-gray-600 text-sm leading-relaxed list-disc list-inside text-left space-y-1">
+              <li>Desfaz <strong>tensões musculares</strong>; melhora a circulação.</li>
+              <li>Aumenta <strong>amplitude de movimento</strong> e flexibilidade.</li>
+              <li>Melhora <strong>postura</strong> e consciência corporal.</li>
+              <li>Alivia <strong>dores</strong> e cansaço.</li>
+              <li>Sensação de <strong>leveza</strong> e energia.</li>
+            </ul>
           </div>
         </div>
-        <div>
-          <h6 class="text-lg font-semibold">Redes Sociais</h6>
-          <div class="mt-3 flex items-center gap-4 text-2xl">
-  <a href="https://www.instagram.com/karlarodriguesyoga/"
-     target="_blank" rel="noopener noreferrer"
-     aria-label="Instagram Karla Rodrigues Yoga"
-     class="cursor-pointer hover:text-purple-200 px-4 focus:outline-none focus:ring-2 focus:ring-purple-300 rounded">
-    <i class="fab fa-instagram"></i>
-  </a>
+      </div>
+    </section>
 
-  <a href="https://www.facebook.com/KarlaRodriguesYoga"
-     target="_blank" rel="noopener noreferrer"
-     aria-label="Facebook Karla Rodrigues Yoga"
-     class="cursor-pointer hover:text-purple-200 px-0 focus:outline-none focus:ring-2 focus:ring-purple-300 rounded">
-    <i class="fab fa-facebook"></i>
-  </a>
-</div>
+    <!-- =========================================================
+         EVENTOS
+         ========================================================= -->
+    <section class="services py-20 bg-gray-100">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto">
+          <h3 class="text-3xl font-bold font-serif text-gray-900">EVENTOS</h3>
+        </div>
+
+        <div class="services-grid mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+          <!-- Card 1 -->
+          <div
+            class="service-card group text-center rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-[600px] overflow-hidden flex flex-col"
+          >
+            <img src="/public/assets/sapo.jpg" class="h-[px] w-[350px] object-cover mx-auto rounded-2xl" alt="" />
+
+            <div class="py-2"></div>
+
+            <h4 class="text-xl font-bold text-gray-900">Aulão de Yoga Restaurativo</h4>
+            <h3 class="text-lg[] font-bold text-gray-900">Data: 18/10</h3>
+            <h3 class="text-lg[] font-bold text-gray-900">Horário: 9:15 - 11h30 </h3>
+
+            <!-- Área do texto -->
+            <div class="mt-3 grow min-h-0">
+              <p class="text-gray-600 h-full overflow-y-auto pr-1 text-lg">
+                Uma prática suave e acolhedora para restaurar o corpo, mente e energia. Um momento de pausa para reconectar-se com você mesma(o).
+              </p>
+            </div>
+
+            <!-- Botão -->
+            <div class="pt-4 mt-auto flex justify-center">
+              <a
+                href="cadastro.html"
+                class="inline-flex items-center justify-center px-14 py-2.5 rounded-lg bg-green-600 text-white font-medium transition-colors duration-300 ease-in-out hover:bg-green-700 focus:bg-green-700 active:scale-[0.98]"
+              >
+                <i class="fab fa-whatsapp text-2xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div
+            class="service-card group text-center rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-[600px] overflow-hidden flex flex-col"
+          >
+            <img src="/public/assets/fatec.jpg" class="h-[250px] w-[350px] object-cover mx-auto rounded-2xl" alt="" />
+
+            <div class="py-2"></div>
+
+            <h4 class="text-xl font-bold text-gray-900">Cinco minutos pra mim</h4>
+            <h2 class="text-lg[] font-bold text-gray-900">Data: Sexta-feiras</h2>
+            <h2 class="text-lg[] font-bold text-gray-900">Horário: 11h</h2>
+            <h3 class="text-lg[] font-bold text-gray-900">Local: Auditório Fatec Zona Leste</h3>
+
+            <!-- Área do texto -->
+            <div class="mt-3 grow min-h-0 overflow-y-auto">
+              <div class="pr-1 space-y-3">
+                <p class="text-gray-600 text-lg leading-relaxed">
+                  Vivências para você: movimentar seu corpo com suavidade, melhorar seu foco, equilíbrio e vitalidade, dormir melhor, lidar melhor com a ansiedade,
+                  estresse e transtornos psicológicos, e relaxar num ambiente descontraído.
+                </p>
+                <p class="text-gray-600 text-lg leading-relaxed">SUA SAÚDE MENTAL TAMBÉM FAZ PARTE DO APRENDIZADO!!</p>
+              </div>
+            </div>
+
+            <!-- Botão -->
+            <div class="pt-4 mt-auto flex justify-center">
+              <a
+                href="cadastro.html"
+                class="inline-flex items-center justify-center px-14 py-2.5 rounded-lg bg-green-600 text-white font-medium transition-colors duration-300 ease-in-out hover:bg-green-700 focus:bg-green-700 active:scale-[0.98]"
+              >
+                <i class="fab fa-whatsapp text-2xl"></i>
+              </a>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="mt-8 border-t border-purple-700 pt-4 text-center text-purple-200">
-        &copy; 2025 Karla Rodrigues Yoga. Todos os direitos reservados.
+    </section>
+
+    <!-- =========================================================
+         GALERIA (ESTRUTURA)
+         ========================================================= -->
+    <section id="sobre" class="bg-red-100 py-20 bg-gray-50">
+      <div class="container mx-auto">
+        <h2 class="text-center text-2xl font-bold text-gray-800 mb-8">CONHEÇA NOSSA ESTRUTURA</h2>
+
+        <div class="flex flex-wrap justify-center gap-4">
+          <img src="/public/assets//estudio-yoga-1.jpg" alt="Foto 1" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-2.jpg" alt="Foto 2" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-3.jpg" alt="Foto 3" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-4.jpg" alt="Foto 4" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-5.jpg" alt="Foto 5" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-6.jpg" alt="Foto 6" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-7.jpg" alt="Foto 7" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-8.jpg" alt="Foto 8" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-9.jpg" alt="Foto 9" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-10.jpg" alt="Foto 10" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-11.jpg" alt="Foto 11" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-12.jpg" alt="Foto 12" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-13.jpg" alt="Foto 13" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-14.jpg" alt="Foto 14" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-15.jpg" alt="Foto 15" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-16.jpg" alt="Foto 16" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-17.jpg" alt="Foto 17" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-18.jpg" alt="Foto 18" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-19.jpg" alt="Foto 19" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-20.jpg" alt="Foto 20" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-21.jpg" alt="Foto 21" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-22.jpg" alt="Foto 22" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <img src="/public/assets/estudio-yoga-23.jpg" alt="Foto 23" class="w-64 h-40 object-cover rounded-lg shadow-md" />
+          <!-- continue com todas as imagens que quiser -->
+        </div>
       </div>
-    </div>
-  </footer>
+    </section>
 
-  <script>
-  (function () {
-    const scroller = document.getElementById('testimonial-scroller');
-    const dotsWrap = document.getElementById('testimonial-dots');
-    if (!scroller || !dotsWrap) return;
+    <!-- =========================================================
+         DEPOIMENTOS
+         ========================================================= -->
+    <section id="depoimentos" class="py-20 bg-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <h3 class="text-3xl font-bold font-serif text-gray-900">DEPOIMENTOS</h3>
+          <p class="mt-2 text-gray-600">Avaliação 5 estrelas no Google Meu Negócio</p>
+        </div>
 
-    const cards = Array.from(scroller.children);
-    // cria as bolinhas
-    cards.forEach((_, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.setAttribute('aria-label', `Ir para depoimento ${i + 1}`);
-      b.className = 'h-2.5 w-2.5 rounded-full bg-slate-300';
-      dotsWrap.appendChild(b);
-    });
+        <!-- Carrossel -->
+        <div class="mt-10">
+          <!-- Faixa rolável -->
+          <div
+            id="testimonial-scroller"
+            class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
+          >
+            <!-- Card 1 -->
+            <article
+              class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300"
+            >
+              <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
+                <img src="/public/assets//maria helena.jpg" alt="Foto de Maria Helena Maia" class="h-full w-full object-cover" />
+              </div>
+              <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Maria Helena Maia</h4>
+              <p class="mt-3 text-slate-600 text-center">
+                “A Karla é uma professora que só de chegar perto dela a gente já fica bem, ela toda inspira paz. Suas aulas são maravilhosas, meu corpo ganhou muita
+                flexibilidade depois que comecei a fazer yoga com ela. Namastê.”
+              </p>
+            </article>
 
-    const dots = Array.from(dotsWrap.children);
-    const setActiveDot = (idx) => {
-      dots.forEach((d, i) => d.className =
-        'h-2.5 w-2.5 rounded-full transition ' + (i === idx ? 'bg-indigo-500' : 'bg-slate-300'));
-    };
+            <!-- Card 2 -->
+            <article
+              class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300"
+            >
+              <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
+                <img src="/public/assets/tamires.png" alt="Foto de Tamires Sevila" class="h-full w-full object-cover" />
+              </div>
+              <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Tamires Sevila</h4>
+              <p class="mt-3 text-slate-600 text-center">
+                “Espaço maravilhoso!!!! Só de pisar na entrada do espaço já consegue sentir uma sensação maravilhosa de relaxamento e calmaria para corpo e a mente, sem
+                contar com a excelência da profissional Karla Rodrigues que faz muito bem o seu trabalho. Maravilha, parabéns!!!!”
+              </p>
+            </article>
 
-    // observa qual card está mais ao centro para ativar o dot
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          const idx = cards.indexOf(e.target);
-          setActiveDot(idx);
-        }
-      });
-    }, {
-      root: scroller,
-      threshold: 0.6,
-    });
-    cards.forEach(c => io.observe(c));
+            <!-- Card 3 -->
+            <article
+              class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300"
+            >
+              <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
+                <img src="/public/assets/valeria.png" alt="Foto de Valquíria Zago" class="h-full w-full object-cover" />
+              </div>
+              <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Valquíria Zago</h4>
+              <p class="mt-3 text-slate-600 text-center">
+                “Cliente da Yoga Massagem há mais de um ano! Ajuda a renovar as energias e recuperar o corpo do stress diário. Super recomendo!”
+              </p>
+            </article>
 
-    // clique nas bolinhas
-    dots.forEach((d, i) => d.addEventListener('click', () => {
-      cards[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-    }));
+            <!-- Card 4 -->
+            <article
+              class="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300"
+            >
+              <div class="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
+                <img src="/public/assets/flavia marcon.jpg" alt="Foto de Flavia Marcon" class="h-full w-full object-cover" />
+              </div>
+              <h4 class="mt-4 text-lg font-bold text-slate-800 text-center">Flavia Marcon</h4>
+              <p class="mt-3 text-slate-600 text-center">
+                “Após algumas pesquisas o Estúdio da Karla foi muito bem recomendado. Ela é super consciente e respeita os limites de cada aluna. Também abre as portas do
+                seu espaço para palestras e vivências bem legais de outros profissionais. Adoro seu estúdio e indico sempre.”
+              </p>
+            </article>
+          </div>
 
-    // arrastar com mouse (touch já funciona nativamente)
-    let isDown = false;
-    let startX = 0;
-    let scrollLeft = 0;
+          <!-- Dots (mantém o seu JS) -->
+          <div id="testimonial-dots" class="mt-6 flex justify-center gap-3"></div>
+        </div>
+      </div>
+    </section>
 
-    scroller.addEventListener('mousedown', (e) => {
-      isDown = true;
-      scroller.classList.add('cursor-grabbing');
-      startX = e.pageX - scroller.offsetLeft;
-      scrollLeft = scroller.scrollLeft;
-      e.preventDefault();
-    });
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+    <footer class="bg-purple-600 text-white">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <h5 class="text-xl font-serif font-bold">Karla Rodrigues Yoga</h5>
+            <p class="mt-2 text-purple-100">Transforme sua vida através da prática do yoga.</p>
+          </div>
+          <div>
+            <h6 class="text-lg font-semibold">Contato</h6>
+            <div class="mt-3 space-y-2 text-purple-100">
+              <div class="flex items-center gap-2"><i class="fas fa-phone"></i><span>(11) 99999-9999</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-envelope"></i><span>contato@namasteyoga.com</span></div>
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt"></i><span>Rua das Flores, 123 - São Paulo</span></div>
+            </div>
+          </div>
+          <div>
+            <h6 class="text-lg font-semibold">Redes Sociais</h6>
+            <div class="mt-3 flex items-center gap-4 text-2xl">
+              <a
+                href="https://www.instagram.com/karlarodriguesyoga/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram Karla Rodrigues Yoga"
+                class="cursor-pointer hover:text-purple-200 px-4 focus:outline-none focus:ring-2 focus:ring-purple-300 rounded"
+              >
+                <i class="fab fa-instagram"></i>
+              </a>
 
-    window.addEventListener('mouseup', () => {
-      isDown = false;
-      scroller.classList.remove('cursor-grabbing');
-    });
+              <a
+                href="https://www.facebook.com/KarlaRodriguesYoga"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook Karla Rodrigues Yoga"
+                class="cursor-pointer hover:text-purple-200 px-0 focus:outline-none focus:ring-2 focus:ring-purple-300 rounded"
+              >
+                <i class="fab fa-facebook"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 border-t border-purple-700 pt-4 text-center text-purple-200">
+          &copy; 2025 Karla Rodrigues Yoga. Todos os direitos reservados.
+        </div>
+      </div>
+    </footer>
 
-    scroller.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      const x = e.pageX - scroller.offsetLeft;
-      const walk = (x - startX); // px
-      scroller.scrollLeft = scrollLeft - walk;
-    });
+    <!-- =========================================================
+         SCRIPTS
+         ========================================================= -->
+    <script>
+      (function () {
+        const scroller = document.getElementById('testimonial-scroller');
+        const dotsWrap = document.getElementById('testimonial-dots');
+        if (!scroller || !dotsWrap) return;
 
-    // snap suave ao fim do drag (opcional)
-    scroller.addEventListener('mouseleave', () => { isDown = false; scroller.classList.remove('cursor-grabbing'); });
-  })();
-</script>
-</body>
+        const cards = Array.from(scroller.children);
+
+        // cria as bolinhas
+        cards.forEach((_, i) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.setAttribute('aria-label', `Ir para depoimento ${i + 1}`);
+          b.className = 'h-2.5 w-2.5 rounded-full bg-slate-300';
+          dotsWrap.appendChild(b);
+        });
+
+        const dots = Array.from(dotsWrap.children);
+        const setActiveDot = (idx) => {
+          dots.forEach((d, i) => {
+            d.className = 'h-2.5 w-2.5 rounded-full transition ' + (i === idx ? 'bg-indigo-500' : 'bg-slate-300');
+          });
+        };
+
+        // observa qual card está mais ao centro para ativar o dot
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                const idx = cards.indexOf(e.target);
+                setActiveDot(idx);
+              }
+            });
+          },
+          { root: scroller, threshold: 0.6 }
+        );
+        cards.forEach((c) => io.observe(c));
+
+        // clique nas bolinhas
+        dots.forEach((d, i) =>
+          d.addEventListener('click', () => {
+            cards[i].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+          })
+        );
+
+        // arrastar com mouse (touch já funciona nativamente)
+        let isDown = false;
+        let startX = 0;
+        let scrollLeft = 0;
+
+        scroller.addEventListener('mousedown', (e) => {
+          isDown = true;
+          scroller.classList.add('cursor-grabbing');
+          startX = e.pageX - scroller.offsetLeft;
+          scrollLeft = scroller.scrollLeft;
+          e.preventDefault();
+        });
+
+        window.addEventListener('mouseup', () => {
+          isDown = false;
+          scroller.classList.remove('cursor-grabbing');
+        });
+
+        scroller.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          const x = e.pageX - scroller.offsetLeft;
+          const walk = x - startX; // px
+          scroller.scrollLeft = scrollLeft - walk;
+        });
+
+        // snap suave ao fim do drag (opcional)
+        scroller.addEventListener('mouseleave', () => {
+          isDown = false;
+          scroller.classList.remove('cursor-grabbing');
+        });
+      })();
+    </script>
+  </body>
 </html>
