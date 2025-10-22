@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Namaste Yoga — Área do Aluno</title>
+
+    <!-- Tailwind via CDN (rápido para protótipo). Se você já compila Tailwind localmente, remova esta linha e use seu CSS gerado. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Paleta e fontes baseadas no styles/globals.css do pacote
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+              serif: ['Playfair Display', 'ui-serif', 'Georgia', 'serif'],
+            },
+            colors: {
+              primary: '#6d28d9', // roxo
+              secondary: '#f3e8ff',
+              ink: '#0a0a0a'
+            },
+            boxShadow: {
+              soft: '0 8px 30px rgba(0,0,0,.06)'
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Ícones: Font Awesome (você pode trocar por Lucide depois) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+
+    <!-- Embla Carousel (versão vanilla, compatível com HTML puro) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/embla-carousel@8.1.6/embla.umd.js"></script>
+
+    <!-- Reset e helpers mínimos -->
+    <style>
+      .container { max-width: 1120px; }
+      .btn { @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition; }
+      .btn-primary { @apply bg-primary text-white hover:opacity-90 shadow-soft; }
+      .btn-ghost { @apply hover:bg-secondary; }
+      .chip { @apply inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-xs font-medium text-primary; }
+      [data-active="true"] { @apply text-primary; }
+    </style>
+  </head>
+  <body class="min-h-screen bg-white text-ink antialiased">
+    <!-- ===== HEADER (edite os dados entre os comentários EDIT) ===== -->
+    <header class="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur">
+      <div class="container mx-auto px-4">
+        <div class="flex items-center justify-between py-3">
+          <a id="logo" href="#" class="flex items-center gap-3 group">
+            <!-- EDIT: caminho da sua logo -->
+            <img src="/public/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" class="h-10 w-10 rounded object-cover"/>
+            <div class="flex flex-col -space-y-0.5">
+              <!-- EDIT: nome/branding -->
+              <span class="text-lg font-serif font-semibold leading-none text-primary group-hover:opacity-90">Karla Rodrigues</span>
+              <span class="text-xs text-gray-500 leading-none">Yoga • Bem-estar</span>
+            </div>
+          </a>
+
+          <div class="hidden md:flex items-center gap-6 text-sm">
+            <!-- EDIT: telefone e endereço -->
+            <div class="hidden lg:flex items-center gap-2 text-gray-600">
+              <i class="fa-solid fa-phone text-primary"></i><span>(11) 99999‑9999</span>
+            </div>
+            <div class="hidden lg:flex items-center gap-2 text-gray-600">
+              <i class="fa-solid fa-location-dot text-primary"></i><span>Mogi das Cruzes • SP</span>
+            </div>
+            <a href="https://www.instagram.com/karlarodriguesyoga/" class="btn-ghost rounded-full p-2" aria-label="Instagram">
+              <i class="fa-brands fa-instagram text-lg"></i>
+            </a>
+            <a href="https://www.facebook.com/KarlaRodriguesYoga" class="btn-ghost rounded-full p-2" aria-label="Facebook">
+              <i class="fa-brands fa-facebook text-lg"></i>
+            </a>
+            <a href="#" class="btn btn-primary rounded-full"><i class="fa-solid fa-user mr-2"></i>Área do aluno</a>
+          </div>
+
+          <button id="menuBtn" class="md:hidden rounded-lg p-2 hover:bg-secondary" aria-label="Abrir menu">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </div>
+
+        <!-- Nav primária -->
+        <nav id="mainNav" class="hidden md:flex items-center gap-6 pb-3">
+          <!-- As abas controlam a seção abaixo -->
+          <button data-tab="Recentes" class="tab text-sm text-gray-600 hover:text-primary">Recentes</button>
+          <button data-tab="Eventos" class="tab text-sm text-gray-600 hover:text-primary">Eventos</button>
+          <button data-tab="Instrutores" class="tab text-sm text-gray-600 hover:text-primary">Instrutores</button>
+          <button data-tab="Bem-estar" class="tab text-sm text-gray-600 hover:text-primary">Bem‑estar</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ===== CARROSSEL (só aparece em Recentes/Eventos) ===== -->
+    <section id="carouselSection" class="relative">
+      <div class="container mx-auto px-4 pt-6 pb-2">
+        <div class="embla overflow-hidden rounded-2xl shadow-soft">
+          <div class="embla__container flex">
+            <!-- EDIT: slides do carrossel -->
+            <div class="embla__slide min-w-0 basis-full">
+              <img class="h-[320px] w-full object-cover" src="https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=1600&auto=format&fit=crop" alt="Yoga 1"/>
+            </div>
+            <div class="embla__slide min-w-0 basis-full">
+              <img class="h-[320px] w-full object-cover" src="https://images.unsplash.com/photo-1552196563-55cd4e45efb3?q=80&w=1600&auto=format&fit=crop" alt="Yoga 2"/>
+            </div>
+            <div class="embla__slide min-w-0 basis-full">
+              <img class="h-[320px] w-full object-cover" src="https://cdn.pixabay.com/photo/2021/03/27/10/43/yoga-6128116_1280.jpg" alt="Yoga 3"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="chip"><i class="fa-solid fa-bolt"></i> Novidades</span>
+            <span class="chip"><i class="fa-solid fa-calendar"></i> Agenda da semana</span>
+          </div>
+          <div class="hidden sm:flex items-center gap-2">
+            <button id="prevBtn" class="btn-ghost rounded-full p-2" aria-label="Anterior"><i class="fa-solid fa-chevron-left"></i></button>
+            <button id="nextBtn" class="btn-ghost rounded-full p-2" aria-label="Próximo"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONTEÚDO (lista de cards) ===== -->
+    <main class="container mx-auto px-4 py-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 id="sectionTitle" class="text-xl font-semibold">Recentes</h2>
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+          <i class="fa-regular fa-clock"></i> <span>Atualizado agora</span>
+        </div>
+      </div>
+
+      <!-- GRID de posts (troca por JS quando muda a aba) -->
+      <div id="postsGrid" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- Os itens são injetados pelo JS abaixo -->
+      </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="border-t bg-white">
+      <div class="container mx-auto px-4 py-10 grid gap-8 md:grid-cols-4">
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <img src="/public/assets/logo.jpg" class="h-9 w-9 rounded object-cover" alt="Logo"/>
+            <div class="text-primary font-serif font-semibold">Karla Rodrigues Yoga</div>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            <!-- EDIT: descrição curta do estúdio -->
+            Acolhimento, movimento e presença. Aulas de Hatha, Vinyasa e práticas de bem‑estar.
+          </p>
+        </div>
+        <div>
+          <h4 class="mb-3 text-sm font-semibold">Contato</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li><i class="fa-solid fa-phone text-primary mr-2"></i><!-- EDIT: fone --> (11) 99999‑9999</li>
+            <li><i class="fa-solid fa-envelope text-primary mr-2"></i><!-- EDIT: email --> contato@yoga.com</li>
+            <li><i class="fa-solid fa-location-dot text-primary mr-2"></i><!-- EDIT: endereço --> Mogi das Cruzes • SP</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="mb-3 text-sm font-semibold">Aulas</h4>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li>Hatha Yoga</li>
+            <li>Vinyasa Flow</li>
+            <li>Relaxamento &amp; Respiração</li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="mb-3 text-sm font-semibold">Redes</h4>
+          <div class="flex items-center gap-3">
+            <a href="https://www.instagram.com/karlarodriguesyoga/" class="btn-ghost rounded-full p-2" aria-label="Instagram">
+              <i class="fa-brands fa-instagram text-lg"></i>
+            </a>
+            <a href="https://www.facebook.com/KarlaRodriguesYoga" class="btn-ghost rounded-full p-2" aria-label="Facebook">
+              <i class="fa-brands fa-facebook text-lg"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="border-t py-4 text-center text-xs text-gray-500">
+        © <span id="year"></span> Karla Rodrigues Yoga. Todos os direitos reservados.
+      </div>
+    </footer>
+
+    <!-- ===== DADOS MOCK + SCRIPT ===== -->
+    <script>
+      const DATA = {
+        'Recentes': [
+          { title: 'Aula de Hatha para iniciantes', category: 'Hatha Yoga', date: '20/10/2025', duration: '60 min', img: 'https://images.unsplash.com/photo-1549576490-b0b4831ef60a?q=80&w=1200&auto=format&fit=crop', excerpt: 'Fundamentos do Hatha e respiração consciente.' },
+          { title: 'Respiração para ansiedade', category: 'Bem-estar', date: '19/10/2025', duration: '15 min', img: 'https://images.unsplash.com/photo-1552196563-55cd4e45efb3?q=80&w=1200&auto=format&fit=crop', excerpt: 'Sequência curta de pranayama e relaxamento.' },
+          { title: 'Vinyasa Flow (nível 1)', category: 'Vinyasa', date: '18/10/2025', duration: '45 min', img: 'https://cdn.pixabay.com/photo/2021/03/27/10/43/yoga-6128116_1280.jpg', excerpt: 'Fluxo suave com ênfase em mobilidade.' }
+        ],
+        'Eventos': [
+          { title: 'Aulão ao ar livre', category: 'Evento', date: '27/10/2025', duration: 'Sábado 9h', img: 'https://images.unsplash.com/photo-1518617840859-acd542e13d41?q=80&w=1200&auto=format&fit=crop', excerpt: 'Encontro no parque com prática guiada.' },
+          { title: 'Meditação da Lua Cheia', category: 'Evento', date: '31/10/2025', duration: '19h', img: 'https://images.unsplash.com/photo-1527239139119-08bbd4d1e8e8?q=80&w=1200&auto=format&fit=crop', excerpt: 'Ritual de intenção e silêncio.' }
+        ],
+        'Instrutores': [
+          { title: 'Karla Rodrigues', category: 'Instrutora', date: '—', duration: '', img: '/public/assets/karla.jpg', excerpt: 'Hatha • Vinyasa • Respiração' },
+          { title: 'Convidado do mês', category: 'Instrutor', date: '—', duration: '', img: 'https://images.unsplash.com/photo-1534361960057-19889db9621e?q=80&w=1200&auto=format&fit=crop', excerpt: 'Workshops temáticos' }
+        ],
+        'Bem-estar': [
+          { title: 'Sono de qualidade', category: 'Saúde', date: 'Guia', duration: '', img: 'https://images.unsplash.com/photo-1505685296765-3a2736de412f?q=80&w=1200&auto=format&fit=crop', excerpt: 'Hábitos e alongamentos noturnos.' },
+          { title: 'Alongamento de 5 minutos', category: 'Rotina', date: 'Vídeo', duration: '5 min', img: 'https://images.unsplash.com/photo-1540206276207-3af25c08abc4?q=80&w=1200&auto=format&fit=crop', excerpt: 'Te acompanha no intervalo do trabalho.' }
+        ]
+      };
+
+      const grid = document.getElementById('postsGrid');
+      const title = document.getElementById('sectionTitle');
+      const year = document.getElementById('year');
+      const carouselSection = document.getElementById('carouselSection');
+      const tabs = Array.from(document.querySelectorAll('nav .tab'));
+
+      function renderCards(key) {
+        title.textContent = key;
+        grid.innerHTML = DATA[key].map((p) => `
+          <article class="group rounded-2xl border p-2 shadow-soft hover:shadow-lg transition bg-white">
+            <div class="relative overflow-hidden rounded-xl">
+              <img src="${p.img}" class="h-44 w-full object-cover transition group-hover:scale-[1.02]" alt="${p.title}"/>
+              ${p.duration ? `<span class="absolute bottom-2 left-2 chip bg-white/95 backdrop-blur">${p.duration}</span>` : ''}
+            </div>
+            <div class="p-3">
+              <div class="text-[11px] uppercase tracking-wide text-primary/80">${p.category}</div>
+              <h3 class="mt-1 text-base font-semibold">${p.title}</h3>
+              <p class="mt-1 text-sm text-gray-600">${p.excerpt}</p>
+              <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                <span><i class="fa-regular fa-calendar mr-1"></i>${p.date}</span>
+                <button class="btn-ghost rounded-lg px-2 py-1 text-xs">Detalhes <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i></button>
+              </div>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      // Tabs
+      tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.dataset.tab;
+          tabs.forEach(b => b.toggleAttribute('data-active', b === btn));
+          renderCards(key);
+          // mostra/esconde carrossel
+          if (key === 'Recentes' || key === 'Eventos') {
+            carouselSection.classList.remove('hidden');
+          } else {
+            carouselSection.classList.add('hidden');
+          }
+        });
+      });
+
+      // Carrossel Embla
+      let embla;
+      function initEmbla() {
+        const viewport = document.querySelector('.embla');
+        if (!viewport || !window.EmblaCarousel) return;
+        embla = EmblaCarousel(viewport, { loop: true, align: 'start' });
+        document.getElementById('prevBtn')?.addEventListener('click', () => embla.scrollPrev());
+        document.getElementById('nextBtn')?.addEventListener('click', () => embla.scrollNext());
+      }
+
+      // Mobile menu toggle
+      document.getElementById('menuBtn')?.addEventListener('click', () => {
+        const nav = document.getElementById('mainNav');
+        nav.classList.toggle('hidden');
+      });
+
+      // Boot
+      year.textContent = new Date().getFullYear();
+      tabs[0]?.setAttribute('data-active', 'true');
+      renderCards('Recentes');
+      window.addEventListener('load', initEmbla);
+    </script>
+  </body>
+</html>
