@@ -1,24 +1,90 @@
-# Logs
-logs
-*.log
+# =======================================
+# Node / Vite / React
+# =======================================
+node_modules/
+dist/
+build/
+.vite/
+.vscode/
+.idea/
+.DS_Store
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+package-lock.json
 
-node_modules
-dist
-dist-ssr
-*.local
+# =======================================
+# Environment / Credentials
+# =======================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# =======================================
+# Tailwind / PostCSS / Temp
+# =======================================
+*.tmp
+*.temp
+*.cache/
+.cache/
+coverage/
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# =======================================
+# OS files
+# =======================================
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# =======================================
+# Editor settings
+# =======================================
+*.swp
+*.swo
+*.bak
+*.orig
+*.rej
+*~
+*.tmp
+*.temp
+
+# =======================================
+# Local assets / generated media
+# =======================================
+public/uploads/
+public/tmp/
+public/generated/
+*.psd
+*.ai
+*.xcf
+*.zip
+
+# =======================================
+# shadcn/ui generated metadata (optional)
+# =======================================
+components.json
+
+# =======================================
+# React testing / storybook (if used)
+# =======================================
+storybook-static/
+coverage/
+*.spec.ts
+*.spec.tsx
+*.test.ts
+*.test.tsx
+
+# =======================================
+# Local backups
+# =======================================
+*.bak
+*.old
+*.backup
