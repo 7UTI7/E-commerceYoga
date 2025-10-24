@@ -5,6 +5,7 @@ const connectDB = require('./config/dbConnect');
 
 // 1. IMPORTAMOS O NOVO ARQUIVO DE ROTAS
 const authRoutes = require('./routes/authRoutes');
+const articleRoutes = require('./routes/articleRoutes');
 
 // --- Conexão com o Banco de Dados ---
 connectDB();
@@ -23,7 +24,9 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 
 // (Nossas outras rotas virão aqui: /api/articles, /api/classes, etc.)
-
+// Rotas de Artigos
+// Qualquer requisição para /api/articles/... será gerenciada pelo articleRoutes
+app.use('/api/articles', articleRoutes);
 
 // --- Inicialização do Servidor ---
 const PORT = process.env.PORT || 3001; 
