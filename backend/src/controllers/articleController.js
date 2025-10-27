@@ -74,8 +74,69 @@ const createArticle = async (req, res) => {
   }
 };
 
+// @desc    Atualizar um artigo
+// @route   PUT /api/articles/:id
+// @access  Private/Admin
+const updateArticle = async (req, res) => {
+  try {
+    const { title, content, slug, status } = req.body;
+    const { id } = req.params; // Pega o ID do artigo da URL
+
+    const article = await Article.findById(id);
+
+    if (!article) {
+      return res.status(404).json({ message: 'Artigo não encontrado.' });
+    }
+
+    // Verifica se o novo slug (se foi alterado) já existe em OUTRO artigo
+    if (slug) {
+      const slugExists = await Article.findOne({ slug: slug, _id: { $ne: id } });
+      if (slugExists) {
+        return res.status(400).json({ message: 'Este "slug" (URL) já está em uso por outro artigo.' });
+      }
+      article.slug = slug;
+    }
+
+    // Atualiza os campos
+    article.title = title || article.title;
+    article.content = content || article.content;
+    article.status = status || article.status;
+    // O autor não muda
+
+    const updatedArticle = await article.save();
+    res.status(200).json(updatedArticle);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao atualizar artigo.' });
+  }
+}
+
+// @desc    Deletar um artigo
+// @route   DELETE /api/articles/:id
+// @access  Private/Admin
+const deleteArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const article = await Article.findById(id);
+
+    if (!article) {
+      return res.status(404).json({ message: 'Artigo não encontrado.' });
+    }
+
+    await article.deleteOne(); // Novo método do Mongoose >= 7
+    // ou: await article.remove(); (para Mongoose mais antigo)
+    
+    res.status(200).json({ message: 'Artigo deletado com sucesso.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao deletar artigo.' });
+  }
+};
+
 module.exports = {
   getPublishedArticles,
   getArticleBySlug,
   createArticle,
+  updateArticle,
+  deleteArticle,
 };

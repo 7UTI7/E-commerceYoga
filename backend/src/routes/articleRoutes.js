@@ -1,20 +1,24 @@
 const express = require('express');
 const router = express.Router();
 
-const {getPublishedArticles, getArticleBySlug, createArticle} = require('../controllers/articleController');
+const {getPublishedArticles, getArticleBySlug, createArticle, updateArticle, deleteArticle} = require('../controllers/articleController');
 
 // Middlewares
 const {protect, admin} = require('../middleware/authMiddleware');
 
-// Rota pública para listar todos os artigos
-// GET /api/articles
+// --- ROTAS PÚBLICAS ---
 router.get('/', getPublishedArticles);
-// Rota pública para buscar um artigo específico pelo slug
-// GET /api/articles/meu-primeiro-artigo
 router.get('/:slug', getArticleBySlug);
 
-// (Aqui virão as rotas de Admin: POST /, PUT /:id, DELETE /:id)
 // --- ROTAS DE ADMIN ---
+
+// Criar (POST)
 router.post('/', protect, admin, createArticle);
+
+// Atualizar (PUT) 
+router.put('/:id', protect, admin, updateArticle);
+
+// Deletar (DELETE) 
+router.delete('/:id', protect, admin, deleteArticle);
 
 module.exports = router;

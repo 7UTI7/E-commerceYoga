@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-// Importamos o nosso controlador
+// Importando controladores
 const { registerUser, loginUser } = require('../controllers/authController');
 
-// Quando uma requisição POST chegar em '/register',
-// ela será gerenciada pela função 'registerUser'
+// Rota de Registro
 router.post('/register', registerUser);
 
 // Rota de Login
