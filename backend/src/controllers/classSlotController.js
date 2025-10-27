@@ -1,4 +1,4 @@
-const ClassSlot = require('../models/ClassSlotModel');
+const ClassSlot = require('../models/classSlotModel');
 
 // --- ROTAS PÚBLICAS ---
 

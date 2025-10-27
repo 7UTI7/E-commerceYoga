@@ -1,6 +1,6 @@
 ## 📜 Documentação da API de Yoga (MVP)
 
-**URL Base:** [ https://large-wolves-brush.loca.lt] 
+**URL Base:** [https://api-yoga-rapha.onrender.com] 
 
 ---
 
