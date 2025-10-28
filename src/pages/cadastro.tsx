@@ -1,9 +1,89 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { register as apiRegister, login as apiLogin } from "../lib/api";
 
 export default function Cadastro() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMsg(null);
+
+    const form = e.target as HTMLFormElement;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
+    const phone = (form.elements.namedItem("phone") as HTMLInputElement).value.trim();
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+    const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
+    const termsChecked = (form.elements.namedItem("terms") as HTMLInputElement).checked;
+
+    if (!termsChecked) {
+      setErrorMsg("Você precisa aceitar os termos para continuar.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMsg("As senhas não conferem.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Importante: o back do Rafael, no cadastro, deve aceitar ao menos { name, email, password }.
+      // O "phone" é opcional na UI; se o back ainda não persistir, apenas ignoramos aqui.
+      const data = await apiRegister(name, email, password);
+
+      // Alguns backends já retornam token no register; outros não.
+      // Tentamos usar o token do register; se não houver, fazemos login na sequência.
+      const tokenFromRegister = (data as any)?.token;
+      const userFromRegister =
+        (data as any).user ?? {
+          _id: (data as any)?._id,
+          name: (data as any)?.name,
+          email: (data as any)?.email,
+          role: (data as any)?.role,
+        };
+
+      let token = tokenFromRegister;
+      let user = userFromRegister;
+
+      if (!token) {
+        // Fallback: autentica com o que acabou de ser cadastrado
+        const loginData = await apiLogin(email, password);
+        user =
+          (loginData as any).user ?? {
+            _id: (loginData as any)?._id,
+            name: (loginData as any)?.name,
+            email: (loginData as any)?.email,
+            role: (loginData as any)?.role,
+          };
+        token = (loginData as any).token;
+      }
+
+      if (!token || !user) {
+        throw new Error("Não foi possível autenticar após o cadastro.");
+      }
+
+      // Armazena sessão (aqui usei localStorage; se quiser 'lembrar de mim', dá para parametrizar como no login)
+      localStorage.setItem("auth_token", token);
+      localStorage.setItem("auth_user", JSON.stringify(user));
+
+      // Usuário cadastrado é comum (USER) por padrão → vai para /user
+      navigate("/user");
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Falha ao criar conta. Tente novamente.";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <section className="grid md:grid-cols-2 min-h-dvh bg-white text-gray-900 antialiased">
@@ -35,7 +115,7 @@ export default function Cadastro() {
 
           {/* CARD DE CADASTRO */}
           <div className="rounded-2xl bg-purple-50 p-6 shadow-lg">
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               {/* Nome */}
               <div>
                 <label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
@@ -67,12 +147,13 @@ export default function Cadastro() {
                     type="email"
                     placeholder="seu@email.com"
                     required
+                    autoComplete="email"
                     className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                   />
                 </div>
               </div>
 
-              {/* Telefone */}
+              {/* Telefone (opcional para API; útil pra contato) */}
               <div>
                 <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-700">
                   Telefone
@@ -84,7 +165,6 @@ export default function Cadastro() {
                     name="phone"
                     type="tel"
                     placeholder="(11) 99999-9999"
-                    required
                     className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                   />
                 </div>
@@ -103,12 +183,14 @@ export default function Cadastro() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     required
+                    autoComplete="new-password"
                     className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                   >
                     <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
                   </button>
@@ -131,12 +213,14 @@ export default function Cadastro() {
                     type={showConfirm ? "text" : "password"}
                     placeholder="••••••••"
                     required
+                    autoComplete="new-password"
                     className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showConfirm ? "Ocultar senha" : "Mostrar senha"}
                   >
                     <i className={`fas ${showConfirm ? "fa-eye-slash" : "fa-eye"}`} />
                   </button>
@@ -145,7 +229,7 @@ export default function Cadastro() {
 
               {/* Termos */}
               <div className="flex items-start gap-2 text-sm">
-                <input id="terms" type="checkbox" className="mt-1 size-4 accent-purple-600" required />
+                <input id="terms" name="terms" type="checkbox" className="mt-1 size-4 accent-purple-600" required />
                 <label htmlFor="terms" className="text-gray-700">
                   Eu aceito os{" "}
                   <a href="#" className="text-purple-700 hover:text-purple-800 font-medium">
@@ -159,12 +243,20 @@ export default function Cadastro() {
                 </label>
               </div>
 
+              {/* Erro */}
+              {errorMsg && (
+                <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-left text-sm text-red-700">
+                  {errorMsg}
+                </div>
+              )}
+
               {/* Botão */}
               <button
                 type="submit"
-                className="w-full rounded-lg bg-purple-600 py-3 font-medium text-white hover:bg-purple-700 transition"
+                disabled={loading}
+                className="w-full rounded-lg bg-purple-600 py-3 font-medium text-white hover:bg-purple-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Criar conta
+                {loading ? "Criando conta…" : "Criar conta"}
               </button>
 
               {/* Separador */}

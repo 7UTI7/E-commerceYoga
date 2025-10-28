@@ -1,16 +1,61 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { login as apiLogin } from "../lib/api";
 
 export default function Login() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  function handleLogin(e: React.FormEvent) {
+  function getStorage() {
+    return remember ? localStorage : sessionStorage;
+  }
+
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    setErrorMsg(null);
 
-    // aqui você pode validar o login depois (email/senha)
-    // se tudo ok:
-    navigate("/user");
+    const form = e.target as HTMLFormElement;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const password = (form.elements.namedItem("password") as HTMLInputElement).value;
+
+    try {
+      setLoading(true);
+
+      // chama a API
+      const data = await apiLogin(email, password);
+
+      // alguns backends retornam { user, token }; outros retornam flat
+      const user = (data as any).user ?? {
+        _id: (data as any)._id,
+        name: (data as any).name,
+        email: (data as any).email,
+        role: (data as any).role,
+      };
+      const token = (data as any).token;
+
+      if (!token || !user) {
+        throw new Error("Resposta de login inválida.");
+      }
+
+      const storage = getStorage();
+      storage.setItem("auth_token", token);
+      storage.setItem("auth_user", JSON.stringify(user));
+
+      // ADMIN vai pro painel; USER vai pra tela do usuário logado
+      if (user.role === "ADMIN") navigate("/admin");
+      else navigate("/user");
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Falha no login. Verifique suas credenciais.";
+      setErrorMsg(msg);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -50,6 +95,7 @@ export default function Login() {
                   type="email"
                   placeholder="seu@email.com"
                   required
+                  autoComplete="email"
                   className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                 />
               </div>
@@ -68,12 +114,14 @@ export default function Login() {
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   required
+                  autoComplete="current-password"
                   className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                 >
                   <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
                 </button>
@@ -83,7 +131,12 @@ export default function Login() {
             {/* lembrar/esqueceu */}
             <div className="flex items-center justify-between text-sm">
               <label className="inline-flex items-center gap-2">
-                <input type="checkbox" className="size-4 accent-purple-600" />
+                <input
+                  type="checkbox"
+                  className="size-4 accent-purple-600"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                />
                 <span>Lembrar de mim</span>
               </label>
               <a href="#" className="text-purple-700 font-medium hover:text-purple-800">
@@ -91,12 +144,20 @@ export default function Login() {
               </a>
             </div>
 
+            {/* erro */}
+            {errorMsg && (
+              <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-left text-sm text-red-700">
+                {errorMsg}
+              </div>
+            )}
+
             {/* botão entrar */}
             <button
               type="submit"
-              className="w-full rounded-lg bg-purple-600 py-3 font-medium text-white hover:bg-purple-700 transition"
+              disabled={loading}
+              className="w-full rounded-lg bg-purple-600 py-3 font-medium text-white hover:bg-purple-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Entrar
+              {loading ? "Entrando…" : "Entrar"}
             </button>
 
             {/* separador */}

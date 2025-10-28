@@ -4,14 +4,11 @@ interface CategoryNavProps {
 }
 
 const categories = [
-  'Recentes',
-  'Hatha Yoga',
-  'Reiki e Karuna',
-  'Yoga Restaurativo',
-  'Yoga Massagem Ayurvédica',
-  'Artigos',
-  'Meditação',
-  'Eventos'
+  "Recentes",
+  "Artigos",
+  "Vídeos",
+  "Eventos",
+  "Aulas",
 ];
 
 export function CategoryNav({ activeCategory, onCategoryChange }: CategoryNavProps) {

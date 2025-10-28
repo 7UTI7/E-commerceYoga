@@ -1,93 +1,53 @@
-import { useState } from 'react';
-import { Calendar, Clock, Tag } from 'lucide-react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+// src/userui/components/PostCard.tsx
+import React from "react";
 
-interface Post {
-  id: number;
+export type PostCardProps = {
   title: string;
   category: string;
   date: string;
-  duration?: string;
   excerpt: string;
-  fullDescription: string;
-  instructor: string;
-  image: string;
-}
+  image?: string;
+  item?: any; // objeto bruto (Article/Video/Event/ClassSlot) se quiser abrir modal/detalhe
+  onClick?: (item: any) => void;
+};
 
-interface PostCardProps {
-  post: Post;
-}
-
-export function PostCard({ post }: PostCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
+export const PostCard: React.FC<PostCardProps> = ({
+  title,
+  category,
+  date,
+  excerpt,
+  image = "/assets/placeholder.jpg",
+  item,
+  onClick,
+}) => {
   return (
-    <div
-      className="relative bg-white rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border border-gray-200"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        transform: isHovered ? 'scale(1.02)' : 'scale(1)',
-        boxShadow: isHovered ? '0 10px 40px rgba(147, 51, 234, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
-        zIndex: isHovered ? 10 : 1
-      }}
+    <article
+      className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow hover:shadow-lg transition"
+      role="button"
+      onClick={() => onClick?.(item)}
     >
-      <div className="flex gap-4">
-        {/* Image */}
-        <div className="w-48 h-48 flex-shrink-0 overflow-hidden">
-          <ImageWithFallback
-            src={post.image}
-            alt={post.title}
-            className="w-full h-full object-cover transition-transform duration-300"
-            style={{
-              transform: isHovered ? 'scale(1.1)' : 'scale(1)'
-            }}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 p-6">
-          <div className="flex items-start justify-between mb-3">
-            <h3 className="text-purple-900 flex-1">{post.title}</h3>
-            <div className="flex items-center gap-1 text-purple-700 text-sm ml-4">
-              <Tag className="w-4 h-4" />
-              <span>{post.category}</span>
-            </div>
-          </div>
-
-          <p className="text-gray-700 mb-4">{post.excerpt}</p>
-
-          <div className="flex items-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Calendar className="w-4 h-4" />
-              <span>{post.date}</span>
-            </div>
-            {post.duration && (
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                <span>{post.duration}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Expanded Content */}
-          <div
-            className="mt-4 transition-all duration-300"
-            style={{
-              maxHeight: isHovered ? '200px' : '0',
-              opacity: isHovered ? 1 : 0,
-              overflow: 'hidden'
-            }}
-          >
-            <div className="border-t border-gray-300 pt-4">
-              <p className="text-gray-700 mb-2">{post.fullDescription}</p>
-              <p className="text-purple-700">
-                <strong>Instrutora:</strong> {post.instructor}
-              </p>
-            </div>
-          </div>
-        </div>
+      <div className="aspect-video w-full overflow-hidden bg-gray-100">
+        <img
+          src={image}
+          alt={title}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          loading="lazy"
+        />
       </div>
-    </div>
+
+      <div className="p-4">
+        <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
+          <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 font-medium text-purple-700">
+            {category}
+          </span>
+          <time className="tabular-nums">{date}</time>
+        </div>
+        <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{title}</h3>
+        <p className="mt-2 line-clamp-3 text-sm text-gray-600">{excerpt}</p>
+      </div>
+    </article>
   );
-}
+};
+
+// Se em algum lugar você estiver importando como default, isso evita quebrar:
+export default PostCard;
