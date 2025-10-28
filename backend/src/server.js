@@ -9,6 +9,7 @@ const articleRoutes = require('./routes/articleRoutes');
 const videoRoutes = require('./routes/videoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const classSlotRoutes = require('./routes/classSlotRoutes');
+const whatsAppGroupRoutes = require('./routes/whatsAppGroupRoutes');
 
 // --- Conexão com o Banco de Dados ---
 connectDB();
@@ -37,6 +38,9 @@ app.use('/api/events', eventRoutes);
 
 // Rotas de Horários de Aula
 app.use('/api/class-slots', classSlotRoutes);
+
+// Rotas de Grupos do WhatsApp
+app.use('/api/whatsapp-groups', whatsAppGroupRoutes);
 
 // --- Inicialização do Servidor ---
 const PORT = process.env.PORT || 3001; 
