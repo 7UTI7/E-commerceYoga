@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, MapPin, User, LogOut } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "../components/ui/dialog";
+import { Phone, MapPin, User, LogOut, PlusSquare } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose,
+} from "../components/ui/dialog";
 import { Button } from "../components/ui/button";
+import { useAuth } from "../../contexts/AuthContext";
 
 export interface HeaderProps {
   onLogoClick?: () => void;
@@ -11,6 +14,7 @@ export interface HeaderProps {
 
 export function Header({ onLogoClick }: HeaderProps) {
   const navigate = useNavigate();
+  const { user, isAdmin, clearSession } = useAuth();
   const [openWhats, setOpenWhats] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
 
@@ -19,7 +23,7 @@ export function Header({ onLogoClick }: HeaderProps) {
 
   const handleLogoClick = () => {
     if (onLogoClick) return onLogoClick();
-    window.location.reload(); // refresh da área logada
+    navigate("/user");
   };
 
   const goInstagram = () =>
@@ -31,14 +35,12 @@ export function Header({ onLogoClick }: HeaderProps) {
     <>
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* altura igual à home */}
           <div className="h-[72px] flex items-center justify-between gap-3">
-            {/* ESQUERDA: logo + telefone + endereço */}
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={handleLogoClick}
                 className="flex items-center gap-2 shrink-0 hover:opacity-90 transition"
-                aria-label="Atualizar a página"
+                aria-label="Ir para área do usuário"
               >
                 <img src="/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" className="h-10 w-10 rounded" />
                 <span className="text-xl font-semibold text-purple-800 whitespace-nowrap">
@@ -46,7 +48,6 @@ export function Header({ onLogoClick }: HeaderProps) {
                 </span>
               </button>
 
-              {/* divisor vertical */}
               <div className="hidden sm:block h-5 w-px bg-gray-200 mx-2" />
 
               <div className="hidden lg:flex items-center gap-5 text-sm text-gray-700 min-w-0">
@@ -69,35 +70,30 @@ export function Header({ onLogoClick }: HeaderProps) {
               </div>
             </div>
 
-            {/* DIREITA: redes + Agendar + Perfil + Sair */}
             <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={goInstagram}
-                aria-label="Instagram"
-                className="text-purple-600 hover:text-purple-800"
-                title="Instagram"
-              >
+              <button onClick={goInstagram} aria-label="Instagram" className="text-purple-600 hover:text-purple-800" title="Instagram">
                 <i className="fab fa-instagram text-[18px]" />
               </button>
-              <button
-                onClick={goFacebook}
-                aria-label="Facebook"
-                className="text-purple-600 hover:text-purple-800"
-                title="Facebook"
-              >
+              <button onClick={goFacebook} aria-label="Facebook" className="text-purple-600 hover:text-purple-800" title="Facebook">
                 <i className="fab fa-facebook text-[18px]" />
               </button>
 
-              {/* Agendar (WhatsApp) — raio igual ao da home */}
-              <Button
-                className="rounded-lg bg-green-600 hover:bg-green-700 text-white shadow"
-                onClick={() => setOpenWhats(true)}
-              >
+              <Button className="rounded-lg bg-green-600 hover:bg-green-700 text-white shadow" onClick={() => setOpenWhats(true)}>
                 <i className="fab fa-whatsapp text-[16px] mr-2" />
                 Agendar
               </Button>
 
-              {/* Perfil */}
+              {isAdmin && (
+                <Button
+                  className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white shadow"
+                  onClick={() => navigate("/admin")}
+                  title="Ir para o painel e publicar"
+                >
+                  <PlusSquare className="w-4 h-4 mr-2" />
+                  Publicar
+                </Button>
+              )}
+
               <Button
                 variant="secondary"
                 className="rounded-lg border-purple-300"
@@ -105,10 +101,9 @@ export function Header({ onLogoClick }: HeaderProps) {
                 title="Perfil"
               >
                 <User className="w-4 h-4 mr-2" />
-                Perfil
+                {user?.name ? user.name.split(" ")[0] : "Perfil"}
               </Button>
 
-              {/* Sair */}
               <Button
                 variant="secondary"
                 className="rounded-lg border-purple-300"
@@ -164,8 +159,8 @@ export function Header({ onLogoClick }: HeaderProps) {
               variant="destructive"
               className="rounded-lg"
               onClick={() => {
-                // localStorage.removeItem("auth");
-                navigate("/");
+                clearSession();
+                navigate("/", { replace: true });
               }}
             >
               Sim, sair

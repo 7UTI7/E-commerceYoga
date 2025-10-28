@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register as apiRegister, login as apiLogin } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Cadastro() {
   const navigate = useNavigate();
+  const { setSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,7 +18,7 @@ export default function Cadastro() {
     const form = e.target as HTMLFormElement;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
     const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
-    const phone = (form.elements.namedItem("phone") as HTMLInputElement).value.trim();
+    const _phone = (form.elements.namedItem("phone") as HTMLInputElement)?.value.trim();
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
     const termsChecked = (form.elements.namedItem("terms") as HTMLInputElement).checked;
@@ -32,13 +34,8 @@ export default function Cadastro() {
 
     try {
       setLoading(true);
-
-      // Importante: o back do Rafael, no cadastro, deve aceitar ao menos { name, email, password }.
-      // O "phone" é opcional na UI; se o back ainda não persistir, apenas ignoramos aqui.
       const data = await apiRegister(name, email, password);
 
-      // Alguns backends já retornam token no register; outros não.
-      // Tentamos usar o token do register; se não houver, fazemos login na sequência.
       const tokenFromRegister = (data as any)?.token;
       const userFromRegister =
         (data as any).user ?? {
@@ -52,7 +49,6 @@ export default function Cadastro() {
       let user = userFromRegister;
 
       if (!token) {
-        // Fallback: autentica com o que acabou de ser cadastrado
         const loginData = await apiLogin(email, password);
         user =
           (loginData as any).user ?? {
@@ -64,15 +60,9 @@ export default function Cadastro() {
         token = (loginData as any).token;
       }
 
-      if (!token || !user) {
-        throw new Error("Não foi possível autenticar após o cadastro.");
-      }
+      if (!token || !user) throw new Error("Não foi possível autenticar após o cadastro.");
 
-      // Armazena sessão (aqui usei localStorage; se quiser 'lembrar de mim', dá para parametrizar como no login)
-      localStorage.setItem("auth_token", token);
-      localStorage.setItem("auth_user", JSON.stringify(user));
-
-      // Usuário cadastrado é comum (USER) por padrão → vai para /user
+      setSession(user, token, true); // lembrar por padrão
       navigate("/user");
     } catch (err: any) {
       const msg =
@@ -153,7 +143,7 @@ export default function Cadastro() {
                 </div>
               </div>
 
-              {/* Telefone (opcional para API; útil pra contato) */}
+              {/* Telefone (opcional) */}
               <div>
                 <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-700">
                   Telefone
@@ -243,14 +233,12 @@ export default function Cadastro() {
                 </label>
               </div>
 
-              {/* Erro */}
               {errorMsg && (
                 <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-left text-sm text-red-700">
                   {errorMsg}
                 </div>
               )}
 
-              {/* Botão */}
               <button
                 type="submit"
                 disabled={loading}
@@ -259,13 +247,11 @@ export default function Cadastro() {
                 {loading ? "Criando conta…" : "Criar conta"}
               </button>
 
-              {/* Separador */}
               <div className="relative my-2 text-center">
                 <span className="relative z-10 bg-purple-50 px-3 text-sm text-gray-600">ou</span>
                 <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />
               </div>
 
-              {/* Rodapé */}
               <div className="text-center text-sm text-gray-600">
                 Já tem conta?{" "}
                 <Link to="/login" className="text-purple-700 font-medium hover:text-purple-800">
@@ -275,7 +261,6 @@ export default function Cadastro() {
             </form>
           </div>
 
-          {/* Voltar */}
           <div className="mt-6 text-center">
             <Link to="/" className="text-sm text-gray-600 hover:text-gray-800">
               ← Voltar para página inicial

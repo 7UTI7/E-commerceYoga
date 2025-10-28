@@ -1,12 +1,17 @@
 import axios from "axios";
 
+const base = import.meta.env.VITE_URL_API;
+if (!base) {
+  console.warn("VITE_URL_API não definida. Crie um .env na raiz com VITE_URL_API=https://sua-api");
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_URL_API, // ex.: https://api-yoga-rapha.onrender.com
+  baseURL: base, // ex.: https://api-yoga-rapha.onrender.com
 });
 
 // Anexa token automaticamente quando existir
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token");
+  const token = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -29,7 +34,7 @@ export type Article = {
 export type Video = {
   _id: string;
   title: string;
-  url: string;            // você usou "url" no tipo — beleza
+  url: string;
   description?: string;
   createdAt: string;
   updatedAt: string;
@@ -38,7 +43,7 @@ export type Video = {
 export type Event = {
   _id: string;
   title: string;
-  date: string;          // ISO
+  date: string;      // ISO
   location?: string;
   description?: string;
   createdAt: string;
@@ -47,9 +52,9 @@ export type Event = {
 
 export type ClassSlot = {
   _id: string;
-  weekday: number;       // 0-6
-  time: string;          // "19:00"
-  modality?: string;     // ex.: Hatha, Yin...
+  weekday: number;   // 0-6
+  time: string;      // "19:00"
+  modality?: string; // ex.: Hatha, Yin...
   createdAt: string;
   updatedAt: string;
 };
@@ -70,7 +75,7 @@ export async function getPublishedArticles() {
   const { data } = await api.get<Article[]>("/api/articles");
   return data;
 }
-// alias para a UI que importa getArticles()
+// alias que a UI usa
 export { getPublishedArticles as getArticles };
 
 export async function getVideos() {

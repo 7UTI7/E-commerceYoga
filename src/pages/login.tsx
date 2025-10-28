@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { login as apiLogin } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -23,11 +25,9 @@ export default function Login() {
 
     try {
       setLoading(true);
-
-      // chama a API
+      console.log("URL API:", import.meta.env.VITE_URL_API);
       const data = await apiLogin(email, password);
 
-      // alguns backends retornam { user, token }; outros retornam flat
       const user = (data as any).user ?? {
         _id: (data as any)._id,
         name: (data as any).name,
@@ -36,18 +36,15 @@ export default function Login() {
       };
       const token = (data as any).token;
 
-      if (!token || !user) {
-        throw new Error("Resposta de login inválida.");
-      }
+      if (!token || !user) throw new Error("Resposta de login inválida.");
 
-      const storage = getStorage();
-      storage.setItem("auth_token", token);
-      storage.setItem("auth_user", JSON.stringify(user));
+      // salva sessão via contexto (controla remember)
+      setSession(user, token, remember);
 
-      // ADMIN vai pro painel; USER vai pra tela do usuário logado
       if (user.role === "ADMIN") navigate("/admin");
       else navigate("/user");
     } catch (err: any) {
+      console.error("LOGIN ERROR:", err);
       const msg =
         err?.response?.data?.message ||
         err?.message ||
@@ -60,7 +57,6 @@ export default function Login() {
 
   return (
     <section className="grid md:grid-cols-2 min-h-dvh bg-white text-gray-900 antialiased">
-      {/* imagem lateral */}
       <div className="hidden md:block relative">
         <img
           src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=1200&fit=crop&crop=center"
@@ -70,7 +66,6 @@ export default function Login() {
         <div className="absolute inset-0 bg-purple-600/20"></div>
       </div>
 
-      {/* formulário */}
       <div className="flex items-center justify-center p-8">
         <div className="w-full max-w-md text-center">
           <img
@@ -82,7 +77,6 @@ export default function Login() {
           <p className="text-sm text-gray-600 mt-1">Bem-vindo de volta! Continue sua jornada.</p>
 
           <form onSubmit={handleLogin} className="mt-6 rounded-2xl bg-purple-50 p-6 shadow-lg space-y-4">
-            {/* email */}
             <div>
               <label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
                 Email
@@ -101,7 +95,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* senha */}
             <div>
               <label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
                 Senha
@@ -128,7 +121,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* lembrar/esqueceu */}
             <div className="flex items-center justify-between text-sm">
               <label className="inline-flex items-center gap-2">
                 <input
@@ -144,14 +136,12 @@ export default function Login() {
               </a>
             </div>
 
-            {/* erro */}
             {errorMsg && (
               <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-left text-sm text-red-700">
                 {errorMsg}
               </div>
             )}
 
-            {/* botão entrar */}
             <button
               type="submit"
               disabled={loading}
@@ -160,13 +150,11 @@ export default function Login() {
               {loading ? "Entrando…" : "Entrar"}
             </button>
 
-            {/* separador */}
             <div className="relative my-2 text-center">
               <span className="relative z-10 bg-purple-50 px-3 text-sm text-gray-600">ou</span>
               <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />
             </div>
 
-            {/* rodapé */}
             <div className="text-center text-sm text-gray-600">
               Ainda não tem conta?{" "}
               <Link to="/cadastro" className="text-purple-700 font-medium hover:text-purple-800">
@@ -175,7 +163,6 @@ export default function Login() {
             </div>
           </form>
 
-          {/* voltar */}
           <div className="mt-6">
             <Link to="/" className="text-sm text-gray-600 hover:text-gray-800">
               ← Voltar para página inicial
