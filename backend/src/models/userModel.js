@@ -18,7 +18,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'A senha é obrigatória.'],
-      select: false, // Nunca retorna a senha por padrão nas consultas
+      select: false,
+      // NOVO: Regra de validação (Regex)
+      // Mínimo 8 caracteres, 1 minúscula, 1 maiúscula, 1 número
+      match: [
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\S]{8,}$/,
+        'A senha deve ter no mínimo 8 caracteres, incluindo uma letra maiúscula, uma minúscula e um número.',
+      ],
     },
     role: {
       type: String,

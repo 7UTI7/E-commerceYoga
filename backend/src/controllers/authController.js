@@ -19,21 +19,17 @@ const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password, // Só passamos a senha normal. O 'pre-save' cuida de criptografar
+      password,
     });
 
-    // Se o usuário foi criado com sucesso
     if (user) {
-   
-      // Geramos um token REAL usando o método que criamos no modelo
       const token = user.getSignedJwtToken();
-
       res.status(201).json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
-        token: token, // Agora enviamos o token real!
+        token: token,
         message: 'Usuário registrado com sucesso!'
       });
     } else {
@@ -41,7 +37,21 @@ const registerUser = async (req, res) => {
     }
 
   } catch (error) {
+    // Verifica se foi um erro de validação do Mongoose
+    if (error.name === 'ValidationError') {
+      // Pega a primeira mensagem de erro (ex: a da senha)
+      const message = Object.values(error.errors).map(val => val.message)[0];
+      return res.status(400).json({ message: message });
+    }
+    
+    // Verifica se foi um erro de chave duplicada (e-mail já existe)
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Este e-mail já está em uso.' });
+    }
+
+    // Log original para erros inesperados
     console.error('[REGISTER_USER_ERROR]', error);
+    // Resposta genérica 500 para outros erros
     res.status(500).json({ message: 'Erro no servidor. Tente novamente mais tarde.' });
   }
 };
@@ -107,7 +117,115 @@ const loginUser = async (req, res) => {
   }
 };
 
+// @desc    Buscar os dados do usuário logado
+// @route   GET /api/auth/me
+// @access  Private (Qualquer usuário logado)
+const getMe = async (req, res) => {
+  try {
+    // Buscamos o usuário completo no banco
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro no servidor.' });
+  }
+};
+
+// @desc    Atualizar dados do usuário logado (nome, email)
+// @route   PUT /api/auth/me
+// @access  Private (Qualquer usuário logado)
+const updateMe = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+
+    // Pega o usuário do banco (o 'req.user' do token)
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    // Lógica de mudança de e-mail
+    // Se o e-mail mudou, precisamos verificar se o novo já existe
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Este e-mail já está em uso por outra conta.' });
+      }
+      user.email = email;
+    }
+
+    // Lógica de mudança de nome
+    if (name) {
+      user.name = name;
+    }
+
+    // Salva as alterações
+    const updatedUser = await user.save();
+
+    res.status(200).json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro no servidor.' });
+  }
+};
+
+// @desc    Atualizar a senha do usuário logado
+// @route   PUT /api/auth/updatepassword
+// @access  Private (Qualquer usuário logado)
+const updatePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'Por favor, forneça a senha antiga e a nova senha.' });
+    }
+
+    // 1. Pega o usuário logado (e sua senha) do banco
+    const user = await User.findById(req.user._id).select('+password');
+
+    // 2. Verifica se a senha antiga (oldPassword) está correta
+    const isMatch = await user.matchPassword(oldPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Senha antiga incorreta.' });
+    }
+
+    // 3. Se estiver correta, define a nova senha
+    user.password = newPassword;
+
+    // 4. Salva o usuário
+    await user.save();
+    
+    res.status(200).json({ message: 'Senha atualizada com sucesso.' });
+
+  } catch (error) {
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+    console.error(error);
+    res.status(500).json({ message: 'Erro no servidor.' });
+  }
+};
+
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  getMe,
+  updateMe,
+  updatePassword
 };
