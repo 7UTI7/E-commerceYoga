@@ -6,26 +6,29 @@ import App from "./App";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
-import UserApp from "./userui/userApp";          // <= tela logada real
-import Admin from "./pages/admin";               // <= painel da professora
+import UserApp from "./userui/userApp";                 // área logada (feed)
+import Admin from "./pages/admin";                      // painel da professora
+import PostDetail from "./userui/components/post-detail";          // <- ajuste o caminho se necessário
 import { ProtectedRoute, AdminRoute } from "./routes/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import "./index.css";
 
-// --- Layout com Header/Footer ---
+// --- Layout com Header/Footer (precisa ter <Outlet/> dentro de App) ---
 const appRoutes = {
   path: "/",
-  element: <App />, // deve renderizar <Outlet />
+  element: <App />,
   children: [
     { index: true, element: <Home /> }, // "/"
+    // outras rotas públicas com header/footer, se quiser
   ],
 };
 
-// --- Rotas sem layout (telas limpas) ---
+// --- Rotas sem layout (telas “limpas”) ---
 const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
 
+  // feed do usuário (protegido)
   {
     path: "/user",
     element: (
@@ -35,6 +38,17 @@ const bareRoutes = [
     ),
   },
 
+  // detalhes de post (protegido)
+  {
+    path: "/post/:kind/:id", // kind: article | video | event | class
+    element: (
+      <ProtectedRoute>
+        <PostDetail />
+      </ProtectedRoute>
+    ),
+  },
+
+  // painel admin (precisa ser ADMIN)
   {
     path: "/admin",
     element: (
@@ -44,6 +58,7 @@ const bareRoutes = [
     ),
   },
 
+  // 404
   {
     path: "*",
     element: (

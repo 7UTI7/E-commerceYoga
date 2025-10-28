@@ -1,53 +1,63 @@
-// src/userui/components/PostCard.tsx
-import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export type PostCardProps = {
+export interface PostCardProps {
+  id: string;
+  kind: "article" | "video" | "event" | "class";
   title: string;
-  category: string;
-  date: string;
-  excerpt: string;
+  description?: string;
   image?: string;
-  item?: any; // objeto bruto (Article/Video/Event/ClassSlot) se quiser abrir modal/detalhe
-  onClick?: (item: any) => void;
-};
+  date?: string;
+}
 
-export const PostCard: React.FC<PostCardProps> = ({
-  title,
-  category,
-  date,
-  excerpt,
-  image = "/assets/placeholder.jpg",
-  item,
-  onClick,
-}) => {
+export default function PostCard({ id, kind, title, description, image, date }: PostCardProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/post/${kind}/${id}`);
+  };
+
   return (
     <article
-      className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow hover:shadow-lg transition"
-      role="button"
-      onClick={() => onClick?.(item)}
+      onClick={handleClick}
+      className="group cursor-pointer overflow-hidden rounded-2xl bg-white shadow-md hover:shadow-lg transition-all duration-300 flex h-full flex-col"
     >
-      <div className="aspect-video w-full overflow-hidden bg-gray-100">
-        <img
-          src={image}
-          alt={title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-          loading="lazy"
-        />
-      </div>
-
-      <div className="p-4">
-        <div className="mb-2 flex items-center justify-between text-xs text-gray-500">
-          <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 font-medium text-purple-700">
-            {category}
-          </span>
-          <time className="tabular-nums">{date}</time>
+      {/* Imagem */}
+      {image ? (
+        <div className="aspect-video w-full overflow-hidden bg-gray-100">
+          <img
+            src={image}
+            alt={title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
         </div>
-        <h3 className="line-clamp-2 text-base font-semibold text-gray-900">{title}</h3>
-        <p className="mt-2 line-clamp-3 text-sm text-gray-600">{excerpt}</p>
+      ) : (
+        <div className="aspect-video flex items-center justify-center bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600 text-sm font-medium">
+          Sem imagem
+        </div>
+      )}
+
+      {/* Conteúdo */}
+      <div className="p-4 sm:p-5 flex-1 flex flex-col">
+        <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 line-clamp-2">
+          {title}
+        </h3>
+
+        {/* ocupa espaço mínimo para não encolher em Aulas */}
+        <p className="mt-2 text-sm text-gray-600 line-clamp-3 min-h-[48px]">
+          {description || ""}
+        </p>
+
+        {/* Rodapé (cola no fim) */}
+        <div className="mt-auto pt-3 flex items-center justify-between text-xs text-gray-500">
+          <span className="capitalize">
+            {kind === "article" && "Artigo"}
+            {kind === "video" && "Vídeo"}
+            {kind === "event" && "Evento"}
+            {kind === "class" && "Aula"}
+          </span>
+          {date && <span>{new Date(date).toLocaleDateString("pt-BR")}</span>}
+        </div>
       </div>
     </article>
   );
-};
-
-// Se em algum lugar você estiver importando como default, isso evita quebrar:
-export default PostCard;
+}

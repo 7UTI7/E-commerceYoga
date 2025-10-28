@@ -1,190 +1,157 @@
 import { useEffect, useMemo, useState } from "react";
+import PostCard from "./PostCard";
 import {
-  getArticles,
+  getPublishedArticles,
   getVideos,
   getEvents,
   getClassSlots,
+  type Article,
+  type Video,
+  type Event,
+  type ClassSlot,
 } from "../../lib/api";
-import type { Article, Video, Event, ClassSlot } from "../../lib/api";
-import { PostCard } from "./PostCard";
+import { getFigmaImage } from "../figmaImages";
 
-type Category = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas";
+type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas";
+type DataKey = "recent" | "article" | "video" | "event" | "class";
 
-type FeedItem =
-  | { kind: "Article"; raw: Article }
-  | { kind: "Video"; raw: Video }
-  | { kind: "Event"; raw: Event }
-  | { kind: "ClassSlot"; raw: ClassSlot };
-
-// Modelo que o seu PostCard entende (ajuste os nomes se necessário)
-type UiCard = {
-  key: string;
+interface Item {
+  id: string;
+  kind: "article" | "video" | "event" | "class";
   title: string;
-  category: string;
-  date: string;
-  excerpt: string;
+  description?: string;
   image?: string;
-  raw: any;
-};
-
-function formatWeekday(n?: number) {
-  const names = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-  if (typeof n !== "number" || n < 0 || n > 6) return "Dia";
-  return names[n];
+  date?: string;
+  raw?: any;
 }
 
-function coerceDate(s?: string) {
-  if (!s) return "";
-  const d = new Date(s);
-  return isNaN(+d) ? "" : d.toLocaleString("pt-BR");
+function uiToKey(ui?: UiCategory): DataKey {
+  switch (ui) {
+    case "Artigos": return "article";
+    case "Vídeos":  return "video";
+    case "Eventos": return "event";
+    case "Aulas":   return "class";
+    case "Recentes":
+    default:        return "recent";
+  }
 }
 
-function normalizeToUi(item: FeedItem): UiCard {
-  if (item.kind === "Article") {
-    const a = item.raw;
-    return {
-      key: `Article-${a._id}`,
-      title: a.title ?? "Artigo",
-      category: "Artigos",
-      date: coerceDate(a.createdAt),
-      excerpt: (a.content ?? "").slice(0, 160) + (a.content ? "…" : ""),
-      image: a.coverImage ?? "/assets/placeholder.jpg",
-      raw: a,
-    };
-  }
+const weekdayName = (i: number) => ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][i] ?? "";
 
-  if (item.kind === "Video") {
-    const v = item.raw;
-    return {
-      key: `Video-${v._id}`,
-      title: v.title ?? "Vídeo",
-      category: "Vídeos",
-      date: coerceDate(v.createdAt),
-      excerpt: (v.description ?? "").slice(0, 160) + (v.description ? "…" : ""),
-      image: "/assets/placeholder.jpg",
-      raw: v,
-    };
-  }
-
-  if (item.kind === "Event") {
-    const e = item.raw;
-    return {
-      key: `Event-${e._id}`,
-      title: e.title ?? "Evento",
-      category: "Eventos",
-      date: coerceDate(e.date) || coerceDate(e.createdAt),
-      excerpt: (e.description ?? "").slice(0, 160) + (e.description ? "…" : ""),
-      image: "/assets/placeholder.jpg",
-      raw: e,
-    };
-  }
-
-  // ClassSlot pode vir sem title/description/dateTime → criamos algo legível
-  const c = item.raw;
-  const title =
-    c.modality
-      ? `Aula de ${c.modality}`
-      : "Aula";
-  const date =
-    c.time && typeof c.weekday === "number"
-      ? `${formatWeekday(c.weekday)} • ${c.time}`
-      : coerceDate(c.createdAt) || "Horário a definir";
-
-  return {
-    key: `ClassSlot-${c._id}`,
-    title,
-    category: "Aulas",
-    date,
-    excerpt: "Agende sua prática.",
-    image: "/assets/placeholder.jpg",
-    raw: c,
-  };
-}
-
-export function PostsSection({ activeCategory }: { activeCategory: Category }) {
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [classes, setClasses] = useState<ClassSlot[]>([]);
+export default function PostsSection({ activeCategory }: { activeCategory?: UiCategory }) {
+  const [posts, setPosts] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const selectedKey = useMemo<DataKey>(() => uiToKey(activeCategory ?? "Recentes"), [activeCategory]);
 
   useEffect(() => {
     let alive = true;
-    (async () => {
+    async function fetchData() {
+      setLoading(true);
       try {
-        setLoading(true);
-        const [a, v, e, c] = await Promise.all([
-          getArticles(), getVideos(), getEvents(), getClassSlots()
-        ]);
-        if (!alive) return;
-        setArticles(a || []);
-        setVideos(v || []);
-        setEvents(e || []);
-        setClasses(c || []);
+        const items: Item[] = [];
+
+        if (selectedKey === "article" || selectedKey === "recent") {
+          const articles = await getPublishedArticles();
+          items.push(
+            ...articles.map((a: Article): Item => ({
+              id: a._id,
+              kind: "article",
+              title: a.title,
+              description: a.content?.trim()
+                ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
+                : undefined,
+              // 👇 tenta imagem do back, senão usa demo (figma)
+              image: a.coverImage || getFigmaImage("article", a),
+              date: a.createdAt ?? a.updatedAt,
+              raw: a,
+            }))
+          );
+        }
+
+        if (selectedKey === "video" || selectedKey === "recent") {
+          const videos = await getVideos();
+          items.push(
+            ...videos.map((v: Video): Item => ({
+              id: v._id,
+              kind: "video",
+              title: v.title,
+              description: v.description,
+              image: getFigmaImage("video", v), // 👈 placeholder local
+              date: v.createdAt ?? v.updatedAt,
+              raw: v,
+            }))
+          );
+        }
+
+        if (selectedKey === "event" || selectedKey === "recent") {
+          const events = await getEvents();
+          items.push(
+            ...events.map((e: Event): Item => ({
+              id: e._id,
+              kind: "event",
+              title: e.title,
+              description: e.description,
+              image: getFigmaImage("event", e), // 👈 placeholder local
+              date: e.date ?? e.createdAt ?? e.updatedAt,
+              raw: e,
+            }))
+          );
+        }
+
+        if (selectedKey === "class" || selectedKey === "recent") {
+          const classes = await getClassSlots();
+          items.push(
+            ...classes.map((c: ClassSlot): Item => ({
+              id: c._id,
+              kind: "class",
+              title: c.modality ? `Aula de ${c.modality}` : "Aula de Yoga",
+              description: `${weekdayName(Number(c.weekday))} • ${c.time}`,
+              image: getFigmaImage("class", c), // 👈 placeholder local
+              date: c.createdAt ?? c.updatedAt,
+              raw: c,
+            }))
+          );
+        }
+
+        items.sort((a, b) => {
+          const da = a.date ? new Date(a.date).getTime() : 0;
+          const db = b.date ? new Date(b.date).getTime() : 0;
+          return db - da;
+        });
+
+        if (alive) setPosts(items);
+      } catch (err) {
+        console.error("Erro ao carregar posts:", err);
+        if (alive) setPosts([]);
       } finally {
         if (alive) setLoading(false);
       }
-    })();
-    return () => { alive = false; };
-  }, []);
-
-  const feed: UiCard[] = useMemo(() => {
-    const mapA: FeedItem[] = articles.map((x) => ({ kind: "Article", raw: x }));
-    const mapV: FeedItem[] = videos.map((x) => ({ kind: "Video", raw: x }));
-    const mapE: FeedItem[] = events.map((x) => ({ kind: "Event", raw: x }));
-    const mapC: FeedItem[] = classes.map((x) => ({ kind: "ClassSlot", raw: x }));
-
-    let items: FeedItem[];
-    switch (activeCategory) {
-      case "Artigos":
-        items = mapA;
-        break;
-      case "Vídeos":
-        items = mapV;
-        break;
-      case "Eventos":
-        items = mapE;
-        break;
-      case "Aulas":
-        items = mapC;
-        break;
-      default: {
-        items = [...mapA, ...mapV, ...mapE, ...mapC];
-        // ordenar por “mais recente”
-        items.sort((x, y) => {
-          const dx = new Date(
-            x.kind === "Event" ? (x.raw as Event).date
-              : (x.raw as any).createdAt
-          ).getTime();
-          const dy = new Date(
-            y.kind === "Event" ? (y.raw as Event).date
-              : (y.raw as any).createdAt
-          ).getTime();
-          return dy - dx;
-        });
-      }
     }
-
-    return items.map(normalizeToUi);
-  }, [activeCategory, articles, videos, events, classes]);
-
-  if (loading) return <div className="p-6 text-center">Carregando…</div>;
-  if (!feed.length) return <div className="p-6 text-center">Nada por aqui ainda.</div>;
+    fetchData();
+    return () => { alive = false; };
+  }, [selectedKey]);
 
   return (
-    <section className="container mx-auto px-4 py-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {feed.map((card) => (
-        <PostCard
-          key={card.key}
-          title={card.title}
-          category={card.category}
-          date={card.date}
-          excerpt={card.excerpt}
-          image={card.image}
-          // se seu PostCard aceita um objeto para abrir modal/detalhes:
-          item={card.raw}
-        />
-      ))}
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      {loading ? (
+        <div className="text-center text-gray-500 py-10">Carregando conteúdo...</div>
+      ) : posts.length === 0 ? (
+        <div className="text-center text-gray-500 py-10">Nenhum conteúdo encontrado.</div>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          {posts.map((item) => (
+            <PostCard
+              key={`${item.kind}-${item.id}`}
+              id={item.id}
+              kind={item.kind}
+              title={item.title}
+              description={item.description}
+              image={item.image}
+              date={item.date}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

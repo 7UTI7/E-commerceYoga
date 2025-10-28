@@ -104,6 +104,10 @@ export async function deleteArticle(id: string) {
   const { data } = await api.delete(`/api/articles/${id}`);
   return data;
 }
+export async function getArticleById(id: string) {
+  const { data } = await api.get<Article>(`/api/articles/${id}`);
+  return data;
+}
 
 // Vídeos
 export async function createVideo(payload: Partial<Video>) {
@@ -116,6 +120,10 @@ export async function updateVideo(id: string, payload: Partial<Video>) {
 }
 export async function deleteVideo(id: string) {
   const { data } = await api.delete(`/api/videos/${id}`);
+  return data;
+}
+export async function getVideoById(id: string) {
+  const { data } = await api.get<Video>(`/api/videos/${id}`);
   return data;
 }
 
@@ -132,6 +140,10 @@ export async function deleteEvent(id: string) {
   const { data } = await api.delete(`/api/events/${id}`);
   return data;
 }
+export async function getEventById(id: string) {
+  const { data } = await api.get<Event>(`/api/events/${id}`);
+  return data;
+}
 
 // Aulas (Class-Slots)
 export async function createClassSlot(payload: Partial<ClassSlot>) {
@@ -144,6 +156,10 @@ export async function updateClassSlot(id: string, payload: Partial<ClassSlot>) {
 }
 export async function deleteClassSlot(id: string) {
   const { data } = await api.delete(`/api/class-slots/${id}`);
+  return data;
+}
+export async function getClassSlotById(id: string) {
+  const { data } = await api.get<ClassSlot>(`/api/class-slots/${id}`);
   return data;
 }
 

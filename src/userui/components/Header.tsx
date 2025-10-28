@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, MapPin, User, LogOut, PlusSquare } from "lucide-react";
+import { Phone, MapPin, User, LogOut } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "../../userui/components/ui/dialog";
+import { Button } from "../../userui/components/ui/button";
 import { useAuth } from "../../contexts/AuthContext";
 
 export interface HeaderProps {
@@ -14,7 +19,9 @@ export interface HeaderProps {
 
 export function Header({ onLogoClick }: HeaderProps) {
   const navigate = useNavigate();
-  const { user, isAdmin, clearSession } = useAuth();
+  const { user, clearSession } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+
   const [openWhats, setOpenWhats] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
 
@@ -23,7 +30,7 @@ export function Header({ onLogoClick }: HeaderProps) {
 
   const handleLogoClick = () => {
     if (onLogoClick) return onLogoClick();
-    navigate("/user");
+    window.location.reload();
   };
 
   const goInstagram = () =>
@@ -36,11 +43,12 @@ export function Header({ onLogoClick }: HeaderProps) {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="h-[72px] flex items-center justify-between gap-3">
+            {/* ESQUERDA */}
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={handleLogoClick}
                 className="flex items-center gap-2 shrink-0 hover:opacity-90 transition"
-                aria-label="Ir para área do usuário"
+                aria-label="Atualizar a página"
               >
                 <img src="/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" className="h-10 w-10 rounded" />
                 <span className="text-xl font-semibold text-purple-800 whitespace-nowrap">
@@ -70,27 +78,44 @@ export function Header({ onLogoClick }: HeaderProps) {
               </div>
             </div>
 
+            {/* DIREITA */}
             <div className="flex items-center gap-3 shrink-0">
-              <button onClick={goInstagram} aria-label="Instagram" className="text-purple-600 hover:text-purple-800" title="Instagram">
+              <button
+                onClick={goInstagram}
+                aria-label="Instagram"
+                className="text-purple-600 hover:text-purple-800"
+                title="Instagram"
+              >
                 <i className="fab fa-instagram text-[18px]" />
               </button>
-              <button onClick={goFacebook} aria-label="Facebook" className="text-purple-600 hover:text-purple-800" title="Facebook">
+              <button
+                onClick={goFacebook}
+                aria-label="Facebook"
+                className="text-purple-600 hover:text-purple-800"
+                title="Facebook"
+              >
                 <i className="fab fa-facebook text-[18px]" />
               </button>
 
-              <Button className="rounded-lg bg-green-600 hover:bg-green-700 text-white shadow" onClick={() => setOpenWhats(true)}>
-                <i className="fab fa-whatsapp text-[16px] mr-2" />
-                Agendar
-              </Button>
+              {/* Agendar — só para não-admin */}
+              {!isAdmin && (
+                <Button
+                  className="rounded-lg bg-green-600 hover:bg-green-700 text-white shadow"
+                  onClick={() => setOpenWhats(true)}
+                >
+                  <i className="fab fa-whatsapp text-[16px] mr-2" />
+                  Agendar
+                </Button>
+              )}
 
+              {/* Gerenciar Conteúdo — só para admin */}
               {isAdmin && (
                 <Button
                   className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white shadow"
                   onClick={() => navigate("/admin")}
-                  title="Ir para o painel e publicar"
+                  title="Ir para o painel administrativo"
                 >
-                  <PlusSquare className="w-4 h-4 mr-2" />
-                  Publicar
+                  Gerenciar Conteúdo
                 </Button>
               )}
 
@@ -101,7 +126,7 @@ export function Header({ onLogoClick }: HeaderProps) {
                 title="Perfil"
               >
                 <User className="w-4 h-4 mr-2" />
-                {user?.name ? user.name.split(" ")[0] : "Perfil"}
+                {user?.name?.split(" ")[0] || "Aluno"}
               </Button>
 
               <Button
@@ -118,33 +143,35 @@ export function Header({ onLogoClick }: HeaderProps) {
         </div>
       </header>
 
-      {/* MODAL: WhatsApp */}
-      <Dialog open={openWhats} onOpenChange={setOpenWhats}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Abrir WhatsApp?</DialogTitle>
-            <DialogDescription>
-              Este link abrirá o WhatsApp em uma nova aba para realizar seu agendamento. Deseja continuar?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 flex justify-end gap-2">
-            <DialogClose asChild>
-              <Button variant="secondary" className="rounded-lg">Cancelar</Button>
-            </DialogClose>
-            <Button
-              className="rounded-lg"
-              onClick={() => {
-                window.open(whatsappHref, "_blank", "noopener,noreferrer");
-                setOpenWhats(false);
-              }}
-            >
-              Continuar
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Modal WhatsApp (só quando não-admin) */}
+      {!isAdmin && (
+        <Dialog open={openWhats} onOpenChange={setOpenWhats}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Abrir WhatsApp?</DialogTitle>
+              <DialogDescription>
+                Este link abrirá o WhatsApp em uma nova aba para realizar seu agendamento. Deseja continuar?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4 flex justify-end gap-2">
+              <DialogClose asChild>
+                <Button variant="secondary" className="rounded-lg">Cancelar</Button>
+              </DialogClose>
+              <Button
+                className="rounded-lg"
+                onClick={() => {
+                  window.open(whatsappHref, "_blank", "noopener,noreferrer");
+                  setOpenWhats(false);
+                }}
+              >
+                Continuar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
-      {/* MODAL: Sair */}
+      {/* Modal Sair — CORRIGIDO: tudo dentro do DialogContent */}
       <Dialog open={openLogout} onOpenChange={setOpenLogout}>
         <DialogContent>
           <DialogHeader>
@@ -159,8 +186,8 @@ export function Header({ onLogoClick }: HeaderProps) {
               variant="destructive"
               className="rounded-lg"
               onClick={() => {
-                clearSession();
-                navigate("/", { replace: true });
+                clearSession?.();
+                navigate("/");
               }}
             >
               Sim, sair
