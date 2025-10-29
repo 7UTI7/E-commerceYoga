@@ -8,6 +8,7 @@ import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
 import UserApp from "./userui/userApp";
 import Admin from "./pages/admin";
+import ProfilePage from "./pages/profile";
 import PostDetail from "./userui/components/post-detail";
 import { ProtectedRoute, AdminRoute } from "./routes/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -29,6 +30,9 @@ const appRoutes = {
   children: [{ index: true, element: <Home /> }],
 };
 
+
+
+
 const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
@@ -37,6 +41,14 @@ const bareRoutes = [
     element: (
       <ProtectedRoute>
         <UserApp />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/user/profile",
+    element: (
+      <ProtectedRoute>
+        <ProfilePage />
       </ProtectedRoute>
     ),
   },

@@ -1,15 +1,46 @@
+// src/pages/cadastro.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register as apiRegister, login as apiLogin } from "../lib/api";
 import { useAuth } from "../contexts/AuthContext";
 
+function formatPhone(value: string) {
+  // mantém apenas dígitos
+  const digits = value.replace(/\D/g, "").slice(0, 11); // máximo 11 (celular BR)
+  const d = digits.split("");
+
+  // (DD) 9XXXX-XXXX
+  if (d.length <= 2) return `(${d.join("")}`;
+  if (d.length <= 7) return `(${d.slice(0, 2).join("")}) ${d.slice(2).join("")}`;
+  if (d.length <= 11)
+    return `(${d.slice(0, 2).join("")}) ${d.slice(2, 7).join("")}-${d.slice(7).join("")}`;
+  return value;
+}
+
+function isValidBrazilMobileMasked(masked: string) {
+  // Aceita formato (DD) 9XXXX-XXXX -> 2 dígitos + 9 + 4
+  // Não forço o 9 na terceira posição, mas mantenho 11 dígitos total.
+  const digits = masked.replace(/\D/g, "");
+  return digits.length === 11;
+}
+
+function isStrongPassword(pw: string) {
+  // mínimo 8, ao menos 1 minúscula e 1 maiúscula
+  return /^(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(pw);
+}
+
 export default function Cadastro() {
   const navigate = useNavigate();
   const { setSession } = useAuth();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // para aplicar máscara de telefone no input (não preciso controlar todos os campos)
+  const [phone, setPhone] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -18,7 +49,7 @@ export default function Cadastro() {
     const form = e.target as HTMLFormElement;
     const name = (form.elements.namedItem("name") as HTMLInputElement).value.trim();
     const email = (form.elements.namedItem("email") as HTMLInputElement).value.trim();
-    const _phone = (form.elements.namedItem("phone") as HTMLInputElement)?.value.trim();
+    const phoneMask = (form.elements.namedItem("phone") as HTMLInputElement)?.value.trim();
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
     const termsChecked = (form.elements.namedItem("terms") as HTMLInputElement).checked;
@@ -27,13 +58,26 @@ export default function Cadastro() {
       setErrorMsg("Você precisa aceitar os termos para continuar.");
       return;
     }
+
+    if (!isStrongPassword(password)) {
+      setErrorMsg("A senha deve ter ao menos 8 caracteres, com letras minúsculas e maiúsculas.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setErrorMsg("As senhas não conferem.");
       return;
     }
 
+    if (phoneMask && !isValidBrazilMobileMasked(phoneMask)) {
+      setErrorMsg("Informe um celular válido no formato (DD) 9XXXX-XXXX.");
+      return;
+    }
+
     try {
       setLoading(true);
+
+      // o backend já valida a senha; aqui garantimos feedback imediato
       const data = await apiRegister(name, email, password);
 
       const tokenFromRegister = (data as any)?.token;
@@ -48,6 +92,7 @@ export default function Cadastro() {
       let token = tokenFromRegister;
       let user = userFromRegister;
 
+      // se o registro não devolver token, faz login em seguida
       if (!token) {
         const loginData = await apiLogin(email, password);
         user =
@@ -62,13 +107,13 @@ export default function Cadastro() {
 
       if (!token || !user) throw new Error("Não foi possível autenticar após o cadastro.");
 
-      setSession(user, token, true); // lembrar por padrão
+      setSession(user, token, true); // lembra por padrão (como no login)
       navigate("/user");
     } catch (err: any) {
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        "Falha ao criar conta. Tente novamente.";
+        "Falha no cadastro. Verifique os dados e tente novamente.";
       setErrorMsg(msg);
     } finally {
       setLoading(false);
@@ -77,17 +122,17 @@ export default function Cadastro() {
 
   return (
     <section className="grid md:grid-cols-2 min-h-dvh bg-white text-gray-900 antialiased">
-      {/* IMAGEM LATERAL */}
+      {/* Imagem lateral */}
       <div className="hidden md:block relative">
         <img
-          src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop&crop=center"
+          src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=1200&fit=crop&crop=center"
+          alt="Yoga background"
           className="absolute inset-0 h-full w-full object-cover"
-          alt="Yoga ambiente"
         />
-        <div className="absolute inset-0 bg-purple-600/20" />
+        <div className="absolute inset-0 bg-black/30" />
       </div>
 
-      {/* FORMULÁRIO */}
+      {/* Conteúdo */}
       <div className="flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           {/* LOGO E TÍTULOS */}
@@ -112,7 +157,7 @@ export default function Cadastro() {
                   Nome completo
                 </label>
                 <div className="relative">
-                  <i className="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i className="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     id="name"
                     name="name"
@@ -130,7 +175,7 @@ export default function Cadastro() {
                   Email
                 </label>
                 <div className="relative">
-                  <i className="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i className="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     id="email"
                     name="email"
@@ -143,18 +188,26 @@ export default function Cadastro() {
                 </div>
               </div>
 
-              {/* Telefone (opcional) */}
+              {/* Telefone (opcional, com máscara e limite) */}
               <div>
                 <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-700">
                   Telefone
                 </label>
                 <div className="relative">
-                  <i className="fas fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i className="fas fa-phone absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     id="phone"
                     name="phone"
                     type="tel"
-                    placeholder="(11) 99999-9999"
+                    inputMode="numeric"
+                    placeholder="(11) 9XXXX-XXXX"
+                    value={phone}
+                    onChange={(e) => setPhone(formatPhone(e.target.value))}
+                    onInput={(e) => {
+                      const el = e.currentTarget as HTMLInputElement;
+                      el.value = formatPhone(el.value);
+                    }}
+                    maxLength={16} // ex.: "(99) 99999-9999" tem 16 caracteres
                     className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                   />
                 </div>
@@ -166,7 +219,7 @@ export default function Cadastro() {
                   Senha
                 </label>
                 <div className="relative">
-                  <i className="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i className="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     id="password"
                     name="password"
@@ -174,6 +227,7 @@ export default function Cadastro() {
                     placeholder="••••••••"
                     required
                     autoComplete="new-password"
+                    minLength={8}
                     className="w-full rounded-lg border border-gray-300 bg-white px-10 py-3 text-base outline-none ring-purple-200 focus:border-purple-600 focus:ring-4"
                   />
                   <button
@@ -185,18 +239,19 @@ export default function Cadastro() {
                     <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`} />
                   </button>
                 </div>
+                <p className="mt-1 text-xs text-gray-600">
+                  A senha deve ter <strong>mínimo de 8 caracteres</strong>, com <strong>letras minúsculas</strong> e{" "}
+                  <strong>maiúsculas</strong>.
+                </p>
               </div>
 
               {/* Confirmar senha */}
               <div>
-                <label
-                  htmlFor="confirmPassword"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-700">
                   Confirmar senha
                 </label>
                 <div className="relative">
-                  <i className="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                  <i className="fas fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     id="confirmPassword"
                     name="confirmPassword"
@@ -217,45 +272,45 @@ export default function Cadastro() {
                 </div>
               </div>
 
-              {/* Termos */}
-              <div className="flex items-start gap-2 text-sm">
-                <input id="terms" name="terms" type="checkbox" className="mt-1 size-4 accent-purple-600" required />
-                <label htmlFor="terms" className="text-gray-700">
-                  Eu aceito os{" "}
-                  <a href="#" className="text-purple-700 hover:text-purple-800 font-medium">
-                    termos de uso
-                  </a>{" "}
-                  e{" "}
-                  <a href="#" className="text-purple-700 hover:text-purple-800 font-medium">
-                    política de privacidade
-                  </a>
-                  .
-                </label>
-              </div>
-
+              {/* Erro (mesmo estilo do login) */}
               {errorMsg && (
                 <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-left text-sm text-red-700">
                   {errorMsg}
                 </div>
               )}
 
+              {/* Termos */}
+              <div className="flex items-center gap-3">
+                <input id="terms" name="terms" type="checkbox" className="h-4 w-4 rounded border-gray-300" />
+                <label htmlFor="terms" className="text-sm text-gray-700">
+                  Eu li e concordo com os{" "}
+                  <a className="text-purple-700 hover:text-purple-800 underline" href="#" onClick={(ev) => ev.preventDefault()}>
+                    termos de uso
+                  </a>
+                  .
+                </label>
+              </div>
+
+              {/* Criar conta */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-purple-600 py-3 font-medium text-white hover:bg-purple-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full rounded-lg bg-purple-600 py-3 font-medium text-white shadow hover:bg-purple-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? "Criando conta…" : "Criar conta"}
               </button>
 
+              {/* Separador */}
               <div className="relative my-2 text-center">
-                <span className="relative z-10 bg-purple-50 px-3 text-sm text-gray-600">ou</span>
-                <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />
+                <span className="relative z-10 bg-purple-50 px-2 text-xs text-gray-500">ou</span>
+                <div className="absolute left-0 right-0 top-1/2 -z-0 h-px bg-gray-200" />
               </div>
 
-              <div className="text-center text-sm text-gray-600">
-                Já tem conta?{" "}
-                <Link to="/login" className="text-purple-700 font-medium hover:text-purple-800">
-                  Faça login aqui
+              {/* Já tem conta */}
+              <div className="text-center text-sm">
+                Já tem uma conta?{" "}
+                <Link to="/login" className="text-purple-700 hover:text-purple-800 font-medium">
+                  Entrar
                 </Link>
               </div>
             </form>
