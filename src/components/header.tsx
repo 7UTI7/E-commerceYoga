@@ -12,25 +12,9 @@ export default function Header() {
               <span className="text-xl font-bold text-purple-700 whitespace-nowrap">Karla Rodrigues Yoga</span>
             </Link>
 
-            <div className="hidden sm:flex items-center gap-2 pl-3 ml-1 border-l border-gray-200 text-sm text-gray-600 whitespace-nowrap">
-              <i className="fas fa-phone text-[18px] text-purple-600"></i>
-              <span>(11) 99999-9999</span>
-            </div>
           </div>
 
-          {/* CENTRO: endereço (clicável → Google Maps) */}
-          <div className="hidden lg:flex items-center gap-2 flex-1 justify-center min-w-0 text-sm">
-            <i className="fas fa-map-marker-alt text-[18px] text-purple-600 shrink-0"></i>
-            <a
-              href="https://www.google.com/maps/search/?api=1&query=R.%20Navajas%2C%20632%20-%20sala%203%20-%20Shangai%2C%20Mogi%20das%20Cruzes%20-%20SP%2C%2008745-200"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-gray-700 hover:text-purple-700 transition-colors block max-w-[700px] truncate"
-              title="R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200"
-            >
-              R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200
-            </a>
-          </div>
+          
 
           {/* DIREITA: redes + ENTRAR + CADASTRAR */}
           <div className="flex items-center gap-3 shrink-0">
