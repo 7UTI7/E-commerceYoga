@@ -22,7 +22,6 @@ interface Item {
   description?: string;
   image?: string;
   date?: string;
-  raw?: any;
 }
 
 function uiToKey(ui?: UiCategory): DataKey {
@@ -31,22 +30,29 @@ function uiToKey(ui?: UiCategory): DataKey {
     case "Vídeos":  return "video";
     case "Eventos": return "event";
     case "Aulas":   return "class";
-    case "Recentes":
     default:        return "recent";
   }
 }
 
 const weekdayName = (i: number) => ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][i] ?? "";
 
+function fmtISO(iso?: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return d.toLocaleString();
+}
+
 export default function PostsSection({ activeCategory }: { activeCategory?: UiCategory }) {
   const [posts, setPosts] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
   const selectedKey = useMemo<DataKey>(() => uiToKey(activeCategory ?? "Recentes"), [activeCategory]);
 
   useEffect(() => {
     let alive = true;
     async function fetchData() {
       setLoading(true);
+      setErr(null);
       try {
         const items: Item[] = [];
 
@@ -60,10 +66,8 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
               description: a.content?.trim()
                 ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
                 : undefined,
-              // 👇 tenta imagem do back, senão usa demo (figma)
               image: a.coverImage || getFigmaImage("article", a),
               date: a.createdAt ?? a.updatedAt,
-              raw: a,
             }))
           );
         }
@@ -76,9 +80,8 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
               kind: "video",
               title: v.title,
               description: v.description,
-              image: getFigmaImage("video", v), // 👈 placeholder local
+              image: getFigmaImage("video", v),
               date: v.createdAt ?? v.updatedAt,
-              raw: v,
             }))
           );
         }
@@ -91,9 +94,8 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
               kind: "event",
               title: e.title,
               description: e.description,
-              image: getFigmaImage("event", e), // 👈 placeholder local
+              image: getFigmaImage("event", e),
               date: e.date ?? e.createdAt ?? e.updatedAt,
-              raw: e,
             }))
           );
         }
@@ -101,15 +103,24 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
         if (selectedKey === "class" || selectedKey === "recent") {
           const classes = await getClassSlots();
           items.push(
-            ...classes.map((c: ClassSlot): Item => ({
-              id: c._id,
-              kind: "class",
-              title: c.modality ? `Aula de ${c.modality}` : "Aula de Yoga",
-              description: `${weekdayName(Number(c.weekday))} • ${c.time}`,
-              image: getFigmaImage("class", c), // 👈 placeholder local
-              date: c.createdAt ?? c.updatedAt,
-              raw: c,
-            }))
+            ...classes.map((c: ClassSlot): Item => {
+              const hasNewShape = !!c.dateTime || !!c.title || !!c.description;
+              const title = hasNewShape ? (c.title || "Aula de Yoga") : (c.modality ? `Aula de ${c.modality}` : "Aula de Yoga");
+              const desc = hasNewShape
+                ? (c.description && c.description.trim().length > 0
+                    ? c.description
+                    : `${fmtISO(c.dateTime)}${c.durationMinutes ? ` • ${c.durationMinutes} min` : ""}${c.maxStudents ? ` • ${c.maxStudents} vagas` : ""}`)
+                : `${weekdayName(Number(c.weekday ?? 0))} • ${c.time ?? ""}`;
+              const date = hasNewShape ? (c.dateTime ?? c.createdAt ?? c.updatedAt) : (c.createdAt ?? c.updatedAt);
+              return {
+                id: c._id,
+                kind: "class",
+                title,
+                description: desc,
+                image: getFigmaImage("class", c),
+                date,
+              };
+            })
           );
         }
 
@@ -120,8 +131,8 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
         });
 
         if (alive) setPosts(items);
-      } catch (err) {
-        console.error("Erro ao carregar posts:", err);
+      } catch (e: any) {
+        if (alive) setErr(e?.response?.data?.message || "Erro ao carregar conteúdos.");
         if (alive) setPosts([]);
       } finally {
         if (alive) setLoading(false);
@@ -133,6 +144,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
 
   return (
     <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
+      {err && <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</div>}
       {loading ? (
         <div className="text-center text-gray-500 py-10">Carregando conteúdo...</div>
       ) : posts.length === 0 ? (

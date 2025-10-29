@@ -6,29 +6,32 @@ import App from "./App";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
-import UserApp from "./userui/userApp";                 // área logada (feed)
-import Admin from "./pages/admin";                      // painel da professora
-import PostDetail from "./userui/components/post-detail";          // <- ajuste o caminho se necessário
+import UserApp from "./userui/userApp";
+import Admin from "./pages/admin";
+import PostDetail from "./userui/components/post-detail";
 import { ProtectedRoute, AdminRoute } from "./routes/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
+import GlobalErrorBoundary from "./userui/components/GlobalErrorBoundary";
 import "./index.css";
 
-// --- Layout com Header/Footer (precisa ter <Outlet/> dentro de App) ---
+// Logs globais
+window.addEventListener("error", (e) => {
+  console.error("[window.error]", (e as ErrorEvent).error || (e as ErrorEvent).message);
+});
+window.addEventListener("unhandledrejection", (e) => {
+  console.error("[unhandledrejection]", (e as PromiseRejectionEvent).reason);
+});
+
+// Rotas
 const appRoutes = {
   path: "/",
   element: <App />,
-  children: [
-    { index: true, element: <Home /> }, // "/"
-    // outras rotas públicas com header/footer, se quiser
-  ],
+  children: [{ index: true, element: <Home /> }],
 };
 
-// --- Rotas sem layout (telas “limpas”) ---
 const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
-
-  // feed do usuário (protegido)
   {
     path: "/user",
     element: (
@@ -37,18 +40,14 @@ const bareRoutes = [
       </ProtectedRoute>
     ),
   },
-
-  // detalhes de post (protegido)
   {
-    path: "/post/:kind/:id", // kind: article | video | event | class
+    path: "/post/:kind/:id",
     element: (
       <ProtectedRoute>
         <PostDetail />
       </ProtectedRoute>
     ),
   },
-
-  // painel admin (precisa ser ADMIN)
   {
     path: "/admin",
     element: (
@@ -57,8 +56,6 @@ const bareRoutes = [
       </AdminRoute>
     ),
   },
-
-  // 404
   {
     path: "*",
     element: (
@@ -74,10 +71,35 @@ const bareRoutes = [
 
 const router = createBrowserRouter([appRoutes, ...bareRoutes]);
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  </React.StrictMode>
-);
+// Guard de bootstrap: se *qualquer* erro acontecer antes de montar,
+// a gente mostra na tela em vez de ficar branco.
+function renderApp() {
+  try {
+    ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+      <React.StrictMode>
+        <AuthProvider>
+          <GlobalErrorBoundary>
+            <RouterProvider router={router} />
+          </GlobalErrorBoundary>
+        </AuthProvider>
+      </React.StrictMode>
+    );
+  } catch (err: any) {
+    const msg =
+      (err && (err.message || String(err))) || "Erro desconhecido durante o bootstrap do app.";
+    console.error("[bootstrap error]", err);
+    const box = document.createElement("pre");
+    box.style.whiteSpace = "pre-wrap";
+    box.style.padding = "16px";
+    box.style.margin = "24px";
+    box.style.border = "1px solid #fecaca";
+    box.style.background = "#fef2f2";
+    box.style.color = "#991b1b";
+    box.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    box.textContent = `Falha ao iniciar a UI:\n\n${msg}`;
+    document.body.innerHTML = "";
+    document.body.appendChild(box);
+  }
+}
+
+renderApp();

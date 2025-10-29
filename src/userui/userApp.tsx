@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Header } from "./components/Header";
 import { CategoryNav } from "./components/CategoryNav";
-import { EventCarousel } from "./components/EventCarousel";
+import EventsCarousel from "./components/EventCarousel";
 import PostsSection from "./components/PostsSection";
 import FooterPublic from "../components/footer";
 
@@ -19,7 +19,7 @@ export default function UserApp() {
       {/* Agora o CategoryNav é tipado com UiCategory e aceita setActiveCategory direto */}
       <CategoryNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
-      {showCarousel && <EventCarousel />}
+      {showCarousel && <EventsCarousel />}
 
       {/* PostsSection aceita prop opcional; aqui passamos a categoria ativa */}
       <PostsSection activeCategory={activeCategory} />
