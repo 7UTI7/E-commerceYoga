@@ -1,174 +1,132 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  getArticleById, getVideoById, getEventById, getClassSlotById,
-  type Article, type Video, type Event, type ClassSlot
+  getArticles, getVideos, getEvents, getClassSlots,
 } from "../../lib/api";
-import { getFigmaImage } from "../../userui/figmaImages";
-
-type Kind = "article" | "video" | "event" | "class";
+import { ArrowLeft } from "lucide-react";
 
 function ytIdFrom(url?: string) {
   if (!url) return "";
-  const r = /(youtu\.be\/|v=|embed\/)([A-Za-z0-9_-]{6,})/i.exec(url);
+  const r = /(youtu\.be\/|watch\?v=|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/i.exec(url);
   return r?.[2] || "";
 }
 
+type Kind = "artigo" | "video" | "evento" | "aula" | undefined;
+
 export default function PostDetail() {
-  const { kind, id } = useParams<{ kind: Kind; id: string }>();
+  const { id, kind } = useParams<{ id: string; kind?: Kind }>();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<Article | Video | Event | ClassSlot | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [item, setItem] = useState<any>(null);
+  const [type, setType] = useState<"Artigo" | "Vídeo" | "Evento" | "Aula" | null>(null);
 
   useEffect(() => {
-    let alive = true;
-    (async () => {
+    async function load() {
+      if (!id) return;
+      setLoading(true);
       try {
-        setLoading(true);
-        setError(null);
-        let res: any;
-        switch (kind) {
-          case "article": res = await getArticleById(id!); break;
-          case "video":   res = await getVideoById(id!); break;
-          case "event":   res = await getEventById(id!); break;
-          case "class":   res = await getClassSlotById(id!); break;
-          default: throw new Error("Tipo inválido");
+        if (kind === "video") {
+          const vids = await getVideos();
+          const v = vids.find(x => x._id === id);
+          if (v) { setItem(v); setType("Vídeo"); setLoading(false); return; }
         }
-        if (alive) setData(res);
-      } catch (e: any) {
-        if (alive) setError(e?.response?.data?.message || e?.message || "Erro ao carregar.");
+        if (kind === "artigo") {
+          const arts = await getArticles();
+          const a = arts.find(x => x._id === id);
+          if (a) { setItem(a); setType("Artigo"); setLoading(false); return; }
+        }
+        if (kind === "evento") {
+          const evs = await getEvents();
+          const e = evs.find(x => x._id === id);
+          if (e) { setItem(e); setType("Evento"); setLoading(false); return; }
+        }
+        if (kind === "aula") {
+          const cls = await getClassSlots();
+          const c = cls.find(x => x._id === id);
+          if (c) { setItem(c); setType("Aula"); setLoading(false); return; }
+        }
+
+        const [arts, vids, evs, cls] = await Promise.all([
+          getArticles(), getVideos(), getEvents(), getClassSlots()
+        ]);
+        let found: any = arts.find(x => x._id === id);
+        if (found) { setItem(found); setType("Artigo"); setLoading(false); return; }
+        found = vids.find(x => x._id === id);
+        if (found) { setItem(found); setType("Vídeo"); setLoading(false); return; }
+        found = evs.find(x => x._id === id);
+        if (found) { setItem(found); setType("Evento"); setLoading(false); return; }
+        found = cls.find(x => x._id === id);
+        if (found) { setItem(found); setType("Aula"); setLoading(false); return; }
+
+        setItem(null); setType(null);
       } finally {
-        if (alive) setLoading(false);
+        setLoading(false);
       }
-    })();
-    return () => { alive = false; };
-  }, [kind, id]);
-
-  const title = useMemo(() => {
-    if (!data) return "";
-    if ((data as any).title) return (data as any).title;
-    if (kind === "class") {
-      const c = data as ClassSlot;
-      const names = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-      const weekday = typeof c.weekday === "number" ? names[c.weekday] : "";
-      return `${c.modality ? `Aula de ${c.modality}` : "Aula"}${weekday||c.time ? " • " : ""}${weekday} ${c.time || ""}`;
     }
-    return "Detalhe";
-  }, [data, kind]);
+    load();
+  }, [id, kind]);
 
-  if (loading) return <div className="p-8 text-center">Carregando…</div>;
-  if (error) return <div className="p-8 text-center text-red-600">{error}</div>;
-  if (!data) return <div className="p-8 text-center">Não encontrado.</div>;
+  const youtubeId = useMemo(() => {
+    if (!item) return "";
+    const raw =
+      (item.youtubeUrl as string | undefined) || // ⇐ backend do Rafael
+      (item.url as string | undefined) ||
+      (item.videoUrl as string | undefined) ||
+      (item.link as string | undefined) ||
+      (item.embed as string | undefined);
+    if (!raw) return "";
+    if (raw.includes("/embed/")) {
+      const m = /embed\/([A-Za-z0-9_-]{6,})/.exec(raw);
+      return m?.[1] || "";
+    }
+    return ytIdFrom(raw);
+  }, [item]);
 
-  return (
-    <div className="mx-auto max-w-3xl p-4 sm:p-6">
-      <div className="mb-3">
-        <button className="text-sm text-purple-700 hover:underline" onClick={() => navigate(-1)}>
-          ← Voltar
+  if (loading) return <div className="mx-auto max-w-3xl p-6 text-gray-600">Carregando…</div>;
+  if (!item) {
+    return (
+      <div className="mx-auto max-w-3xl p-6">
+        <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+          <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
+        <div className="text-gray-700">Conteúdo não encontrado.</div>
       </div>
+    );
+  }
 
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{title}</h1>
-
-      <div className="mt-2 text-sm text-gray-500">
-        {kind === "article" && (data as Article).updatedAt &&
-          <>Atualizado em {new Date((data as Article).updatedAt).toLocaleString("pt-BR")}</>}
-        {kind === "event" && (data as Event).date &&
-          <>Quando: {new Date((data as Event).date).toLocaleString("pt-BR")}</>}
-        {kind === "class" &&
-          <>Criado em {new Date((data as ClassSlot).createdAt).toLocaleString("pt-BR")}</>}
-      </div>
-
-      <div className="mt-6 prose prose-purple max-w-none">
-        {kind === "article" && <ArticleBody article={data as Article} />}
-        {kind === "video"   && <VideoBody video={data as Video} />}
-        {kind === "event"   && <EventBody event={data as Event} />}
-        {kind === "class"   && <ClassBody item={data as ClassSlot} />}
-      </div>
-    </div>
-  );
-}
-
-function ArticleBody({ article }: { article: Article }) {
-  const fallback = getFigmaImage("article", article);
-  const cover = article.coverImage || fallback;
   return (
-    <>
-      {cover && (
-        <img src={cover} alt={article.title} className="w-full rounded-xl shadow mb-6" />
-      )}
-      <div className="whitespace-pre-wrap">
-        {article.content || "Sem conteúdo."}
-      </div>
-    </>
-  );
-}
+    <div className="mx-auto max-w-3xl p-6">
+      <button onClick={() => navigate(-1)} className="mb-4 inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm">
+        <ArrowLeft className="w-4 h-4" /> Voltar
+      </button>
 
-function VideoBody({ video }: { video: Video }) {
-  const id = ytIdFrom(video.url);
-  const fallback = getFigmaImage("video", video);
-  return (
-    <>
-      <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow">
-        {id ? (
-          <iframe
-            className="absolute inset-0 h-full w-full"
-            src={`https://www.youtube.com/embed/${id}`}
-            title={video.title}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          />
-        ) : fallback ? (
-          <img src={fallback} alt={video.title} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-600">
-            URL de vídeo inválida
+      <div className="rounded-2xl bg-white shadow p-5">
+        {type && <div className="mb-2 text-xs font-medium text-purple-700">{type}</div>}
+        <h1 className="text-2xl font-semibold mb-3">{item.title || item.slug || "Sem título"}</h1>
+
+        {type === "Vídeo" && youtubeId && (
+          <div className="mb-4 relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
+            <iframe
+              className="absolute inset-0 w-full h-full"
+              src={`https://www.youtube.com/embed/${youtubeId}`}
+              title={item.title || "Vídeo"}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
           </div>
         )}
-      </div>
-      {video.description && (
-        <p className="mt-4 text-gray-700 whitespace-pre-wrap">{video.description}</p>
-      )}
-    </>
-  );
-}
 
-function EventBody({ event }: { event: Event }) {
-  const fallback = getFigmaImage("event", event);
-  return (
-    <>
-      {fallback && (
-        <img src={fallback} alt={event.title} className="w-full rounded-xl shadow mb-6" />
-      )}
-      <div className="rounded-xl bg-purple-50 p-4 shadow-sm">
-        <div className="text-sm text-gray-600">
-          <b>Data:</b> {new Date(event.date).toLocaleString("pt-BR")}
-          {event.location ? <> • <b>Local:</b> {event.location}</> : null}
+        {item.content && <p className="whitespace-pre-wrap">{item.content}</p>}
+        {item.description && !item.content && <p className="text-gray-700 whitespace-pre-wrap">{item.description}</p>}
+
+        <div className="mt-4 text-sm text-gray-500">
+          {item.createdAt && <>Publicado em {new Date(item.createdAt).toLocaleString("pt-BR")}</>}
+          {item.date && <> • {new Date(item.date).toLocaleString("pt-BR")}</>}
+          {item.modality && <> • Modalidade: {item.modality}</>}
+          {item.location && <> • Local: {item.location}</>}
         </div>
       </div>
-      {event.description && (
-        <p className="mt-4 text-gray-700 whitespace-pre-wrap">{event.description}</p>
-      )}
-    </>
-  );
-}
-
-function ClassBody({ item }: { item: ClassSlot }) {
-  const names = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-  const weekday = typeof item.weekday === "number" ? names[item.weekday] : "";
-  const fallback = getFigmaImage("class", item);
-  return (
-    <>
-      {fallback && (
-        <img src={fallback} alt={item.modality || "Aula"} className="w-full rounded-xl shadow mb-6" />
-      )}
-      <div className="rounded-xl bg-purple-50 p-4 shadow-sm">
-        <div className="text-sm text-gray-600">
-          <b>Modalidade:</b> {item.modality ?? "—"} • <b>Dia:</b> {weekday} • <b>Horário:</b> {item.time}
-        </div>
-      </div>
-    </>
+    </div>
   );
 }

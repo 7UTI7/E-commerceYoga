@@ -1,17 +1,13 @@
+// src/lib/api.ts
 import axios from "axios";
 
-const base = import.meta.env.VITE_URL_API;
-if (!base) {
-  console.warn("VITE_URL_API não definida. Crie um .env na raiz com VITE_URL_API=https://sua-api");
-}
-
 const api = axios.create({
-  baseURL: base, // ex.: https://api-yoga-rapha.onrender.com
+  baseURL: import.meta.env.VITE_URL_API, // ex.: https://seu-backend.onrender.com
 });
 
-// Anexa token automaticamente quando existir
+// Injeta token (se existir) em todas as requisições
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token");
+  const token = localStorage.getItem("auth_token");
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -19,6 +15,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// -------------------- Tipos --------------------
 export type Article = {
   _id: string;
   title: string;
@@ -43,7 +40,7 @@ export type Video = {
 export type Event = {
   _id: string;
   title: string;
-  date: string;      // ISO
+  date: string;          // ISO
   location?: string;
   description?: string;
   createdAt: string;
@@ -52,31 +49,32 @@ export type Event = {
 
 export type ClassSlot = {
   _id: string;
-  weekday: number;   // 0-6
-  time: string;      // "19:00"
-  modality?: string; // ex.: Hatha, Yin...
+  weekday: number;       // 0-6
+  time: string;          // "19:00"
+  modality?: string;
   createdAt: string;
   updatedAt: string;
 };
 
-// -------- Auth --------
+// -------------------- Auth --------------------
 export async function register(name: string, email: string, password: string) {
   const { data } = await api.post("/api/auth/register", { name, email, password });
   return data; // { user, token } ou { user }
 }
-
 export async function login(email: string, password: string) {
   const { data } = await api.post("/api/auth/login", { email, password });
   return data; // { user, token }
 }
 
-// -------- Público --------
+// -------------------- Listagens públicas --------------------
 export async function getPublishedArticles() {
   const { data } = await api.get<Article[]>("/api/articles");
   return data;
 }
-// alias que a UI usa
-export { getPublishedArticles as getArticles };
+// Alias usado no Admin (pega do mesmo endpoint; ajuste se o backend tiver rota diferente)
+export async function getArticles() {
+  return getPublishedArticles();
+}
 
 export async function getVideos() {
   const { data } = await api.get<Video[]>("/api/videos");
@@ -91,7 +89,25 @@ export async function getClassSlots() {
   return data;
 }
 
-// -------- Admin (token via interceptor) --------
+// -------------------- Get by ID (detalhe) --------------------
+export async function getArticleById(id: string) {
+  const { data } = await api.get<Article>(`/api/articles/${id}`);
+  return data;
+}
+export async function getVideoById(id: string) {
+  const { data } = await api.get<Video>(`/api/videos/${id}`);
+  return data;
+}
+export async function getEventById(id: string) {
+  const { data } = await api.get<Event>(`/api/events/${id}`);
+  return data;
+}
+export async function getClassSlotById(id: string) {
+  const { data } = await api.get<ClassSlot>(`/api/class-slots/${id}`);
+  return data;
+}
+
+// -------------------- CRUD Artigos --------------------
 export async function createArticle(payload: Partial<Article>) {
   const { data } = await api.post<Article>("/api/articles", payload);
   return data;
@@ -104,12 +120,8 @@ export async function deleteArticle(id: string) {
   const { data } = await api.delete(`/api/articles/${id}`);
   return data;
 }
-export async function getArticleById(id: string) {
-  const { data } = await api.get<Article>(`/api/articles/${id}`);
-  return data;
-}
 
-// Vídeos
+// -------------------- CRUD Vídeos --------------------
 export async function createVideo(payload: Partial<Video>) {
   const { data } = await api.post<Video>("/api/videos", payload);
   return data;
@@ -122,12 +134,8 @@ export async function deleteVideo(id: string) {
   const { data } = await api.delete(`/api/videos/${id}`);
   return data;
 }
-export async function getVideoById(id: string) {
-  const { data } = await api.get<Video>(`/api/videos/${id}`);
-  return data;
-}
 
-// Eventos
+// -------------------- CRUD Eventos --------------------
 export async function createEvent(payload: Partial<Event>) {
   const { data } = await api.post<Event>("/api/events", payload);
   return data;
@@ -140,12 +148,8 @@ export async function deleteEvent(id: string) {
   const { data } = await api.delete(`/api/events/${id}`);
   return data;
 }
-export async function getEventById(id: string) {
-  const { data } = await api.get<Event>(`/api/events/${id}`);
-  return data;
-}
 
-// Aulas (Class-Slots)
+// -------------------- CRUD Aulas (Class Slots) --------------------
 export async function createClassSlot(payload: Partial<ClassSlot>) {
   const { data } = await api.post<ClassSlot>("/api/class-slots", payload);
   return data;
@@ -156,10 +160,6 @@ export async function updateClassSlot(id: string, payload: Partial<ClassSlot>) {
 }
 export async function deleteClassSlot(id: string) {
   const { data } = await api.delete(`/api/class-slots/${id}`);
-  return data;
-}
-export async function getClassSlotById(id: string) {
-  const { data } = await api.get<ClassSlot>(`/api/class-slots/${id}`);
   return data;
 }
 

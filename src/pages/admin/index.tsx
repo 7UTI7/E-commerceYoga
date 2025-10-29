@@ -1,5 +1,4 @@
-// src/pages/admin/index.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   // artigos
   getArticles, createArticle, updateArticle, deleteArticle,
@@ -17,10 +16,28 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "../../userui/components/ui/dialog";
 
-// ------------------------------------------------------
-
+/* =================== HELPERS =================== */
 type Tab = "Artigos" | "Vídeos" | "Eventos" | "Aulas";
 
+// Extrai ID do YouTube (watch?v=, youtu.be/, embed/, shorts/)
+function ytIdFrom(url?: string) {
+  if (!url) return "";
+  const r = /(youtu\.be\/|watch\?v=|embed\/|shorts\/)([A-Za-z0-9_-]{6,})/i.exec(url);
+  return r?.[2] || "";
+}
+function toDatetimeLocal(iso?: string) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function toISO(dtLocal?: string) {
+  if (!dtLocal) return undefined;
+  const d = new Date(dtLocal);
+  return d.toISOString();
+}
+
+/* =================== ADMIN ROOT =================== */
 export default function Admin() {
   const [tab, setTab] = useState<Tab>("Artigos");
 
@@ -28,7 +45,6 @@ export default function Admin() {
     <div className="mx-auto max-w-5xl p-6">
       <h1 className="mb-4 text-2xl font-semibold">Painel da Professora</h1>
 
-      {/* Abas */}
       <nav className="mb-6 flex flex-wrap gap-2">
         {(["Artigos","Vídeos","Eventos","Aulas"] as Tab[]).map(t => (
           <button
@@ -51,15 +67,14 @@ export default function Admin() {
   );
 }
 
-// ========================= ARTIGOS =========================
-
+/* =================== ARTIGOS =================== */
 function ArticlesPanel() {
   const [list, setList] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
   // criar
   const [title, setTitle] = useState("");
-  const [slug, setSlug]   = useState("");
+  const [slug, setSlug] = useState("");
   const [content, setContent] = useState("");
   const [status, setStatus] = useState<"PUBLISHED"|"DRAFT">("PUBLISHED");
   const [creating, setCreating] = useState(false);
@@ -68,7 +83,7 @@ function ArticlesPanel() {
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Article | null>(null);
   const [eTitle, setETitle] = useState("");
-  const [eSlug, setESlug]   = useState("");
+  const [eSlug, setESlug] = useState("");
   const [eContent, setEContent] = useState("");
   const [eStatus, setEStatus] = useState<"PUBLISHED"|"DRAFT">("PUBLISHED");
   const [saving, setSaving] = useState(false);
@@ -104,9 +119,7 @@ function ArticlesPanel() {
     if (!editing) return;
     setSaving(true);
     try {
-      const updated = await updateArticle(editing._id, {
-        title: eTitle, slug: eSlug, content: eContent, status: eStatus,
-      });
+      const updated = await updateArticle(editing._id, { title: eTitle, slug: eSlug, content: eContent, status: eStatus });
       setList(prev => prev.map(x => x._id === editing._id ? updated : x));
       setOpenEdit(false);
     } finally { setSaving(false); }
@@ -132,7 +145,7 @@ function ArticlesPanel() {
             <option value="PUBLISHED">PUBLISHED</option>
             <option value="DRAFT">DRAFT</option>
           </select>
-          <Button disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
+          <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
             {creating ? "Publicando..." : "Publicar artigo"}
           </Button>
         </div>
@@ -189,8 +202,7 @@ function ArticlesPanel() {
   );
 }
 
-// ========================= VÍDEOS =========================
-
+/* =================== VÍDEOS (ALINHADO COM O BACKEND) =================== */
 function VideosPanel() {
   const [list, setList] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,15 +211,9 @@ function VideosPanel() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState(""); // opcional
   const [creating, setCreating] = useState(false);
-
-  // editar
-  const [openEdit, setOpenEdit] = useState(false);
-  const [editing, setEditing] = useState<Video | null>(null);
-  const [eTitle, setETitle] = useState("");
-  const [eUrl, setEUrl] = useState("");
-  const [eDescription, setEDescription] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -216,38 +222,52 @@ function VideosPanel() {
   }
   useEffect(() => { load(); }, []);
 
+  const ytId = useMemo(() => ytIdFrom(url), [url]);
+  const normalized = ytId ? `https://www.youtube.com/watch?v=${ytId}` : "";
+  const embedUrl = ytId ? `https://www.youtube.com/embed/${ytId}` : "";
+
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+
+    if (!title.trim()) return setError("Informe um título.");
+    if (!description.trim()) return setError("Informe uma descrição.");
+    if (!ytId) return setError("URL do YouTube inválida.");
+
     setCreating(true);
     try {
-      const created = await createVideo({ title, url, description });
+      // ⇩⇩⇩ exatamente o que o backend espera
+      const created = await createVideo({
+        title: title.trim(),
+        description: description.trim(),
+        youtubeUrl: normalized,
+        ...(category.trim() ? { category: category.trim() } : {}),
+      } as any);
+
       setList(prev => [created, ...prev]);
-      setTitle(""); setUrl(""); setDescription("");
-    } finally { setCreating(false); }
-  }
-
-  function onOpenEdit(v: Video) {
-    setEditing(v);
-    setETitle(v.title || "");
-    setEUrl(v.url || "");
-    setEDescription(v.description || "");
-    setOpenEdit(true);
-  }
-
-  async function onSaveEdit() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const updated = await updateVideo(editing._id, { title: eTitle, url: eUrl, description: eDescription });
-      setList(prev => prev.map(x => x._id === editing._id ? updated : x));
-      setOpenEdit(false);
-    } finally { setSaving(false); }
+      setTitle(""); setUrl(""); setDescription(""); setCategory("");
+    } catch (err: any) {
+      console.error("Erro ao criar vídeo:", err?.response || err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        err?.message ||
+        "Erro ao criar vídeo.";
+      setError(msg);
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function onDelete(id: string) {
     if (!confirm("Excluir este vídeo?")) return;
-    await deleteVideo(id);
-    setList(prev => prev.filter(x => x._id !== id));
+    try {
+      await deleteVideo(id);
+      setList(prev => prev.filter(x => x._id !== id));
+    } catch (err) {
+      console.error("Erro ao excluir vídeo:", err);
+      alert("Não foi possível excluir.");
+    }
   }
 
   return (
@@ -255,10 +275,24 @@ function VideosPanel() {
       <h2 className="mb-3 text-xl font-medium">Vídeos</h2>
 
       <form onSubmit={onCreate} className="mb-6 grid gap-3 rounded-lg border p-4 bg-white">
-        <input className="rounded border p-2" placeholder="Título" value={title} onChange={e=>setTitle(e.target.value)} required />
-        <input className="rounded border p-2" placeholder="URL do YouTube" value={url} onChange={e=>setUrl(e.target.value)} required />
-        <textarea className="min-h-20 rounded border p-2" placeholder="Descrição (opcional)" value={description} onChange={e=>setDescription(e.target.value)} />
-        <Button disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
+        <input className="rounded border p-2" placeholder="Título" value={title} onChange={e=>setTitle(e.target.value)} />
+        <input className="rounded border p-2" placeholder="URL do YouTube (qualquer formato)" value={url} onChange={e=>setUrl(e.target.value)} />
+        <textarea className="min-h-20 rounded border p-2" placeholder="Descrição" value={description} onChange={e=>setDescription(e.target.value)} />
+        <input className="rounded border p-2" placeholder="Categoria (opcional)" value={category} onChange={e=>setCategory(e.target.value)} />
+
+        {ytId && (
+          <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
+            <iframe className="absolute inset-0 w-full h-full" src={embedUrl} title="Preview vídeo" allowFullScreen />
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+
+        <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
           {creating ? "Publicando..." : "Publicar vídeo"}
         </Button>
       </form>
@@ -269,62 +303,30 @@ function VideosPanel() {
         <ul className="space-y-2">
           {list.map(v => (
             <li key={v._id} className="flex items-start justify-between rounded border bg-white p-3">
-              <div>
-                <div className="font-medium">{v.title}</div>
-                <div className="text-xs text-gray-500">{new Date(v.createdAt).toLocaleString("pt-BR")}</div>
+              <div className="min-w-0">
+                <div className="font-medium truncate">{v.title}</div>
+                <div className="text-xs text-gray-500 truncate">{(v as any).youtubeUrl}</div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" className="rounded-lg" onClick={() => onOpenEdit(v)}>Editar</Button>
+              <div className="flex gap-2 shrink-0">
+                <a className="text-sm text-purple-700 hover:underline" href={(v as any).youtubeUrl} target="_blank" rel="noreferrer">Ver</a>
                 <Button variant="destructive" className="rounded-lg" onClick={() => onDelete(v._id)}>Excluir</Button>
               </div>
             </li>
           ))}
         </ul>
       )}
-
-      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar vídeo</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-3">
-            <input className="rounded border p-2" placeholder="Título" value={eTitle} onChange={e=>setETitle(e.target.value)} />
-            <input className="rounded border p-2" placeholder="URL do YouTube" value={eUrl} onChange={e=>setEUrl(e.target.value)} />
-            <textarea className="min-h-20 rounded border p-2" placeholder="Descrição" value={eDescription} onChange={e=>setEDescription(e.target.value)} />
-            <div className="ml-auto flex gap-2">
-              <button className="rounded-lg border px-3 py-2" onClick={() => setOpenEdit(false)}>Cancelar</button>
-              <button className="rounded-lg bg-purple-600 px-3 py-2 text-white hover:bg-purple-700" onClick={onSaveEdit} disabled={saving}>
-                {saving ? "Salvando…" : "Salvar"}
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }
 
-// ========================= EVENTOS =========================
-
-function toDatetimeLocal(iso?: string) {
-  if (!iso) return "";
-  const d = new Date(iso);
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
-function toISO(dtLocal?: string) {
-  if (!dtLocal) return undefined;
-  const d = new Date(dtLocal);
-  return d.toISOString();
-}
-
+/* =================== EVENTOS =================== */
 function EventsPanel() {
   const [list, setList] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
   // criar
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState(""); // datetime-local
+  const [date, setDate] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [creating, setCreating] = useState(false);
@@ -333,7 +335,7 @@ function EventsPanel() {
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Event | null>(null);
   const [eTitle, setETitle] = useState("");
-  const [eDate, setEDate] = useState(""); // datetime-local
+  const [eDate, setEDate] = useState("");
   const [eLocation, setELocation] = useState("");
   const [eDescription, setEDescription] = useState("");
   const [saving, setSaving] = useState(false);
@@ -368,9 +370,7 @@ function EventsPanel() {
     if (!editing) return;
     setSaving(true);
     try {
-      const updated = await updateEvent(editing._id, {
-        title: eTitle, date: toISO(eDate)!, location: eLocation, description: eDescription,
-      });
+      const updated = await updateEvent(editing._id, { title: eTitle, date: toISO(eDate)!, location: eLocation, description: eDescription });
       setList(prev => prev.map(x => x._id === editing._id ? updated : x));
       setOpenEdit(false);
     } finally { setSaving(false); }
@@ -391,7 +391,7 @@ function EventsPanel() {
         <input className="rounded border p-2" type="datetime-local" value={date} onChange={e=>setDate(e.target.value)} required />
         <input className="rounded border p-2" placeholder="Local (opcional)" value={location} onChange={e=>setLocation(e.target.value)} />
         <textarea className="min-h-20 rounded border p-2" placeholder="Descrição (opcional)" value={description} onChange={e=>setDescription(e.target.value)} />
-        <Button disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
+        <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
           {creating ? "Publicando..." : "Publicar evento"}
         </Button>
       </form>
@@ -440,14 +440,13 @@ function EventsPanel() {
   );
 }
 
-// ========================= AULAS (CLASS SLOTS) =========================
-
+/* =================== AULAS =================== */
 function ClassesPanel() {
   const [list, setList] = useState<ClassSlot[]>([]);
   const [loading, setLoading] = useState(true);
 
   // criar
-  const [weekday, setWeekday] = useState<number>(1); // 1=Seg
+  const [weekday, setWeekday] = useState<number>(1);
   const [time, setTime] = useState("19:00");
   const [modality, setModality] = useState("");
   const [creating, setCreating] = useState(false);
@@ -515,7 +514,7 @@ function ClassesPanel() {
           <input className="rounded border p-2" type="time" value={time} onChange={e=>setTime(e.target.value)} />
           <input className="rounded border p-2" placeholder="Modalidade (ex.: Hatha, Yin…)" value={modality} onChange={e=>setModality(e.target.value)} />
         </div>
-        <Button disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
+        <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
           {creating ? "Publicando..." : "Publicar aula"}
         </Button>
       </form>
