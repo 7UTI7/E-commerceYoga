@@ -442,126 +442,144 @@ function EventsPanel() {
 
 /* =================== AULAS =================== */
 function ClassesPanel() {
-  const [list, setList] = useState<ClassSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [list, setList] = useState<ClassSlot[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // criar
-  const [weekday, setWeekday] = useState<number>(1);
-  const [time, setTime] = useState("19:00");
-  const [modality, setModality] = useState("");
-  const [creating, setCreating] = useState(false);
+  // criar
+  const [weekday, setWeekday] = useState<number>(1);
+  const [time, setTime] = useState("19:00");
+  const [modality, setModality] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null); // <-- ADICIONADO
 
-  // editar
-  const [openEdit, setOpenEdit] = useState(false);
-  const [editing, setEditing] = useState<ClassSlot | null>(null);
-  const [eWeekday, setEWeekday] = useState<number>(1);
-  const [eTime, setETime] = useState("19:00");
-  const [eModality, setEModality] = useState("");
-  const [saving, setSaving] = useState(false);
+  // editar
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editing, setEditing] = useState<ClassSlot | null>(null);
+  const [eWeekday, setEWeekday] = useState<number>(1);
+  const [eTime, setETime] = useState("19:00");
+  const [eModality, setEModality] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  async function load() {
-    setLoading(true);
-    try { setList(await getClassSlots()); }
-    finally { setLoading(false); }
+  async function load() {
+    setLoading(true);
+    try { setList(await getClassSlots()); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { load(); }, []);
+
+  // Função para criar aula no frontend (Admin.tsx)
+
+async function onCreate(e: React.FormEvent) {
+  e.preventDefault();  // Impede o comportamento padrão de envio do formulário
+  setCreating(true);   // Ativa o "loading" de publicação
+
+  try {
+    // Verificar se os campos estão preenchidos
+    if (!time || !modality) {
+      alert("Por favor, preencha todos os campos.");
+      return;
+    }
+
+    // Envia os dados para o backend
+    const created = await createClassSlot({ weekday, time, modality });
+
+    // Atualiza a lista de aulas com a aula recém-criada
+    setList(prev => [created, ...prev]);
+
+    // Reseta os campos após criar a aula
+    setWeekday(1);
+    setTime("19:00");
+    setModality("");
+
+  } catch (err) {
+    console.error("Erro ao criar aula", err);
+    alert("Erro ao publicar aula.");
+  } finally {
+    setCreating(false); // Desativa o "loading"
   }
-  useEffect(() => { load(); }, []);
+}
 
-  async function onCreate(e: React.FormEvent) {
-    e.preventDefault();
-    setCreating(true);
-    try {
-      const created = await createClassSlot({ weekday, time, modality });
-      setList(prev => [created, ...prev]);
-      setWeekday(1); setTime("19:00"); setModality("");
-    } finally { setCreating(false); }
-  }
 
-  function onOpenEdit(c: ClassSlot) {
-    setEditing(c);
-    setEWeekday(c.weekday ?? 1);
-    setETime(c.time || "19:00");
-    setEModality(c.modality || "");
-    setOpenEdit(true);
-  }
+  function onOpenEdit(c: ClassSlot) {
+    // ... (código de editar sem alteração) ...
+    setEditing(c);
+    setEWeekday(c.weekday ?? 1);
+    setETime(c.time || "19:00");
+    setEModality(c.modality || "");
+    setOpenEdit(true);
+  }
 
-  async function onSaveEdit() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const updated = await updateClassSlot(editing._id, { weekday: eWeekday, time: eTime, modality: eModality });
-      setList(prev => prev.map(x => x._id === editing._id ? updated : x));
-      setOpenEdit(false);
-    } finally { setSaving(false); }
-  }
+  async function onSaveEdit() {
+    // ... (código de salvar edição sem alteração) ...
+    if (!editing) return;
+    setSaving(true);
+    try {
+      const updated = await updateClassSlot(editing._id, { weekday: eWeekday, time: eTime, modality: eModality });
+      setList(prev => prev.map(x => x._id === editing._id ? updated : x));
+      setOpenEdit(false);
+    } finally { setSaving(false); }
+  }
 
-  async function onDelete(id: string) {
-    if (!confirm("Excluir esta aula?")) return;
-    await deleteClassSlot(id);
-    setList(prev => prev.filter(x => x._id !== id));
-  }
+  async function onDelete(id: string) {
+    // ... (código de excluir sem alteração) ...
+    if (!confirm("Excluir esta aula?")) return;
+    await deleteClassSlot(id);
+    setList(prev => prev.filter(x => x._id !== id));
+  }
 
-  const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
-  return (
-    <section>
-      <h2 className="mb-3 text-xl font-medium">Aulas</h2>
+  return (
+    <section>
+      <h2 className="mb-3 text-xl font-medium">Aulas</h2>
 
-      <form onSubmit={onCreate} className="mb-6 grid gap-3 rounded-lg border p-4 bg-white">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <select className="rounded border p-2" value={weekday} onChange={e=>setWeekday(parseInt(e.target.value))}>
-            {days.map((d, i) => <option key={i} value={i}>{d}</option>)}
-          </select>
-          <input className="rounded border p-2" type="time" value={time} onChange={e=>setTime(e.target.value)} />
-          <input className="rounded border p-2" placeholder="Modalidade (ex.: Hatha, Yin…)" value={modality} onChange={e=>setModality(e.target.value)} />
-        </div>
-        <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
-          {creating ? "Publicando..." : "Publicar aula"}
-        </Button>
-      </form>
+      <form onSubmit={onCreate} className="mb-6 grid gap-3 rounded-lg border p-4 bg-white">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <select className="rounded border p-2" value={weekday} onChange={e=>setWeekday(parseInt(e.target.value))}>
+            {days.map((d, i) => <option key={i} value={i}>{d}</option>)}
+          </select>
+          <input className="rounded border p-2" type="time" value={time} onChange={e=>setTime(e.target.value)} />
+          <input className="rounded border p-2" placeholder="Modalidade (ex.: Hatha, Yin…)" value={modality} onChange={e=>setModality(e.target.value)} />
+        </div>
 
-      {loading ? (
-        <div className="text-gray-500">Carregando…</div>
-      ) : (
-        <ul className="space-y-2">
-          {list.map(c => (
-            <li key={c._id} className="flex items-start justify-between rounded border bg-white p-3">
-              <div>
-                <div className="font-medium">
-                  {c.modality ? `Aula de ${c.modality}` : "Aula"} • {days[c.weekday]} • {c.time}
-                </div>
-                <div className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleString("pt-BR")}</div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" className="rounded-lg" onClick={() => onOpenEdit(c)}>Editar</Button>
-                <Button variant="destructive" className="rounded-lg" onClick={() => onDelete(c._id)}>Excluir</Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+        {/* VVVV EXIBIÇÃO DE ERRO ADICIONADA VVVV */}
+        {error && ( 
+          <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
+        {/* ^^^^ EXIBIÇÃO DE ERRO ADICIONADA ^^^^ */}
 
-      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar aula</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-3">
-            <div className="grid gap-3 sm:grid-cols-3">
-              <select className="rounded border p-2" value={eWeekday} onChange={e=>setEWeekday(parseInt(e.target.value))}>
-                {days.map((d, i) => <option key={i} value={i}>{d}</option>)}
-              </select>
-              <input className="rounded border p-2" type="time" value={eTime} onChange={e=>setETime(e.target.value)} />
-              <input className="rounded border p-2" placeholder="Modalidade" value={eModality} onChange={e=>setEModality(e.target.value)} />
-            </div>
-            <div className="ml-auto flex gap-2">
-              <button className="rounded-lg border px-3 py-2" onClick={() => setOpenEdit(false)}>Cancelar</button>
-              <button className="rounded-lg bg-purple-600 px-3 py-2 text-white hover:bg-purple-700" onClick={onSaveEdit} disabled={saving}>
-                {saving ? "Salvando…" : "Salvar"}
-              </button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </section>
-  );
+        <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
+          {creating ? "Publicando..." : "Publicar aula"}
+        </Button>
+      </form>
+
+      {loading ? (
+        <div className="text-gray-500">Carregando…</div>
+      ) : (
+        <ul className="space-y-2">
+        {/* ... (listagem sem alteração) ... */}
+          {list.map(c => (
+            <li key={c._id} className="flex items-start justify-between rounded border bg-white p-3">
+              <div>
+                <div className="font-medium">
+                  {c.modality ? `Aula de ${c.modality}` : "Aula"} • {days[c.weekday]} • {c.time}
+                </div>
+                <div className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleString("pt-BR")}</div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" className="rounded-lg" onClick={() => onOpenEdit(c)}>Editar</Button>
+                <Button variant="destructive" className="rounded-lg" onClick={() => onDelete(c._id)}>Excluir</Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+        {/* ... (modal de edição sem alteração) ... */}
+      </Dialog>
+    </section>
+  );
 }

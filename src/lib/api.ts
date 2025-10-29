@@ -150,10 +150,12 @@ export async function deleteEvent(id: string) {
 }
 
 // -------------------- CRUD Aulas (Class Slots) --------------------
-export async function createClassSlot(payload: Partial<ClassSlot>) {
-  const { data } = await api.post<ClassSlot>("/api/class-slots", payload);
+// No arquivo lib/api.ts
+export async function createClassSlot(payload: { weekday: number; time: string; modality: string }) {
+  const { data } = await api.post("/api/class-slots", payload);
   return data;
 }
+
 export async function updateClassSlot(id: string, payload: Partial<ClassSlot>) {
   const { data } = await api.put<ClassSlot>(`/api/class-slots/${id}`, payload);
   return data;
