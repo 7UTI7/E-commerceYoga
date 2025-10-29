@@ -442,144 +442,255 @@ function EventsPanel() {
 
 /* =================== AULAS =================== */
 function ClassesPanel() {
-  const [list, setList] = useState<ClassSlot[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [list, setList] = useState<ClassSlot[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // criar
-  const [weekday, setWeekday] = useState<number>(1);
-  const [time, setTime] = useState("19:00");
-  const [modality, setModality] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null); // <-- ADICIONADO
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dtLocal, setDtLocal] = useState("");
+  const [durationMinutes, setDurationMinutes] = useState<number | "">("");
+  const [maxStudents, setMaxStudents] = useState<number | "">("");
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // editar
-  const [openEdit, setOpenEdit] = useState(false);
-  const [editing, setEditing] = useState<ClassSlot | null>(null);
-  const [eWeekday, setEWeekday] = useState<number>(1);
-  const [eTime, setETime] = useState("19:00");
-  const [eModality, setEModality] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editing, setEditing] = useState<ClassSlot | null>(null);
+  const [eTitle, setETitle] = useState("");
+  const [eDescription, setEDescription] = useState("");
+  const [eDtLocal, setEDtLocal] = useState("");
+  const [eDurationMinutes, setEDurationMinutes] = useState<number | "">("");
+  const [eMaxStudents, setEMaxStudents] = useState<number | "">("");
+  const [saving, setSaving] = useState(false);
 
-  async function load() {
-    setLoading(true);
-    try { setList(await getClassSlots()); }
-    finally { setLoading(false); }
-  }
-  useEffect(() => { load(); }, []);
-
-  // Função para criar aula no frontend (Admin.tsx)
-
-async function onCreate(e: React.FormEvent) {
-  e.preventDefault();  // Impede o comportamento padrão de envio do formulário
-  setCreating(true);   // Ativa o "loading" de publicação
-
-  try {
-    // Verificar se os campos estão preenchidos
-    if (!time || !modality) {
-      alert("Por favor, preencha todos os campos.");
-      return;
-    }
-
-    // Envia os dados para o backend
-    const created = await createClassSlot({ weekday, time, modality });
-
-    // Atualiza a lista de aulas com a aula recém-criada
-    setList(prev => [created, ...prev]);
-
-    // Reseta os campos após criar a aula
-    setWeekday(1);
-    setTime("19:00");
-    setModality("");
-
-  } catch (err) {
-    console.error("Erro ao criar aula", err);
-    alert("Erro ao publicar aula.");
-  } finally {
-    setCreating(false); // Desativa o "loading"
+  function toDatetimeLocal(iso?: string) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
-}
 
+  function toISO(dt?: string) {
+    if (!dt) return undefined;
+    const d = new Date(dt);
+    return d.toISOString();
+  }
 
-  function onOpenEdit(c: ClassSlot) {
-    // ... (código de editar sem alteração) ...
-    setEditing(c);
-    setEWeekday(c.weekday ?? 1);
-    setETime(c.time || "19:00");
-    setEModality(c.modality || "");
-    setOpenEdit(true);
-  }
+  async function load() {
+    setLoading(true);
+    try {
+      setList(await getClassSlots());
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  async function onSaveEdit() {
-    // ... (código de salvar edição sem alteração) ...
-    if (!editing) return;
-    setSaving(true);
-    try {
-      const updated = await updateClassSlot(editing._id, { weekday: eWeekday, time: eTime, modality: eModality });
-      setList(prev => prev.map(x => x._id === editing._id ? updated : x));
-      setOpenEdit(false);
-    } finally { setSaving(false); }
-  }
+  useEffect(() => {
+    load();
+  }, []);
 
-  async function onDelete(id: string) {
-    // ... (código de excluir sem alteração) ...
-    if (!confirm("Excluir esta aula?")) return;
-    await deleteClassSlot(id);
-    setList(prev => prev.filter(x => x._id !== id));
-  }
+  async function onCreate(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setCreating(true);
+    try {
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
+        dateTime: toISO(dtLocal)!,
+        durationMinutes: typeof durationMinutes === "number" ? durationMinutes : undefined,
+        maxStudents: typeof maxStudents === "number" ? maxStudents : undefined,
+      };
+      if (!payload.title || !payload.description || !payload.dateTime) {
+        setError("Preencha título, descrição e data/hora.");
+        return;
+      }
+      const created = await createClassSlot(payload);
+      setList((prev) => [created, ...prev]);
+      setTitle("");
+      setDescription("");
+      setDtLocal("");
+      setDurationMinutes("");
+      setMaxStudents("");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Erro ao publicar aula.";
+      setError(msg);
+    } finally {
+      setCreating(false);
+    }
+  }
 
-  const days = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+  function onOpenEdit(c: ClassSlot) {
+    setEditing(c);
+    setETitle(c.title);
+    setEDescription(c.description);
+    setEDtLocal(toDatetimeLocal(c.dateTime));
+    setEDurationMinutes(c.durationMinutes ?? "");
+    setEMaxStudents(c.maxStudents ?? "");
+    setOpenEdit(true);
+  }
 
-  return (
-    <section>
-      <h2 className="mb-3 text-xl font-medium">Aulas</h2>
+  async function onSaveEdit() {
+    if (!editing) return;
+    setSaving(true);
+    try {
+      const payload: Partial<ClassSlot> = {
+        title: eTitle.trim(),
+        description: eDescription.trim(),
+        dateTime: eDtLocal ? toISO(eDtLocal) : undefined,
+        durationMinutes: typeof eDurationMinutes === "number" ? eDurationMinutes : undefined,
+        maxStudents: typeof eMaxStudents === "number" ? eMaxStudents : undefined,
+      };
+      const updated = await updateClassSlot(editing._id, payload);
+      setList((prev) => prev.map((x) => (x._id === editing._id ? updated : x)));
+      setOpenEdit(false);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Erro ao salvar aula.";
+      setError(msg);
+    } finally {
+      setSaving(false);
+    }
+  }
 
-      <form onSubmit={onCreate} className="mb-6 grid gap-3 rounded-lg border p-4 bg-white">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <select className="rounded border p-2" value={weekday} onChange={e=>setWeekday(parseInt(e.target.value))}>
-            {days.map((d, i) => <option key={i} value={i}>{d}</option>)}
-          </select>
-          <input className="rounded border p-2" type="time" value={time} onChange={e=>setTime(e.target.value)} />
-          <input className="rounded border p-2" placeholder="Modalidade (ex.: Hatha, Yin…)" value={modality} onChange={e=>setModality(e.target.value)} />
-        </div>
+  async function onDelete(id: string) {
+    await deleteClassSlot(id);
+    setList((prev) => prev.filter((x) => x._id !== id));
+  }
 
-        {/* VVVV EXIBIÇÃO DE ERRO ADICIONADA VVVV */}
-        {error && ( 
-          <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-        {/* ^^^^ EXIBIÇÃO DE ERRO ADICIONADA ^^^^ */}
+  return (
+    <section className="space-y-4">
+      <h2 className="text-xl font-semibold">Aulas</h2>
 
-        <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 hover:bg-purple-700 text-white">
-          {creating ? "Publicando..." : "Publicar aula"}
-        </Button>
-      </form>
+      <form onSubmit={onCreate} className="space-y-3 rounded border bg-white p-4">
+        {error && <div className="rounded bg-red-50 p-2 text-sm text-red-700">{error}</div>}
 
-      {loading ? (
-        <div className="text-gray-500">Carregando…</div>
-      ) : (
-        <ul className="space-y-2">
-        {/* ... (listagem sem alteração) ... */}
-          {list.map(c => (
-            <li key={c._id} className="flex items-start justify-between rounded border bg-white p-3">
-              <div>
-                <div className="font-medium">
-                  {c.modality ? `Aula de ${c.modality}` : "Aula"} • {days[c.weekday]} • {c.time}
-                </div>
-                <div className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleString("pt-BR")}</div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" className="rounded-lg" onClick={() => onOpenEdit(c)}>Editar</Button>
-                <Button variant="destructive" className="rounded-lg" onClick={() => onDelete(c._id)}>Excluir</Button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="flex flex-col gap-1">
+            <span className="text-sm">Título</span>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} className="rounded border p-2" />
+          </label>
 
-      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        {/* ... (modal de edição sem alteração) ... */}
-      </Dialog>
-    </section>
-  );
+          <label className="flex flex-col gap-1">
+            <span className="text-sm">Data e Hora</span>
+            <input type="datetime-local" value={dtLocal} onChange={(e) => setDtLocal(e.target.value)} className="rounded border p-2" />
+          </label>
+
+          <label className="md:col-span-2 flex flex-col gap-1">
+            <span className="text-sm">Descrição</span>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="rounded border p-2" rows={3} />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm">Duração (min)</span>
+            <input
+              type="number"
+              min={1}
+              value={durationMinutes}
+              onChange={(e) => setDurationMinutes(e.target.value ? Number(e.target.value) : "")}
+              className="rounded border p-2"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="text-sm">Vagas</span>
+            <input
+              type="number"
+              min={1}
+              value={maxStudents}
+              onChange={(e) => setMaxStudents(e.target.value ? Number(e.target.value) : "")}
+              className="rounded border p-2"
+            />
+          </label>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button type="submit" disabled={creating} className="ml-auto rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+            {creating ? "Publicando..." : "Publicar aula"}
+          </Button>
+        </div>
+      </form>
+
+      {loading ? (
+        <div className="text-gray-500">Carregando…</div>
+      ) : (
+        <ul className="space-y-2">
+          {list.map((c) => (
+            <li key={c._id} className="flex items-start justify-between rounded border bg-white p-3">
+              <div>
+                <div className="font-medium">{c.title}</div>
+                <div className="text-sm text-gray-600">{new Date(c.dateTime).toLocaleString()}</div>
+                <div className="text-sm text-gray-700">{c.description}</div>
+                <div className="text-xs text-gray-500">
+                  {c.durationMinutes ? `Duração: ${c.durationMinutes} min` : ""} {c.maxStudents ? ` • Vagas: ${c.maxStudents}` : ""}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="secondary" className="rounded-lg" onClick={() => onOpenEdit(c)}>
+                  Editar
+                </Button>
+                <Button variant="destructive" className="rounded-lg" onClick={() => onDelete(c._id)}>
+                  Excluir
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <Dialog open={openEdit} onOpenChange={setOpenEdit}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Aula</DialogTitle>
+            <DialogDescription />
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-sm">Título</span>
+                <input value={eTitle} onChange={(e) => setETitle(e.target.value)} className="rounded border p-2" />
+              </label>
+
+              <label className="flex flex-col gap-1">
+                <span className="text-sm">Data e Hora</span>
+                <input type="datetime-local" value={eDtLocal} onChange={(e) => setEDtLocal(e.target.value)} className="rounded border p-2" />
+              </label>
+
+              <label className="md:col-span-2 flex flex-col gap-1">
+                <span className="text-sm">Descrição</span>
+                <textarea value={eDescription} onChange={(e) => setEDescription(e.target.value)} className="rounded border p-2" rows={3} />
+              </label>
+
+              <label className="flex flex-col gap-1">
+                <span className="text-sm">Duração (min)</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={eDurationMinutes}
+                  onChange={(e) => setEDurationMinutes(e.target.value ? Number(e.target.value) : "")}
+                  className="rounded border p-2"
+                />
+              </label>
+
+              <label className="flex flex-col gap-1">
+                <span className="text-sm">Vagas</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={eMaxStudents}
+                  onChange={(e) => setEMaxStudents(e.target.value ? Number(e.target.value) : "")}
+                  className="rounded border p-2"
+                />
+              </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button onClick={onSaveEdit} disabled={saving} className="ml-auto rounded-lg bg-purple-600 text-white hover:bg-purple-700">
+                {saving ? "Salvando..." : "Salvar alterações"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
 }
