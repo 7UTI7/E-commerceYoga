@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Phone, MapPin, User, LogOut } from "lucide-react";
+import { User, LogOut } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,8 @@ import {
 } from "../../userui/components/ui/dialog";
 import { Button } from "../../userui/components/ui/button";
 import { useAuth } from "../../contexts/AuthContext";
+
+const CONTENT_MAX = "max-w-[850px]";
 
 export interface HeaderProps {
   onLogoClick?: () => void;
@@ -41,9 +43,8 @@ export function Header({ onLogoClick }: HeaderProps) {
   return (
     <>
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className={`mx-auto ${CONTENT_MAX} px-4 sm:px-6 lg:px-8`}>
           <div className="h-[72px] flex items-center justify-between gap-3">
-            {/* ESQUERDA */}
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={handleLogoClick}
@@ -55,30 +56,8 @@ export function Header({ onLogoClick }: HeaderProps) {
                   Karla Rodrigues Yoga
                 </span>
               </button>
-
-              <div className="hidden sm:block h-5 w-px bg-gray-200 mx-2" />
-
-              <div className="hidden lg:flex items-center gap-5 text-sm text-gray-700 min-w-0">
-                <div className="flex items-center gap-1.5 whitespace-nowrap">
-                  <Phone className="w-4 h-4 text-purple-600" />
-                  <span>(11) 99999-9999</span>
-                </div>
-                <a
-                  href="https://www.google.com/maps/search/?api=1&query=R.%20Navajas%2C%20632%20-%20sala%203%20-%20Shangai%2C%20Mogi%20das%20Cruzes%20-%20SP%2C%2008745-200"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title="Abrir no Google Maps"
-                  className="flex items-center gap-1.5 text-purple-700 hover:text-purple-800 min-w-0"
-                >
-                  <MapPin className="w-4 h-4" />
-                  <span className="truncate">
-                    R. Navajas, 632 - sala 3 - Shangai, Mogi das Cruzes - SP, 08745-200
-                  </span>
-                </a>
-              </div>
             </div>
 
-            {/* DIREITA */}
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={goInstagram}
@@ -97,7 +76,6 @@ export function Header({ onLogoClick }: HeaderProps) {
                 <i className="fab fa-facebook text-[18px]" />
               </button>
 
-              {/* Agendar — só para não-admin */}
               {!isAdmin && (
                 <Button
                   className="rounded-lg bg-green-600 hover:bg-green-700 text-white shadow"
@@ -108,7 +86,6 @@ export function Header({ onLogoClick }: HeaderProps) {
                 </Button>
               )}
 
-              {/* Gerenciar Conteúdo — só para admin */}
               {isAdmin && (
                 <Button
                   className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white shadow"
@@ -143,7 +120,6 @@ export function Header({ onLogoClick }: HeaderProps) {
         </div>
       </header>
 
-      {/* Modal WhatsApp (só quando não-admin) */}
       {!isAdmin && (
         <Dialog open={openWhats} onOpenChange={setOpenWhats}>
           <DialogContent>
@@ -171,7 +147,6 @@ export function Header({ onLogoClick }: HeaderProps) {
         </Dialog>
       )}
 
-      {/* Modal Sair — CORRIGIDO: tudo dentro do DialogContent */}
       <Dialog open={openLogout} onOpenChange={setOpenLogout}>
         <DialogContent>
           <DialogHeader>

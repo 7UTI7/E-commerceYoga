@@ -109,6 +109,32 @@ export async function getArticleById(id: string) {
   return data
 }
 
+// --- NOVO: buscar por slug (dois formatos de backend possíveis) ---
+export async function getArticleBySlug(slug: string) {
+  try {
+    const { data } = await api.get<Article>(`/api/articles/slug/${slug}`)
+    return data
+  } catch (err: any) {
+    if (err?.response?.status !== 404) throw err
+    const { data } = await api.get<Article[]>("/api/articles", { params: { slug } as any })
+    const found = Array.isArray(data) ? data.find(a => a.slug === slug) : null
+    if (!found) throw err
+    return found
+  }
+}
+
+// --- NOVO: tenta por ID; se der 400/404, tenta por SLUG ---
+export async function getArticleByIdOrSlug(key: string) {
+  try {
+    return await getArticleById(key)
+  } catch (err: any) {
+    const code = err?.response?.status
+    if (code !== 400 && code !== 404) throw err
+    return await getArticleBySlug(key)
+  }
+}
+
+
 export async function getVideoById(id: string) {
   const { data } = await api.get<Video>(`/api/videos/${id}`)
   return data

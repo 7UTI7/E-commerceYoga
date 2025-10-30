@@ -110,6 +110,10 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
 function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} className={`rounded-xl border px-3 py-2.5 bg-gray-50 outline-none focus:ring-2 focus:ring-purple-200 ${props.className || ""}`} />;
 }
+function ErrorBanner({ message }: { message: string | null }) {
+  if (!message) return null;
+  return <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{message}</div>;
+}
 
 function ArticlesPanel() {
   const [list, setList] = useState<Article[]>([]);
@@ -119,6 +123,7 @@ function ArticlesPanel() {
   const [content, setContent] = useState("");
   const [status, setStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED");
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Article | null>(null);
@@ -145,9 +150,14 @@ function ArticlesPanel() {
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    if (!title.trim() || !slug.trim() || !content.trim()) {
+      setError("Preencha título, slug e conteúdo.");
+      return;
+    }
     setCreating(true);
     try {
-      const created = await createArticle({ title, slug, content, status });
+      const created = await createArticle({ title: title.trim(), slug: slug.trim(), content: content.trim(), status });
       setList((p) => [created, ...p]);
       setTitle("");
       setSlug("");
@@ -199,12 +209,13 @@ function ArticlesPanel() {
     <>
       <Card title="Novo Artigo">
         <form onSubmit={onCreate} className="grid gap-4">
+          <ErrorBanner message={error} />
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Título">
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
             </Field>
             <Field label="Slug">
-              <Input value={slug} onChange={(e) => setSlug(e.target.value)} required placeholder="url-amigavel" />
+              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="url-amigavel" />
             </Field>
           </div>
           <Field label="Conteúdo (Markdown)">
@@ -435,6 +446,7 @@ function VideosPanel() {
     <>
       <Card title="Novo Vídeo">
         <form onSubmit={onCreate} className="grid gap-4">
+          <ErrorBanner message={error} />
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Título">
               <Input value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -455,8 +467,6 @@ function VideosPanel() {
               <iframe className="absolute inset-0 h-full w-full" src={embedUrl} title="Preview vídeo" allowFullScreen />
             </div>
           ) : null}
-
-          {error && <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
 
           <Button type="submit" disabled={creating} className="ml-auto rounded-xl bg-purple-600 hover:bg-purple-700 text-white">
             {creating ? "Publicando..." : "Publicar vídeo"}
@@ -541,12 +551,7 @@ function VideosPanel() {
             </Field>
             {ytIdFrom(eUrl) ? (
               <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 aspect-video">
-                <iframe
-                  className="absolute inset-0 h-full w-full"
-                  src={`https://www.youtube.com/embed/${ytIdFrom(eUrl)}`}
-                  title="Preview edição"
-                  allowFullScreen
-                />
+                <iframe className="absolute inset-0 h-full w-full" src={`https://www.youtube.com/embed/${ytIdFrom(eUrl)}`} title="Preview edição" allowFullScreen />
               </div>
             ) : null}
             <div className="flex items-center gap-2">
@@ -569,6 +574,7 @@ function EventsPanel() {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
   const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [openEdit, setOpenEdit] = useState(false);
   const [editing, setEditing] = useState<Event | null>(null);
@@ -595,10 +601,15 @@ function EventsPanel() {
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    if (!title.trim() || !date.trim()) {
+      setError("Preencha título e data/hora.");
+      return;
+    }
     setCreating(true);
     try {
       const iso = toISO(date)!;
-      const created = await createEvent({ title, date: iso, location, description });
+      const created = await createEvent({ title: title.trim(), date: iso, location: location.trim(), description: description.trim() });
       setList((p) => [created, ...p]);
       setTitle("");
       setDate("");
@@ -651,12 +662,13 @@ function EventsPanel() {
     <>
       <Card title="Novo Evento">
         <form onSubmit={onCreate} className="grid gap-4">
+          <ErrorBanner message={error} />
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Título">
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} required />
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
             </Field>
             <Field label="Data e Hora">
-              <Input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} required />
+              <Input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} />
             </Field>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
@@ -880,7 +892,7 @@ function ClassesPanel() {
     <>
       <Card title="Nova Aula">
         <form onSubmit={onCreate} className="grid gap-4">
-          {error && <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div>}
+          <ErrorBanner message={error} />
           <div className="grid md:grid-cols-2 gap-4">
             <Field label="Título">
               <Input value={title} onChange={(e) => setTitle(e.target.value)} />

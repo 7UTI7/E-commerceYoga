@@ -4,14 +4,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, MapPin } from "lucide-react";
 
 import {
-  getArticleById,
+  getArticleByIdOrSlug,
   getVideoById,
   getEventById,
   getClassSlotById,
   type Article,
-  type Video,
   type Event,
-  type ClassSlot,
 } from "../../lib/api";
 
 import { Button } from "./ui/button";
@@ -52,6 +50,9 @@ function youtubeIdFromAny(url?: string): string | undefined {
   return m?.[2] || undefined;
 }
 
+// garante string sempre
+const safeImage = (src?: string) => src || "/assets/cover-default.jpg";
+
 export default function PostDetail() {
   const { kind, id } = useParams<{ kind: Kind; id: string }>();
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function PostDetail() {
         let unified: Unified | null = null;
 
         if (kind === "article") {
-          const a: Article = await getArticleById(id);
+          const a: Article = await getArticleByIdOrSlug(id);
           unified = {
             id: a._id,
             kind,
@@ -82,7 +83,7 @@ export default function PostDetail() {
             dateLabel: a.createdAt ? new Date(a.createdAt).toLocaleDateString("pt-BR") : undefined,
             excerpt: a.content?.trim() ? a.content.slice(0, 180) : undefined,
             fullDescription: a.content,
-            image: a.coverImage || getFigmaImage("article", a),
+            image: safeImage(a.coverImage || getFigmaImage("article", a)),
           };
         }
 
@@ -97,7 +98,7 @@ export default function PostDetail() {
             dateLabel: v.createdAt ? new Date(v.createdAt).toLocaleDateString("pt-BR") : undefined,
             excerpt: v.description,
             fullDescription: v.description,
-            image: getFigmaImage("video", v),
+            image: safeImage(getFigmaImage("video", v)),
             youtubeId: ytId,
           };
         }
@@ -113,7 +114,7 @@ export default function PostDetail() {
             location: e.location,
             excerpt: e.description?.trim() ? e.description.slice(0, 180) : undefined,
             fullDescription: e.description,
-            image: getFigmaImage("event", e),
+            image: safeImage(getFigmaImage("event", e)),
           };
         }
 
@@ -129,7 +130,7 @@ export default function PostDetail() {
             duration: typeof c.durationMinutes === "number" ? `${c.durationMinutes} min` : undefined,
             excerpt: c.description?.trim() ? c.description.slice(0, 180) : undefined,
             fullDescription: c.description,
-            image: getFigmaImage("class", c),
+            image: safeImage(getFigmaImage("class", c)),
           };
         }
 
@@ -202,7 +203,6 @@ export default function PostDetail() {
 
   return (
     <div className="bg-gradient-to-b from-purple-50 to-white min-h-screen">
-      {/* Top bar / Voltar */}
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="mx-auto max-w-5xl px-4 py-4">
           <Button
@@ -216,7 +216,6 @@ export default function PostDetail() {
         </div>
       </div>
 
-      {/* Hero */}
       <div className="relative h-[460px] overflow-hidden">
         <ImageWithFallback
           src={item.image}
@@ -231,7 +230,6 @@ export default function PostDetail() {
             </div>
             <h1 className="text-white mb-4">{item.title}</h1>
 
-            {/* Meta */}
             <div className="flex flex-wrap items-center gap-4 text-white/90">
               {dateLabel && (
                 <div className="flex items-center gap-2">
@@ -262,9 +260,7 @@ export default function PostDetail() {
         </div>
       </div>
 
-      {/* Body */}
       <div className="mx-auto max-w-5xl px-4 py-10">
-        {/* Excerpt / Resumo */}
         {item.excerpt && (
           <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 border-l-4 border-purple-600">
             <h3 className="text-purple-900 mb-3">Resumo</h3>
@@ -272,7 +268,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* Conteúdo principal */}
         {item.kind === "article" && item.fullDescription && (
           <div className="bg-white rounded-2xl shadow-md p-6 md:p-8 space-y-4">
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
@@ -305,7 +300,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* CTA */}
         {ctaBlock && (
           <div className="mt-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-xl p-8 text-center text-white">
             <h3 className="text-white mb-3">{ctaBlock.title}</h3>
@@ -328,7 +322,6 @@ export default function PostDetail() {
         )}
       </div>
 
-      {/* Modal WhatsApp */}
       <Dialog open={openWhats} onOpenChange={setOpenWhats}>
         <DialogContent>
           <DialogHeader>
