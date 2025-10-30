@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-
+import EventCarousel from "../userui/components/EventCarousel";
 
 export default function Home() {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -12,8 +12,6 @@ export default function Home() {
     if (!scroller || !dotsWrap) return;
 
     const cards = Array.from(scroller.children) as HTMLElement[];
-
-    // cria as bolinhas
     dotsWrap.innerHTML = "";
     cards.forEach((_, i) => {
       const b = document.createElement("button");
@@ -49,7 +47,6 @@ export default function Home() {
       })
     );
 
-    // arrastar com mouse
     let isDown = false;
     let startX = 0;
     let scrollLeft = 0;
@@ -92,7 +89,6 @@ export default function Home() {
 
   return (
     <>
-      {/* HERO */}
       <section className="relative h-[90vh] min-h-[560px] flex items-center justify-center text-center">
         <img src="/assets/yogatelainicial2.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-black/40"></div>
@@ -108,16 +104,14 @@ export default function Home() {
             Descubra a paz e harmonia através da prática do yoga. Transforme corpo, mente e espírito.
           </p>
           <Link
-             to="/cadastro"
-             className="mt-8 inline-flex items-center rounded-xl bg-purple-600 px-6 py-3 text-white text-lg font-semibold hover:bg-purple-700 hover:scale-[1.02] transition"
-             >
+            to="/cadastro"
+            className="mt-8 inline-flex items-center rounded-xl bg-purple-600 px-6 py-3 text-white text-lg font-semibold hover:bg-purple-700 hover:scale-[1.02] transition"
+          >
             Comece sua jornada
           </Link>
-
         </div>
       </section>
 
-      {/* ABOUT */}
       <section id="sobre" className="py-20 bg-red-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -154,7 +148,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ESPECIALIDADES */}
       <section className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
@@ -162,7 +155,6 @@ export default function Home() {
           </div>
 
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {/* Hatha Yoga */}
             <div className="group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
               <img src="/assets/especialidade1.jpg" alt="Hatha Yoga" className="h-40 w-full object-cover rounded-2xl" />
               <h4 className="mt-4 text-xl font-bold text-gray-900 text-center">Hatha Yoga</h4>
@@ -175,7 +167,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Reiki e Karuna */}
             <div className="group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
               <img src="/assets/especialidaed2.jpg" alt="Reiki e Karuna" className="h-40 w-full object-cover rounded-2xl" />
               <h4 className="mt-4 text-xl font-bold text-gray-900 text-center">Reiki e Karuna</h4>
@@ -188,7 +179,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Yoga Restaurativo */}
             <div className="group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
               <img src="/assets/especialidade3.jpg" alt="Yoga Restaurativo" className="h-40 w-full object-cover rounded-2xl" />
               <h4 className="mt-4 text-xl font-bold text-gray-900 text-center">Yoga Restaurativo</h4>
@@ -201,7 +191,6 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Yoga Massagem Ayurvédica */}
             <div className="group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
               <img src="/assets/especilidade5.jpg" alt="Yoga Massagem Ayurvédica" className="h-40 w-full object-cover rounded-2xl" />
               <h4 className="mt-4 text-xl font-bold text-gray-900 text-center">Yoga Massagem Ayurvédica</h4>
@@ -217,76 +206,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* EVENTOS */}
       <section className="py-20 bg-gray-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-900">EVENTOS</h3>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-            {/* Card 1 */}
-            <div className="text-center rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-[600px] overflow-hidden flex flex-col">
-              <img src="/assets/sapo.jpg" className="h-[px] w-[350px] object-cover mx-auto rounded-2xl" alt="" />
-              <div className="py-2"></div>
-              <h4 className="text-xl font-bold text-gray-900">Aulão de Yoga Restaurativo</h4>
-              <h3 className="font-bold text-gray-900">Data: 18/10</h3>
-              <h3 className="font-bold text-gray-900">Horário: 9:15 - 11h30 </h3>
-
-              <div className="mt-3 grow min-h-0">
-                <p className="text-gray-600 h-full overflow-y-auto pr-1 text-lg">
-                  Uma prática suave e acolhedora para restaurar o corpo, mente e energia. Um momento de pausa para reconectar-se com você mesma(o).
-                </p>
-              </div>
-
-              <div className="pt-4 mt-auto flex justify-center">
-                <a
-                  href="/cadastro.html"
-                  className="inline-flex items-center justify-center px-14 py-2.5 rounded-lg bg-green-600 text-white font-medium transition-colors duration-300 ease-in-out hover:bg-green-700 focus:bg-green-700 active:scale-[0.98]"
-                >
-                  <i className="fab fa-whatsapp text-2xl"></i>
-                </a>
-              </div>
-            </div>
-
-            {/* Card 2 */}
-            <div className="text-center rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-[600px] overflow-hidden flex flex-col">
-              <img src="/assets/fatec.jpg" className="h-[250px] w-[350px] object-cover mx-auto rounded-2xl" alt="" />
-              <div className="py-2"></div>
-              <h4 className="text-xl font-bold text-gray-900">Cinco minutos pra mim</h4>
-              <h2 className="font-bold text-gray-900">Data: Sexta-feiras</h2>
-              <h2 className="font-bold text-gray-900">Horário: 11h</h2>
-              <h3 className="font-bold text-gray-900">Local: Auditório Fatec Zona Leste</h3>
-
-              <div className="mt-3 grow min-h-0 overflow-y-auto">
-                <div className="pr-1 space-y-3">
-                  <p className="text-gray-600 text-lg leading-relaxed">
-                    Vivências para você: movimentar seu corpo com suavidade, melhorar seu foco, equilíbrio e vitalidade, dormir melhor, lidar melhor com a ansiedade,
-                    estresse e transtornos psicológicos, e relaxar num ambiente descontraído.
-                  </p>
-                  <p className="text-gray-600 text-lg leading-relaxed">SUA SAÚDE MENTAL TAMBÉM FAZ PARTE DO APRENDIZADO!!</p>
-                </div>
-              </div>
-
-              <div className="pt-4 mt-auto flex justify-center">
-                <a
-                  href="/cadastro.html"
-                  className="inline-flex items-center justify-center px-14 py-2.5 rounded-lg bg-green-600 text-white font-medium transition-colors duration-300 ease-in-out hover:bg-green-700 focus:bg-green-700 active:scale-[0.98]"
-                >
-                  <i className="fab fa-whatsapp text-2xl"></i>
-                </a>
-              </div>
-            </div>
+          <div className="mt-12">
+            <EventCarousel />
           </div>
         </div>
       </section>
 
-      {/* GALERIA (ESTRUTURA) */}
       <section id="estrutura" className="py-20 bg-red-100">
         <div className="container mx-auto">
           <h2 className="text-center text-2xl font-bold text-gray-800 mb-8">CONHEÇA NOSSA ESTRUTURA</h2>
           <div className="flex flex-wrap justify-center gap-4">
-            {/* listei como no seu HTML */}
             {Array.from({ length: 23 }).map((_, i) => (
               <img
                 key={i}
@@ -299,7 +234,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* DEPOIMENTOS */}
       <section id="depoimentos" className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -313,7 +247,6 @@ export default function Home() {
               id="testimonial-scroller"
               className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
             >
-              {/* Card 1 */}
               <article className="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300">
                 <div className="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
                   <img src="/assets/maria helena.jpg" alt="Foto de Maria Helena Maia" className="h-full w-full object-cover" />
@@ -325,7 +258,6 @@ export default function Home() {
                 </p>
               </article>
 
-              {/* Card 2 */}
               <article className="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300">
                 <div className="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
                   <img src="/assets/tamires.png" alt="Foto de Tamires Sevila" className="h-full w-full object-cover" />
@@ -337,7 +269,6 @@ export default function Home() {
                 </p>
               </article>
 
-              {/* Card 3 */}
               <article className="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300">
                 <div className="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
                   <img src="/assets/valeria.png" alt="Foto de Valquíria Zago" className="h-full w-full object-cover" />
@@ -348,7 +279,6 @@ export default function Home() {
                 </p>
               </article>
 
-              {/* Card 4 */}
               <article className="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300">
                 <div className="mx-auto h-16 w-16 overflow-hidden rounded-full ring-2 ring-purple-100">
                   <img src="/assets/flavia marcon.jpg" alt="Foto de Flavia Marcon" className="h-full w-full object-cover" />
@@ -361,7 +291,6 @@ export default function Home() {
               </article>
             </div>
 
-            {/* Dots */}
             <div ref={dotsWrapRef} id="testimonial-dots" className="mt-6 flex justify-center gap-3"></div>
           </div>
         </div>
