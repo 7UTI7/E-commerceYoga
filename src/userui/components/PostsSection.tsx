@@ -60,7 +60,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
           const articles = await getPublishedArticles();
           items.push(
             ...articles.map((a: Article): Item => ({
-              id: a._id,
+              id: a.slug,
               kind: "article",
               title: a.title,
               description: a.content?.trim()
