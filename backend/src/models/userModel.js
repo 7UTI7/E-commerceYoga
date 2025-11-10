@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema(
       required: [true, 'O e-mail é obrigatório.'],
       unique: true, // Garante que não teremos dois e-mails iguais
       lowercase: true, // Salva sempre em minúsculas
+      match: [
+        /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
+        'Por favor, insira um endereço de e-mail válido.',
+      ],
     },
     password: {
       type: String,
@@ -30,6 +34,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['STUDENT', 'ADMIN'], // Só pode ser um desses dois valores
       default: 'STUDENT', // O padrão é sempre ser 'STUDENT'
+    },
+    isVerified: {
+      type: Boolean,
+      default: false, // O usuário começa como NÃO verificado
     },
   },
   {
