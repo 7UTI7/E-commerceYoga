@@ -13,6 +13,20 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+// +++ NOVO TIPO ADICIONADO +++
+// (Baseado nos seus articleModel.js e videoModel.js)
+export type Comment = {
+  _id: string;
+  content: string;
+  author: { // O backend já está populando 'name'
+    _id: string;
+    name: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+// +++ TIPO ATUALIZADO +++
 export type Article = {
   _id: string
   title: string
@@ -23,8 +37,10 @@ export type Article = {
   status: "DRAFT" | "PUBLISHED"
   createdAt: string
   updatedAt: string
+  comments?: Comment[]; // <-- ADICIONADO
 }
 
+// +++ TIPO ATUALIZADO +++
 export type Video = {
   _id: string
   title: string
@@ -35,6 +51,7 @@ export type Video = {
   youtubeUrl?: string
   category?: string
   level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
+  comments?: Comment[]; // <-- ADICIONADO
 }
 
 export type Event = {
@@ -72,6 +89,7 @@ export type User = {
   updatedAt?: string
 }
 
+// ... (funções register, login, gets... ) ...
 export async function register(name: string, email: string, password: string) {
   const { data } = await api.post("/api/auth/register", { name, email, password })
   return data
@@ -106,6 +124,7 @@ export async function getClassSlots() {
   return data
 }
 
+// +++ ATUALIZADO (retorno agora inclui comments) +++
 export async function getArticleById(id: string) {
   const { data } = await api.get<Article>(`/api/articles/${id}`)
   return data
@@ -113,7 +132,8 @@ export async function getArticleById(id: string) {
 
 export async function getArticleBySlug(slug: string) {
   try {
-    const { data } = await api.get<Article>(`/api/articles/slug/${slug}`)
+    // +++ ATUALIZADO (retorno agora inclui comments) +++
+    const { data } = await api.get<Article>(`/api/articles/slug/${slug}`) //
     return data
   } catch (err: any) {
     if (err?.response?.status !== 404) throw err
@@ -134,9 +154,9 @@ export async function getArticleByIdOrSlug(key: string) {
   }
 }
 
-
+// +++ ATUALIZADO (retorno agora inclui comments) +++
 export async function getVideoById(id: string) {
-  const { data } = await api.get<Video>(`/api/videos/${id}`)
+  const { data } = await api.get<Video>(`/api/videos/${id}`) //
   return data
 }
 
@@ -165,6 +185,13 @@ export async function deleteArticle(id: string) {
   return data
 }
 
+// +++ NOVA FUNÇÃO ADICIONADA +++
+export async function createArticleComment(articleId: string, content: string) {
+  // O backend retorna o novo comentário populado
+  const { data } = await api.post<Comment>(`/api/articles/${articleId}/comments`, { content }); //
+  return data;
+}
+
 export async function createVideo(payload: Partial<Video>) {
   const { data } = await api.post<Video>("/api/videos", payload)
   return data
@@ -180,10 +207,15 @@ export async function deleteVideo(id: string) {
   return data
 }
 
-// +++ FUNÇÃO ADICIONADA +++
 export async function toggleFavoriteVideo(videoId: string) {
-  // O backend retorna { message: "..." }
-  const { data } = await api.post(`/api/videos/${videoId}/favorite`);
+  const { data } = await api.post(`/api/videos/${videoId}/favorite`); //
+  return data;
+}
+
+// +++ NOVA FUNÇÃO ADICIONADA +++
+export async function createVideoComment(videoId: string, content: string) {
+  // O backend retorna o novo comentário populado
+  const { data } = await api.post<Comment>(`/api/videos/${videoId}/comments`, { content }); //
   return data;
 }
 
@@ -239,10 +271,8 @@ export async function updatePassword(payload: { oldPassword: string; newPassword
   return data
 }
 
-// +++ FUNÇÃO ADICIONADA +++
 export async function getMyFavoriteVideos() {
-  // O backend retorna um array de objetos Video completos
-  const { data } = await api.get<Video[]>("/api/auth/me/favorites");
+  const { data } = await api.get<Video[]>("/api/auth/me/favorites"); //
   return data;
 }
 

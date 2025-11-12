@@ -1,7 +1,6 @@
 // src/userui/components/post-detail.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// +++ ÍCONES ATUALIZADOS +++
 import { ArrowLeft, Calendar, Clock, MapPin, BarChart3, Star } from "lucide-react";
 
 import {
@@ -13,6 +12,7 @@ import {
   type Event,
   type Video,
   type ClassSlot,
+  type Comment, // <-- ADICIONADO (para a prop 'comments')
 } from "../../lib/api";
 
 import { Button } from "./ui/button";
@@ -20,8 +20,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { getFigmaImage } from "../figmaImages";
 
-// +++ Importa o hook do AuthContext +++
-import { useAuth } from "../../contexts/AuthContext"; // <-- ADICIONADO (verifique o caminho)
+import { useAuth } from "../../contexts/AuthContext"; //
+
+// +++ IMPORTAÇÃO DO NOVO COMPONENTE +++
+import CommentsSection from "./CommentsSection"; // <-- ADICIONADO (verifique o caminho)
 
 type Kind = "article" | "video" | "event" | "class" | "group";
 type UiCategory = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
@@ -36,6 +38,7 @@ function kindToUi(kind: Kind): UiCategory {
   }
 }
 
+// +++ TIPO 'Unified' ATUALIZADO +++
 type Unified = {
   id: string;
   kind: Kind;
@@ -50,6 +53,7 @@ type Unified = {
   fullDescription?: string;
   image: string;
   youtubeId?: string;
+  comments?: Comment[]; // <-- ADICIONADO
 };
 
 function youtubeIdFromAny(url?: string): string | undefined {
@@ -67,7 +71,6 @@ export default function PostDetail() {
   const [item, setItem] = useState<Unified | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // +++ Pega os dados do AuthContext +++
   const { user, favoriteVideoIds, toggleFavorite } = useAuth(); //
 
   const [openWhats, setOpenWhats] = useState(false);
@@ -89,10 +92,11 @@ export default function PostDetail() {
       try {
         let unified: Unified | null = null;
 
+        // Os 'comments' já estão sendo incluídos na busca
         if (kind === "article") {
-          const a: Article = await getArticleByIdOrSlug(id);
+          const a: Article = await getArticleByIdOrSlug(id); //
           unified = {
-            id: a._id, // <-- Corrigido de a._id para a._id (estava certo)
+            id: a._id,
             kind,
             title: a.title,
             category: kindToUi(kind),
@@ -100,11 +104,12 @@ export default function PostDetail() {
             excerpt: a.content?.trim() ? a.content.slice(0, 180) : undefined,
             fullDescription: a.content,
             image: safeImage(a.coverImage || getFigmaImage("article", a)),
+            comments: a.comments || [], // <-- ADICIONADO
           };
         }
 
         if (kind === "video") {
-          const v: Video = await getVideoById(id);
+          const v: Video = await getVideoById(id); //
           const ytId = youtubeIdFromAny(v.youtubeUrl || v.url);
           unified = {
             id: v._id,
@@ -117,6 +122,7 @@ export default function PostDetail() {
             fullDescription: v.description,
             image: safeImage(getFigmaImage("video", v)),
             youtubeId: ytId,
+            comments: v.comments || [], // <-- ADICIONADO
           };
         }
 
@@ -132,6 +138,7 @@ export default function PostDetail() {
             excerpt: e.description?.trim() ? e.description.slice(0, 180) : undefined,
             fullDescription: e.description,
             image: safeImage(getFigmaImage("event", e)),
+            // (Eventos não têm comentários)
           };
         }
 
@@ -149,6 +156,7 @@ export default function PostDetail() {
             excerpt: c.description?.trim() ? c.description.slice(0, 180) : undefined,
             fullDescription: c.description,
             image: safeImage(getFigmaImage("class", c)),
+            // (Aulas não têm comentários)
           };
         }
 
@@ -166,7 +174,6 @@ export default function PostDetail() {
     return () => { alive = false; };
   }, [kind, id, navigate]);
 
-  // +++ LÓGICA DE FAVORITOS ADICIONADA +++
   const isFavorited = useMemo(() => {
     if (!item || item.kind !== 'video') return false;
     return favoriteVideoIds.includes(item.id); //
@@ -182,6 +189,9 @@ export default function PostDetail() {
 
   const isEvent = item?.kind === "event";
   const isClass = item?.kind === "class";
+  // +++ ATUALIZADO (para verificar se é artigo ou vídeo) +++
+  const canHaveComments = item?.kind === 'article' || item?.kind === 'video';
+
   const categoryLabel = item?.category || "";
 
   const ctaBlock = useMemo(() => {
@@ -257,28 +267,29 @@ export default function PostDetail() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent" />
 
-        {/* +++ BOTÃO DE ESTRELA ADICIONADO +++ */}
-        {showFavoriteStar && (
-          <button
-            onClick={handleFavoriteClick}
-            className="absolute top-6 right-8 p-2 bg-black/30 backdrop-blur-sm rounded-full text-white hover:bg-black/50 transition-colors z-20"
-            aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-          >
-            <Star className={`w-6 h-6 transition-colors ${isFavorited
-                ? 'fill-yellow-400 stroke-yellow-400'
-                : 'fill-transparent stroke-white'
-              }`} />
-          </button>
-        )}
-
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white z-10">
           <div className="mx-auto max-w-5xl">
             <div className="inline-block bg-purple-600 text-white px-4 py-1 rounded-full text-sm mb-4">
               {categoryLabel}
             </div>
-            <h1 className="text-white mb-4">{item.title}</h1>
 
-            <div className="flex flex-wrap items-center gap-4 text-white/90">
+            <div className="flex items-center gap-3">
+              <h1 className="text-white mb-0">{item.title}</h1>
+              {showFavoriteStar && (
+                <button
+                  onClick={handleFavoriteClick}
+                  className="p-1 rounded-full text-white/70 hover:text-white"
+                  aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                >
+                  <Star className={`w-7 h-7 transition-colors ${isFavorited
+                      ? 'fill-yellow-400 stroke-yellow-400'
+                      : 'fill-transparent stroke-currentColor'
+                    }`} />
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 text-white/90 mt-4">
               {dateLabel && (
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5" />
@@ -354,6 +365,15 @@ export default function PostDetail() {
           </div>
         )}
 
+        {/* +++ SEÇÃO DE COMENTÁRIOS ADICIONADA +++ */}
+        {canHaveComments && (
+          <CommentsSection
+            postId={item.id}
+            kind={item.kind as 'article' | 'video'} // Nós sabemos que é um desses
+            initialComments={item.comments || []}
+          />
+        )}
+
         {ctaBlock && (
           <div className="mt-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-xl p-8 text-center text-white">
             <h3 className="text-white mb-3">{ctaBlock.title}</h3>
@@ -379,6 +399,7 @@ export default function PostDetail() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Abrir WhatsApp?</DialogTitle>
+            {/* Corrigido o typo */}
             <DialogDescription>
               Este link abrirá o WhatsApp em uma nova aba para {isEvent ? "participar do evento" : "agendar sua aula"}. Deseja continuar?
             </DialogDescription>
