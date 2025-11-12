@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const crypto = require('crypto');
 
 const articleSchema = new mongoose.Schema(
   {
@@ -35,21 +36,22 @@ const articleSchema = new mongoose.Schema(
   }
 );
 
-// NOVO: Hook (gancho) que roda ANTES de salvar ('.save()')
 articleSchema.pre('save', function (next) {
-  // Verifique se o título foi modificado (para não gerar um novo slug
-  // toda vez que o usuário editar o *conteúdo*, por exemplo)
-  if (this.isModified('title')) {
-    // Cria o slug a partir do título
-    // ex: "Meu Título!" -> "meu-titulo"
-    this.slug = slugify(this.title, { 
-      lower: true,  // Força minúsculas
-      strict: true, // Remove caracteres especiais (como '!')
-    });
+  // Rode APENAS se o 'title' foi modificado
+  // OU se for um documento novo (para o caso de updates onde o título não muda)
+  if (this.isModified('title') || this.isNew) {
     
-    // NOTA: Isso não trata duplicatas (ex: dois artigos com o mesmo título).
-    // Para um MVP, isso é suficiente. Podemos adicionar um hash aleatório
-    // (ex: slug + '-' + crypto.randomBytes(4).toString('hex')) depois, se necessário.
+    // 1. Gera o slug base
+    const baseSlug = slugify(this.title, { 
+      lower: true,  
+      strict: true, 
+    });
+
+    // 2. Gera 4 caracteres aleatórios (ex: 'a1b2')
+    const randomChars = crypto.randomBytes(4).toString('hex').slice(0, 4);
+
+    // 3. Combina os dois para garantir que seja único
+    this.slug = `${baseSlug}-${randomChars}`;
   }
   next();
 });
