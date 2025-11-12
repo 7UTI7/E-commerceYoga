@@ -1,16 +1,18 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
+const crypto = require('crypto');
 
 const articleSchema = new mongoose.Schema(
   {
     title: {
       type: String,
       required: [true, 'O título é obrigatório.'],
-        },
+    },
     // slug é a URL amigável, ex: "como-meditar-em-5-minutos"
     slug: {
       type: String,
-      required: [true, 'O slug é obrigatório.'],
-      unique: true, // Não pode haver dois slugs iguais
+      // required: [true, 'O slug é obrigatório.'],
+      unique: true,
       lowercase: true,
     },
     content: {
@@ -33,6 +35,26 @@ const articleSchema = new mongoose.Schema(
     timestamps: true, // Adiciona 'createdAt' e 'updatedAt'
   }
 );
+
+articleSchema.pre('save', function (next) {
+  // Rode APENAS se o 'title' foi modificado
+  // OU se for um documento novo (para o caso de updates onde o título não muda)
+  if (this.isModified('title') || this.isNew) {
+
+    // 1. Gera o slug base
+    const baseSlug = slugify(this.title, {
+      lower: true,
+      strict: true,
+    });
+
+    // 2. Gera 4 caracteres aleatórios (ex: 'a1b2')
+    const randomChars = crypto.randomBytes(4).toString('hex').slice(0, 4);
+
+    // 3. Combina os dois para garantir que seja único
+    this.slug = `${baseSlug}-${randomChars}`;
+  }
+  next();
+});
 
 const Article = mongoose.model('Article', articleSchema);
 

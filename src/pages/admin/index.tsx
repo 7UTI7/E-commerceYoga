@@ -63,8 +63,8 @@ export default function Admin() {
                                 key={k}
                                 onClick={() => setTab(k as Tab)}
                                 className={`h-11 rounded-xl px-4 text-sm flex items-center justify-center transition ${tab === (k as Tab)
-                                        ? "bg-purple-600 text-white shadow"
-                                        : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                                    ? "bg-purple-600 text-white shadow"
+                                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                                     }`}
                             >
                                 {icon}
@@ -119,14 +119,14 @@ function ErrorBanner({ message }: { message: string | null }) {
 }
 
 // ====================================================================
-// --- ARTIGOS --- (Componente original, sem mudanças)
+// --- ARTIGOS --- (Componente MODIFICADO)
 // ====================================================================
 
 function ArticlesPanel() {
     const [list, setList] = useState<Article[]>([]);
     const [loading, setLoading] = useState(true);
     const [title, setTitle] = useState("");
-    const [slug, setSlug] = useState("");
+    // const [slug, setSlug] = useState(""); // <-- REMOVIDO
     const [content, setContent] = useState("");
     const [status, setStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED");
     const [creating, setCreating] = useState(false);
@@ -137,7 +137,7 @@ function ArticlesPanel() {
     const [openEdit, setOpenEdit] = useState(false);
     const [editing, setEditing] = useState<Article | null>(null);
     const [eTitle, setETitle] = useState("");
-    const [eSlug, setESlug] = useState("");
+    const [eSlug, setESlug] = useState(""); // <-- MANTIDO (para edição)
     const [eContent, setEContent] = useState("");
     const [eStatus, setEStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED");
     const [saving, setSaving] = useState(false);
@@ -163,16 +163,19 @@ function ArticlesPanel() {
     async function onCreate(e: React.FormEvent) {
         e.preventDefault();
         setCreateError(null); // Limpa erros de criação
-        if (!title.trim() || !slug.trim() || !content.trim()) {
-            setCreateError("Preencha título, slug e conteúdo.");
+
+        // Validação ATUALIZADA (sem slug)
+        if (!title.trim() || !content.trim()) {
+            setCreateError("Preencha título e conteúdo.");
             return;
         }
         setCreating(true);
         try {
-            const created = await createArticle({ title: title.trim(), slug: slug.trim(), content: content.trim(), status });
+            // Payload ATUALIZADO (sem slug)
+            const created = await createArticle({ title: title.trim(), content: content.trim(), status });
             setList((p) => [created, ...p]);
             setTitle("");
-            setSlug("");
+            // setSlug(""); // <-- REMOVIDO
             setContent("");
             setStatus("PUBLISHED");
         } catch (err: any) {
@@ -191,7 +194,7 @@ function ArticlesPanel() {
         const a = confirmEdit;
         setEditing(a);
         setETitle(a.title ?? "");
-        setESlug(a.slug ?? "");
+        setESlug(a.slug ?? ""); // <-- MANTIDO (para edição)
         setEContent(a.content ?? "");
         setEStatus(a.status ?? "PUBLISHED");
         setOpenEdit(true);
@@ -203,6 +206,7 @@ function ArticlesPanel() {
         // Não limpa o erro aqui, pois o erro de salvar deve aparecer no modal de edição
         setSaving(true);
         try {
+            // Payload MANTIDO (com slug, para permitir edição manual)
             const updated = await updateArticle(editing._id, { title: eTitle, slug: eSlug, content: eContent, status: eStatus });
             setList((p) => p.map((x) => (x._id === editing._id ? updated : x)));
             setOpenEdit(false);
@@ -244,9 +248,11 @@ function ArticlesPanel() {
                         <Field label="Título">
                             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
                         </Field>
+                        {/* CAMPO DE SLUG REMOVIDO DA CRIAÇÃO
                         <Field label="Slug">
                             <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="url-amigavel" />
                         </Field>
+                        */}
                     </div>
                     <Field label="Conteúdo (Markdown)">
                         <Textarea rows={8} value={content} onChange={(e) => setContent(e.target.value)} />
@@ -341,6 +347,7 @@ function ArticlesPanel() {
                         <Field label="Título">
                             <Input value={eTitle} onChange={(e) => setETitle(e.target.value)} />
                         </Field>
+                        {/* CAMPO DE SLUG MANTIDO NA EDIÇÃO */}
                         <Field label="Slug">
                             <Input value={eSlug} onChange={(e) => setESlug(e.target.value)} />
                         </Field>
