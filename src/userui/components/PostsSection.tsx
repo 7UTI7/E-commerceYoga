@@ -5,28 +5,30 @@ import {
   getVideos,
   getEvents,
   getClassSlots,
-  getWhatsAppGroups, // <-- ADICIONADO
+  getWhatsAppGroups,
   type Article,
   type Video,
   type Event,
   type ClassSlot,
-  type WhatsAppGroup, // <-- ADICIONADO
+  type WhatsAppGroup,
 } from "../../lib/api";
 import { getFigmaImage } from "../figmaImages";
 import { Clock } from "lucide-react";
 
 // Tipos e Interfaces
-type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos"; // <-- 'Grupos' ADICIONADO
-type DataKey = "recent" | "article" | "video" | "event" | "class" | "group"; // <-- 'group' ADICIONADO
+type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
+type DataKey = "recent" | "article" | "video" | "event" | "class" | "group";
 
+// +++ ATUALIZADO (Interface Item) +++
 interface Item {
   id: string;
-  kind: "article" | "video" | "event" | "class" | "group"; // <-- 'group' ADICIONADO
+  kind: "article" | "video" | "event" | "class" | "group";
   title: string;
   description?: string;
   image?: string;
   date?: string;
-  joinLink?: string; // <-- ADICIONADO
+  joinLink?: string;
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; // <-- ADICIONADO
 }
 
 // Funções Helper
@@ -36,7 +38,7 @@ function uiToKey(ui?: UiCategory): DataKey {
     case "Vídeos": return "video";
     case "Eventos": return "event";
     case "Aulas": return "class";
-    case "Grupos": return "group"; // <-- ADICIONADO
+    case "Grupos": return "group";
     default: return "recent";
   }
 }
@@ -89,6 +91,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
         if (selectedKey === "video" || selectedKey === "recent") {
           const videos = await getVideos();
           items.push(
+            // +++ ATUALIZADO (map de Vídeos) +++
             ...videos.map((v: Video): Item => ({
               id: v._id,
               kind: "video",
@@ -96,6 +99,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
               description: v.description,
               image: getFigmaImage("video", v),
               date: v.createdAt ?? v.updatedAt,
+              level: v.level, // <-- ADICIONADO
             }))
           );
         }
@@ -117,6 +121,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
         if (selectedKey === "class" || selectedKey === "recent") {
           const classes = await getClassSlots();
           items.push(
+            // +++ ATUALIZADO (map de Aulas) +++
             ...classes.map((c: ClassSlot): Item => {
               const hasNewShape = !!c.dateTime || !!c.title || !!c.description;
               const title = hasNewShape ? (c.title || "Aula de Yoga") : (c.modality ? `Aula de ${c.modality}` : "Aula de Yoga");
@@ -133,12 +138,12 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
                 description: desc,
                 image: getFigmaImage("class", c),
                 date,
+                level: c.level, // <-- ADICIONADO
               };
             })
           );
         }
 
-        // +++ INÍCIO DO NOVO BLOCO +++
         if (selectedKey === "group" || selectedKey === "recent") {
           const groups = await getWhatsAppGroups();
           items.push(
@@ -147,13 +152,13 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
               kind: "group",
               title: g.name,
               description: g.description,
-              image: getFigmaImage("group", g), // Crie uma imagem padrão para 'group'
+              image: getFigmaImage("group", g),
               date: g.createdAt ?? g.updatedAt,
-              joinLink: g.joinLink, // Passando o link
+              joinLink: g.joinLink,
             }))
           );
         }
-        // +++ FIM DO NOVO BLOCO +++
+
 
         // Ordenar todos os itens por data, mais recente primeiro
         items.sort((a, b) => {
@@ -206,6 +211,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
           <>
             {/* Lista de Posts */}
             <div className="space-y-6 mb-8">
+              {/* +++ ATUALIZADO (render do PostCard) +++ */}
               {currentPosts.map((item) => (
                 <PostCard
                   key={`${item.kind}-${item.id}`}
@@ -215,7 +221,8 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
                   description={item.description}
                   image={item.image}
                   date={item.date}
-                  joinLink={item.joinLink} // <-- ADICIONADO
+                  joinLink={item.joinLink}
+                  level={item.level} // <-- ADICIONADO
                 />
               ))}
             </div>

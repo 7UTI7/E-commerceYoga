@@ -4,16 +4,20 @@ import {
     getVideos, createVideo, updateVideo, deleteVideo,
     getEvents, createEvent, updateEvent, deleteEvent,
     getClassSlots, createClassSlot, updateClassSlot, deleteClassSlot,
-    getWhatsAppGroups, createWhatsAppGroup, updateWhatsAppGroup, deleteWhatsAppGroup, // <-- ADICIONADO
+    getWhatsAppGroups, createWhatsAppGroup, updateWhatsAppGroup, deleteWhatsAppGroup,
     type Article, type Video, type Event, type ClassSlot,
-    type WhatsAppGroup, // <-- ADICIONADO
+    type WhatsAppGroup,
 } from "../../lib/api";
 import { Button } from "../../userui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "../../userui/components/ui/dialog";
-import { ChevronLeft, Calendar, Video as VideoIcon, FileText, Users, Link } from "lucide-react"; // <-- ÍCONE 'Link' ADICIONADO
+import { ChevronLeft, Calendar, Video as VideoIcon, FileText, Users, Link } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type Tab = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos"; // <-- 'Grupos' ADICIONADO
+type Tab = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
+
+// +++ NOVO: Tipo de Nível e Opções +++
+type Level = 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
+const levelOptions: Level[] = ['Todos', 'Iniciante', 'Intermediário', 'Avançado'];
 
 function ytIdFrom(url?: string) {
     if (!url) return "";
@@ -51,13 +55,13 @@ export default function Admin() {
                     <div className="flex items-center justify-between px-2 pb-2">
                         <div className="text-sm text-gray-600">Gerencie artigos, vídeos, eventos e aulas</div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2"> {/* <-- ATUALIZADO para 'md:grid-cols-5' */}
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                         {([
                             { k: "Artigos", icon: <FileText className="w-4 h-4 mr-2" /> },
                             { k: "Vídeos", icon: <VideoIcon className="w-4 h-4 mr-2" /> },
                             { k: "Eventos", icon: <Calendar className="w-4 h-4 mr-2" /> },
                             { k: "Aulas", icon: <Users className="w-4 h-4 mr-2" /> },
-                            { k: "Grupos", icon: <Link className="w-4 h-4 mr-2" /> }, // <-- ADICIONADO
+                            { k: "Grupos", icon: <Link className="w-4 h-4 mr-2" /> },
                         ] as const).map(({ k, icon }) => (
                             <button
                                 key={k}
@@ -78,7 +82,7 @@ export default function Admin() {
                 {tab === "Vídeos" && <VideosPanel />}
                 {tab === "Eventos" && <EventsPanel />}
                 {tab === "Aulas" && <ClassesPanel />}
-                {tab === "Grupos" && <GroupsPanel />} {/* <-- ADICIONADO */}
+                {tab === "Grupos" && <GroupsPanel />}
             </div>
         </div>
     );
@@ -373,7 +377,7 @@ function ArticlesPanel() {
 }
 
 // ====================================================================
-// --- VÍDEOS --- (Componente original, sem mudanças)
+// --- VÍDEOS --- (Componente ATUALIZADO)
 // ====================================================================
 
 function VideosPanel() {
@@ -383,6 +387,7 @@ function VideosPanel() {
     const [url, setUrl] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
+    const [level, setLevel] = useState<Level>("Todos"); // <-- ADICIONADO
     const [creating, setCreating] = useState(false);
     // --- Estados de erro separados ---
     const [createError, setCreateError] = useState<string | null>(null);
@@ -394,6 +399,7 @@ function VideosPanel() {
     const [eUrl, setEUrl] = useState("");
     const [eDescription, setEDescription] = useState("");
     const [eCategory, setECategory] = useState("");
+    const [eLevel, setELevel] = useState<Level>("Todos"); // <-- ADICIONADO
     const [saving, setSaving] = useState(false);
 
     const [confirmEdit, setConfirmEdit] = useState<Video | null>(null);
@@ -430,13 +436,15 @@ function VideosPanel() {
                 title: title.trim(),
                 description: description.trim(),
                 youtubeUrl: normalized,
+                level: level, // <-- ADICIONADO
                 ...(category.trim() ? { category: category.trim() } : {}),
-            } as any);
+            });
             setList((p) => [created, ...p]);
             setTitle("");
             setUrl("");
             setDescription("");
             setCategory("");
+            setLevel("Todos"); // <-- ADICIONADO (reset)
         } catch (err: any) {
             const msg = err?.response?.data?.message || err?.response?.data?.error || err?.message || "Erro ao criar vídeo.";
             setCreateError(msg);
@@ -455,8 +463,9 @@ function VideosPanel() {
         setEditing(v);
         setETitle(v.title ?? "");
         setEDescription(v.description ?? "");
-        setECategory((v as any).category ?? "");
-        setEUrl((v as any).youtubeUrl ?? "");
+        setECategory(v.category ?? "");
+        setELevel(v.level ?? "Todos"); // <-- ADICIONADO
+        setEUrl(v.youtubeUrl ?? "");
         setOpenEdit(true);
         setConfirmEdit(null);
     }
@@ -472,7 +481,8 @@ function VideosPanel() {
                 description: eDescription.trim(),
                 youtubeUrl: normalizedE,
                 category: eCategory.trim(),
-            } as any);
+                level: eLevel, // <-- ADICIONADO
+            });
             setList((p) => p.map((x) => (x._id === editing._id ? updated : x)));
             setOpenEdit(false);
         } catch (err: any) {
@@ -519,9 +529,19 @@ function VideosPanel() {
                     <Field label="Descrição">
                         <Textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
                     </Field>
-                    <Field label="Categoria (opcional)">
-                        <Input value={category} onChange={(e) => setCategory(e.target.value)} />
-                    </Field>
+                    {/* +++ LINHA ATUALIZADA (com Nível) +++ */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                        <Field label="Categoria (opcional)">
+                            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+                        </Field>
+                        <Field label="Nível">
+                            <Select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
+                                {levelOptions.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </Select>
+                        </Field>
+                    </div>
 
                     {ytId ? (
                         <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 aspect-video">
@@ -546,8 +566,18 @@ function VideosPanel() {
                                 <li key={v._id} className="rounded-xl border bg-white p-4 flex items-start justify-between">
                                     <div className="min-w-0">
                                         <div className="font-medium truncate">{v.title}</div>
-                                        <div className="text-xs text-gray-500 mt-1 truncate">{(v as any).youtubeUrl}</div>
-                                        {(v as any).category ? <div className="text-xs text-gray-500 mt-1">Categoria: {(v as any).category}</div> : null}
+                                        {/* +++ LINHA ATUALIZADA (com Nível) +++ */}
+                                        <div className="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-2">
+                                            <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[11px]">{v.level || 'Todos'}</span>
+                                            <span className="text-gray-400">/</span>
+                                            {v.category ? (
+                                                <>
+                                                    <span>{v.category}</span>
+                                                    <span className="text-gray-400">/</span>
+                                                </>
+                                            ) : null}
+                                            <span className="truncate">{v.youtubeUrl}</span>
+                                        </div>
                                     </div>
                                     <div className="flex gap-2 shrink-0">
                                         <Button variant="secondary" className="rounded-xl" onClick={() => askEdit(v)}>
@@ -610,9 +640,19 @@ function VideosPanel() {
                         <Field label="Descrição">
                             <Textarea rows={4} value={eDescription} onChange={(e) => setEDescription(e.target.value)} />
                         </Field>
-                        <Field label="Categoria (opcional)">
-                            <Input value={eCategory} onChange={(e) => setECategory(e.target.value)} />
-                        </Field>
+                        {/* +++ LINHA ATUALIZADA (com Nível) +++ */}
+                        <div className="grid md:grid-cols-2 gap-4">
+                            <Field label="Categoria (opcional)">
+                                <Input value={eCategory} onChange={(e) => setECategory(e.target.value)} />
+                            </Field>
+                            <Field label="Nível">
+                                <Select value={eLevel} onChange={(e) => setELevel(e.target.value as Level)}>
+                                    {levelOptions.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                </Select>
+                            </Field>
+                        </div>
                         {ytIdFrom(eUrl) ? (
                             <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 aspect-video">
                                 <iframe className="absolute inset-0 h-full w-full" src={`https://www.youtube.com/embed/${ytIdFrom(eUrl)}`} title="Preview edição" allowFullScreen />
@@ -867,7 +907,7 @@ function EventsPanel() {
 }
 
 // ====================================================================
-// --- AULAS --- (Componente original, sem mudanças)
+// --- AULAS --- (Componente ATUALIZADO)
 // ====================================================================
 
 function ClassesPanel() {
@@ -879,6 +919,7 @@ function ClassesPanel() {
     const [dtLocal, setDtLocal] = useState("");
     const [durationMinutes, setDurationMinutes] = useState<string>("");
     const [maxStudents, setMaxStudents] = useState<string>("");
+    const [level, setLevel] = useState<Level>("Todos"); // <-- ADICIONADO
     const [creating, setCreating] = useState(false);
     // --- Estados de erro separados ---
     const [createError, setCreateError] = useState<string | null>(null);
@@ -891,6 +932,7 @@ function ClassesPanel() {
     const [eDtLocal, setEDtLocal] = useState("");
     const [eDurationMinutes, setEDurationMinutes] = useState<string>("");
     const [eMaxStudents, setEMaxStudents] = useState<string>("");
+    const [eLevel, setELevel] = useState<Level>("Todos"); // <-- ADICIONADO
     const [saving, setSaving] = useState(false);
 
     const [confirmEdit, setConfirmEdit] = useState<ClassSlot | null>(null);
@@ -920,6 +962,7 @@ function ClassesPanel() {
                 title: title.trim(),
                 description: description.trim(),
                 dateTime: toISO(dtLocal),
+                level: level, // <-- ADICIONADO
             };
             if (durationMinutes.trim()) payload.durationMinutes = parseInt(durationMinutes, 10);
             if (maxStudents.trim()) payload.maxStudents = parseInt(maxStudents, 10);
@@ -935,6 +978,7 @@ function ClassesPanel() {
             setDtLocal("");
             setDurationMinutes("");
             setMaxStudents("");
+            setLevel("Todos"); // <-- ADICIONADO (reset)
         } catch (err: any) {
             setCreateError(err?.response?.data?.message || "Erro ao publicar aula.");
         } finally {
@@ -948,13 +992,14 @@ function ClassesPanel() {
     }
     function proceedEdit() {
         if (!confirmEdit) return;
-        const c = confirmEdit as any;
+        const c = confirmEdit;
         setEditing(c);
         setETitle(c.title ?? "");
         setEDescription(c.description ?? "");
         setEDtLocal(toDatetimeLocal(c.dateTime));
         setEDurationMinutes(typeof c.durationMinutes === "number" ? String(c.durationMinutes) : "");
         setEMaxStudents(typeof c.maxStudents === "number" ? String(c.maxStudents) : "");
+        setELevel(c.level ?? "Todos"); // <-- ADICIONADO
         setOpenEdit(true);
         setConfirmEdit(null);
     }
@@ -963,14 +1008,17 @@ function ClassesPanel() {
         if (!editing) return;
         setSaving(true);
         try {
-            const patch: any = {};
+            const patch: Partial<ClassSlot> = {
+                level: eLevel // <-- ADICIONADO
+            };
             if (eTitle.trim()) patch.title = eTitle.trim();
             if (eDescription.trim()) patch.description = eDescription.trim();
             const iso = toISO(eDtLocal);
             if (iso) patch.dateTime = iso;
             if (eDurationMinutes.trim()) patch.durationMinutes = parseInt(eDurationMinutes, 10);
             if (eMaxStudents.trim()) patch.maxStudents = parseInt(eMaxStudents, 10);
-            const updated = await updateClassSlot(editing._id, patch as any);
+
+            const updated = await updateClassSlot(editing._id, patch);
             setList((p) => p.map((x) => (x._id === editing._id ? updated : x)));
             setOpenEdit(false);
         } catch (err: any) {
@@ -1016,12 +1064,20 @@ function ClassesPanel() {
                     <Field label="Descrição">
                         <Textarea rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
                     </Field>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    {/* +++ LINHA ATUALIZADA (com Nível) +++ */}
+                    <div className="grid md:grid-cols-3 gap-4">
                         <Field label="Duração (min)">
                             <Input type="number" min={1} value={durationMinutes} onChange={(e) => setDurationMinutes(e.target.value)} />
                         </Field>
                         <Field label="Vagas">
                             <Input type="number" min={1} value={maxStudents} onChange={(e) => setMaxStudents(e.target.value)} />
+                        </Field>
+                        <Field label="Nível">
+                            <Select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
+                                {levelOptions.map(opt => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </Select>
                         </Field>
                     </div>
                     <Button type="submit" disabled={creating} className="ml-auto rounded-xl bg-purple-600 hover:bg-purple-700 text-white">
@@ -1040,12 +1096,15 @@ function ClassesPanel() {
                             {list.map((c) => (
                                 <li key={c._id} className="rounded-xl border bg-white p-4 flex items-start justify-between">
                                     <div>
-                                        <div className="font-medium">{(c as any).title || "Aula"}</div>
-                                        <div className="text-sm text-gray-600">{(c as any).dateTime ? new Date((c as any).dateTime).toLocaleString() : ""}</div>
-                                        <div className="text-sm text-gray-700">{(c as any).description}</div>
-                                        <div className="text-xs text-gray-500">
-                                            {typeof (c as any).durationMinutes === "number" ? `Duração: ${(c as any).durationMinutes} min` : ""}
-                                            {typeof (c as any).maxStudents === "number" ? ` • Vagas: ${(c as any).maxStudents}` : ""}
+                                        <div className="font-medium">{c.title || "Aula"}</div>
+                                        <div className="text-sm text-gray-600">{c.dateTime ? new Date(c.dateTime).toLocaleString() : ""}</div>
+                                        <div className="text-sm text-gray-700">{c.description}</div>
+                                        {/* +++ LINHA ATUALIZADA (com Nível) +++ */}
+                                        <div className="text-xs text-gray-500 mt-1 flex flex-wrap items-center gap-2">
+                                            <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[11px]">{c.level || 'Todos'}</span>
+                                            <span className="text-gray-400">|</span>
+                                            {typeof c.durationMinutes === "number" ? <span>Duração: {c.durationMinutes} min</span> : null}
+                                            {typeof c.maxStudents === "number" ? <span> • Vagas: {c.maxStudents}</span> : null}
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
@@ -1055,7 +1114,7 @@ function ClassesPanel() {
                                         <Button variant="destructive" className="rounded-xl" onClick={() => askDelete(c)}>
                                             Excluir
                                         </Button>
-                                        s             </div>
+                                    </div>
                                 </li>
                             ))}
                         </ul>
@@ -1070,10 +1129,10 @@ function ClassesPanel() {
                         <DialogDescription>Você está prestes a abrir o editor desta aula.</DialogDescription>
                     </DialogHeader>
                     <div className="mt-4 flex justify-end gap-2">
-                        section-            <DialogClose asChild>
+                        <DialogClose asChild>
                             <Button variant="secondary" className="rounded-lg">Cancelar</Button>
                         </DialogClose>
-                        t         <Button className="rounded-lg" onClick={proceedEdit}>Continuar</Button>
+                        <Button className="rounded-lg" onClick={proceedEdit}>Continuar</Button>
                     </div>
                 </DialogContent>
             </Dialog>
@@ -1082,10 +1141,10 @@ function ClassesPanel() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Deseja excluir esta aula?</DialogTitle>
-                        s           <DialogDescription>Esta ação não poderá ser desfeita.</DialogDescription>
+                        <DialogDescription>Esta ação não poderá ser desfeita.</DialogDescription>
                     </DialogHeader>
                     <div className="mt-4 flex justify-end gap-2">
-                        s           <DialogClose asChild>
+                        <DialogClose asChild>
                             <Button variant="secondary" className="rounded-lg">Cancelar</Button>
                         </DialogClose>
                         <Button variant="destructive" className="rounded-lg" onClick={proceedDelete}>Excluir</Button>
@@ -1106,24 +1165,32 @@ function ClassesPanel() {
                             </Field>
                             <Field label="Data e Hora">
                                 <Input type="datetime-local" value={eDtLocal} onChange={(e) => setEDtLocal(e.target.value)} />
-                                F             </Field>
+                            </Field>
                         </div>
-                        _   <Field label="Descrição">
+                        <Field label="Descrição">
                             <Textarea rows={4} value={eDescription} onChange={(e) => setEDescription(e.target.value)} />
                         </Field>
-                        <div className="grid md:grid-cols-2 gap-4">
+                        {/* +++ LINHA ATUALIZADA (com Nível) +++ */}
+                        <div className="grid md:grid-cols-3 gap-4">
                             <Field label="Duração (min)">
                                 <Input type="number" min={1} value={eDurationMinutes} onChange={(e) => setEDurationMinutes(e.target.value)} />
                             </Field>
                             <Field label="Vagas">
                                 <Input type="number" min={1} value={eMaxStudents} onChange={(e) => setEMaxStudents(e.target.value)} />
-                                f           </Field>
+                            </Field>
+                            <Field label="Nível">
+                                <Select value={eLevel} onChange={(e) => setELevel(e.target.value as Level)}>
+                                    {levelOptions.map(opt => (
+                                        <option key={opt} value={opt}>{opt}</option>
+                                    ))}
+                                </Select>
+                            </Field>
                         </div>
                         <div className="flex items-center">
                             <Button className="ml-auto rounded-xl bg-purple-600 text-white hover:bg-purple-700" onClick={onSaveEdit} disabled={saving}>
                                 {saving ? "Salvando..." : "Salvar alterações"}
                             </Button>
-                            Dos     </div>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>

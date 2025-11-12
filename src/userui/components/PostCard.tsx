@@ -1,13 +1,14 @@
-import { useState } from "react"; // 'useState' já estava
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Tag } from "lucide-react";
+// +++ ÍCONE ATUALIZADO +++
+import { Calendar, Tag, BarChart3 } from "lucide-react"; // <-- 'BarChart3' (ou 'Activity') para o nível
 
-// +++ 1. IMPORTAR COMPONENTES DO MODAL +++
-// (Estou assumindo os caminhos com base no seu EventsCarousel.tsx)
+// (Importações do Modal)
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "./ui/button";
 
+// +++ INTERFACE ATUALIZADA +++
 export interface PostCardProps {
   id: string;
   kind: "article" | "video" | "event" | "class" | "group";
@@ -16,6 +17,7 @@ export interface PostCardProps {
   image?: string;
   date?: string;
   joinLink?: string;
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; // <-- ADICIONADO
 }
 
 function mapKindToCategory(kind: PostCardProps["kind"]) {
@@ -36,22 +38,18 @@ export default function PostCard({
   description,
   image,
   date,
-  joinLink
+  joinLink,
+  level // <-- ADICIONADO
 }: PostCardProps) {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
-
-  // +++ 2. ADICIONAR ESTADO PARA O MODAL +++
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  // +++ 3. ATUALIZAR O HANDLER DE CLIQUE +++
   const handleClick = (e: React.MouseEvent) => {
-    // Se for um grupo, previna a ação padrão e abra o modal
     if (kind === 'group' && joinLink) {
-      e.preventDefault(); // Impede outros comportamentos
+      e.preventDefault();
       setConfirmOpen(true);
     } else {
-      // Comportamento padrão para outros tipos
       navigate(`/post/${kind}/${id}`);
     }
   };
@@ -59,14 +57,16 @@ export default function PostCard({
   const category = mapKindToCategory(kind);
   const formattedDate = date ? new Date(date).toLocaleDateString("pt-BR") : "";
 
-  // +++ 4. ENVOLVER RETORNO EM FRAGMENT (<>) +++
+  // Determina se deve mostrar o nível
+  const showLevel = (kind === 'video' || kind === 'class') && level;
+
   return (
     <>
       <article
         className="w-full relative bg-white rounded-lg overflow-hidden transition-all duration-300 cursor-pointer border border-gray-200"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={handleClick} // <-- Chama o novo handler
+        onClick={handleClick}
         style={{
           transform: isHovered ? 'scale(1.02)' : 'scale(1)',
           boxShadow: isHovered ? '0 10px 40px rgba(147, 51, 234, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
@@ -106,14 +106,23 @@ export default function PostCard({
 
             <p className="text-gray-700 mb-4 line-clamp-2">{description || ""}</p>
 
+            {/* +++ DIV DE INFOS ATUALIZADA +++ */}
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>{formattedDate}</span>
               </div>
+
+              {/* +++ SELO DE NÍVEL ADICIONADO +++ */}
+              {showLevel && (
+                <div className="flex items-center gap-1">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>{level}</span>
+                </div>
+              )}
             </div>
 
-            {/* Conteúdo Expandido */}
+            {/* Conteúdo Expandido (Hover) */}
             <div
               className="mt-4 transition-all duration-300"
               style={{
@@ -130,15 +139,13 @@ export default function PostCard({
         </div>
       </article>
 
-      {/* +++ 5. ADICIONAR O MODAL (copiado do carrossel) +++ */}
+      {/* Modal para Grupos de WhatsApp */}
       <Dialog
         open={confirmOpen}
-        onOpenChange={setConfirmOpen} // Controla o fechamento
+        onOpenChange={setConfirmOpen}
       >
         <DialogContent
-          // Impede que o clique DENTRO do modal feche ele
           onPointerDownOutside={(e) => e.preventDefault()}
-          // Impede que o clique DENTRO do modal dispare o onClick do <article>
           onClick={(e) => e.stopPropagation()}
         >
           <DialogHeader>
@@ -156,7 +163,6 @@ export default function PostCard({
             <Button
               className="rounded-lg"
               onClick={() => {
-                // Ação principal: abrir o link e fechar o modal
                 if (joinLink) {
                   window.open(joinLink, "_blank", "noopener,noreferrer");
                 }

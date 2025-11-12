@@ -1,7 +1,8 @@
 // src/userui/components/post-detail.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, MapPin } from "lucide-react";
+// +++ ÍCONE ATUALIZADO +++
+import { ArrowLeft, Calendar, Clock, MapPin, BarChart3 } from "lucide-react";
 
 import {
   getArticleByIdOrSlug,
@@ -10,6 +11,8 @@ import {
   getClassSlotById,
   type Article,
   type Event,
+  type Video, // <-- ADICIONADO
+  type ClassSlot, // <-- ADICIONADO
 } from "../../lib/api";
 
 import { Button } from "./ui/button";
@@ -17,8 +20,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { getFigmaImage } from "../figmaImages";
 
-type Kind = "article" | "video" | "event" | "class" | "group"; // <-- 'group' ADICIONADO
-type UiCategory = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos"; // <-- 'Grupos' ADICIONADO
+type Kind = "article" | "video" | "event" | "class" | "group";
+type UiCategory = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
 
 function kindToUi(kind: Kind): UiCategory {
   switch (kind) {
@@ -26,10 +29,11 @@ function kindToUi(kind: Kind): UiCategory {
     case "video": return "Vídeos";
     case "event": return "Eventos";
     case "class": return "Aulas";
-    case "group": return "Grupos"; // <-- ADICIONADO
+    case "group": return "Grupos";
   }
 }
 
+// +++ TIPO 'Unified' ATUALIZADO +++
 type Unified = {
   id: string;
   kind: Kind;
@@ -39,6 +43,7 @@ type Unified = {
   timeLabel?: string;
   duration?: string;
   location?: string;
+  levelLabel?: string; // <-- ADICIONADO
   excerpt?: string;
   fullDescription?: string;
   image: string;
@@ -70,7 +75,6 @@ export default function PostDetail() {
     async function load() {
       if (!kind || !id) return;
 
-      // Se for um grupo, não há página de detalhes, então volte.
       if (kind === 'group') {
         navigate(-1);
         return;
@@ -95,8 +99,9 @@ export default function PostDetail() {
           };
         }
 
+        // +++ BLOCO 'video' ATUALIZADO +++
         if (kind === "video") {
-          const v: any = await getVideoById(id);
+          const v: Video = await getVideoById(id); // <-- TIPO 'Video'
           const ytId = youtubeIdFromAny(v.youtubeUrl || v.url);
           unified = {
             id: v._id,
@@ -104,6 +109,7 @@ export default function PostDetail() {
             title: v.title,
             category: kindToUi(kind),
             dateLabel: v.createdAt ? new Date(v.createdAt).toLocaleDateString("pt-BR") : undefined,
+            levelLabel: v.level, // <-- ADICIONADO
             excerpt: v.description,
             fullDescription: v.description,
             image: safeImage(getFigmaImage("video", v)),
@@ -126,8 +132,9 @@ export default function PostDetail() {
           };
         }
 
+        // +++ BLOCO 'class' ATUALIZADO +++
         if (kind === "class") {
-          const c: any = await getClassSlotById(id);
+          const c: ClassSlot = await getClassSlotById(id); // <-- TIPO 'ClassSlot'
           unified = {
             id: c._id,
             kind,
@@ -136,6 +143,7 @@ export default function PostDetail() {
             dateLabel: c.dateTime ? new Date(c.dateTime).toLocaleDateString("pt-BR") : undefined,
             timeLabel: c.dateTime ? new Date(c.dateTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : undefined,
             duration: typeof c.durationMinutes === "number" ? `${c.durationMinutes} min` : undefined,
+            levelLabel: c.level, // <-- ADICIONADO
             excerpt: c.description?.trim() ? c.description.slice(0, 180) : undefined,
             fullDescription: c.description,
             image: safeImage(getFigmaImage("class", c)),
@@ -154,7 +162,7 @@ export default function PostDetail() {
     }
     load();
     return () => { alive = false; };
-  }, [kind, id, navigate]); // Adicionado 'navigate' às dependências
+  }, [kind, id, navigate]);
 
   const isEvent = item?.kind === "event";
   const isClass = item?.kind === "class";
@@ -207,6 +215,7 @@ export default function PostDetail() {
   const timeLabel = item.timeLabel || "";
   const location = item.location || "";
   const duration = item.duration || "";
+  const levelLabel = item.levelLabel || ""; // <-- ADICIONADO
   const embedSrc = item.youtubeId ? `https://www.youtube.com/embed/${item.youtubeId}` : "";
 
   return (
@@ -238,6 +247,7 @@ export default function PostDetail() {
             </div>
             <h1 className="text-white mb-4">{item.title}</h1>
 
+            {/* +++ DIV DE INFOS ATUALIZADA +++ */}
             <div className="flex flex-wrap items-center gap-4 text-white/90">
               {dateLabel && (
                 <div className="flex items-center gap-2">
@@ -261,6 +271,13 @@ export default function PostDetail() {
                 <div className="flex items-center gap-2">
                   <Clock className="w-5 h-5" />
                   <span>{duration}</span>
+                </div>
+              )}
+              {/* +++ SELO DE NÍVEL ADICIONADO +++ */}
+              {levelLabel && (
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  <span>{levelLabel}</span>
                 </div>
               )}
             </div>
@@ -315,8 +332,8 @@ export default function PostDetail() {
 
             <Button
               className={`px-6 md:px-8 py-3 rounded-lg flex items-center gap-2 mx-auto transition-colors ${isEvent
-                  ? "bg-white hover:bg-gray-50 border-2 border-green-500 text-green-600"
-                  : "bg-green-500 hover:bg-green-600 text-white"
+                ? "bg-white hover:bg-gray-50 border-2 border-green-500 text-green-600"
+                : "bg-green-500 hover:bg-green-600 text-white"
                 }`}
               onClick={() => setOpenWhats(true)}
             >
