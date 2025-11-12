@@ -18,26 +18,24 @@ const getPublishedArticles = async (req, res) => {
 
 const getArticleBySlug = async (req, res) => {
   try {
-    // Pega o :slug da URL (ex: /api/articles/como-meditar)
     const { slug } = req.params;
-
-    // Encontra o artigo que tenha o slug E esteja publicado
+    
+    // ATUALIZAÇÃO AQUI: Use .populate()
     const article = await Article.findOne({
       slug: slug,
       status: 'PUBLISHED',
-    });
+    })
+    // Popular o 'author' (quem escreveu o artigo)
+    .populate('author', 'name') 
+    // Popular o 'author' DENTRO do array 'comments'
+    .populate('comments.author', 'name'); 
 
     if (article) {
-      // Se achou, retorna o artigo
       res.status(200).json(article);
     } else {
-      // Se não achar (ou se for um 'DRAFT'), retorna 404
       res.status(404).json({ message: 'Artigo não encontrado ou não publicado.' });
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erro ao buscar artigo.' });
-  }
+  } catch (error) { /*...*/ }
 };
 
 // --- ADMIN ---
@@ -133,10 +131,48 @@ const deleteArticle = async (req, res) => {
   }
 };
 
+// @desc    Criar um novo comentário em um artigo
+// @route   POST /api/articles/:id/comments
+// @access  Private (Qualquer usuário logado)
+const createArticleComment = async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content) {
+      return res.status(400).json({ message: 'O conteúdo do comentário é obrigatório.' });
+    }
+
+    const article = await Article.findById(req.params.id);
+
+    if (article) {
+      const comment = {
+        content: content,
+        author: req.user._id, // Vem do middleware 'protect'
+      };
+
+      // Adiciona o novo comentário no início do array
+      article.comments.unshift(comment);
+
+      await article.save();
+      
+      // Popula o autor do comentário recém-criado para devolvê-lo
+      // (Opcional, mas bom para o frontend)
+      const populatedArticle = await Article.findById(article._id).populate('comments.author', 'name');
+      
+      res.status(201).json(populatedArticle.comments[0]);
+    } else {
+      res.status(404).json({ message: 'Artigo não encontrado.' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao criar comentário.' });
+  }
+};
+
 module.exports = {
   getPublishedArticles,
   getArticleBySlug,
   createArticle,
   updateArticle,
   deleteArticle,
+  createArticleComment,
 };
