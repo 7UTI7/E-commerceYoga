@@ -1,8 +1,8 @@
 // src/userui/components/post-detail.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-// +++ ÍCONE ATUALIZADO +++
-import { ArrowLeft, Calendar, Clock, MapPin, BarChart3 } from "lucide-react";
+// +++ ÍCONES ATUALIZADOS +++
+import { ArrowLeft, Calendar, Clock, MapPin, BarChart3, Star } from "lucide-react";
 
 import {
   getArticleByIdOrSlug,
@@ -11,14 +11,17 @@ import {
   getClassSlotById,
   type Article,
   type Event,
-  type Video, // <-- ADICIONADO
-  type ClassSlot, // <-- ADICIONADO
+  type Video,
+  type ClassSlot,
 } from "../../lib/api";
 
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "./ui/dialog";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { getFigmaImage } from "../figmaImages";
+
+// +++ Importa o hook do AuthContext +++
+import { useAuth } from "../../contexts/AuthContext"; // <-- ADICIONADO (verifique o caminho)
 
 type Kind = "article" | "video" | "event" | "class" | "group";
 type UiCategory = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
@@ -33,7 +36,6 @@ function kindToUi(kind: Kind): UiCategory {
   }
 }
 
-// +++ TIPO 'Unified' ATUALIZADO +++
 type Unified = {
   id: string;
   kind: Kind;
@@ -43,7 +45,7 @@ type Unified = {
   timeLabel?: string;
   duration?: string;
   location?: string;
-  levelLabel?: string; // <-- ADICIONADO
+  levelLabel?: string;
   excerpt?: string;
   fullDescription?: string;
   image: string;
@@ -56,7 +58,6 @@ function youtubeIdFromAny(url?: string): string | undefined {
   return m?.[2] || undefined;
 }
 
-// garante string sempre
 const safeImage = (src?: string) => src || "/assets/cover-default.jpg";
 
 export default function PostDetail() {
@@ -65,6 +66,9 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [item, setItem] = useState<Unified | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // +++ Pega os dados do AuthContext +++
+  const { user, favoriteVideoIds, toggleFavorite } = useAuth(); //
 
   const [openWhats, setOpenWhats] = useState(false);
   const whatsappHref =
@@ -88,7 +92,7 @@ export default function PostDetail() {
         if (kind === "article") {
           const a: Article = await getArticleByIdOrSlug(id);
           unified = {
-            id: a._id,
+            id: a._id, // <-- Corrigido de a._id para a._id (estava certo)
             kind,
             title: a.title,
             category: kindToUi(kind),
@@ -99,9 +103,8 @@ export default function PostDetail() {
           };
         }
 
-        // +++ BLOCO 'video' ATUALIZADO +++
         if (kind === "video") {
-          const v: Video = await getVideoById(id); // <-- TIPO 'Video'
+          const v: Video = await getVideoById(id);
           const ytId = youtubeIdFromAny(v.youtubeUrl || v.url);
           unified = {
             id: v._id,
@@ -109,7 +112,7 @@ export default function PostDetail() {
             title: v.title,
             category: kindToUi(kind),
             dateLabel: v.createdAt ? new Date(v.createdAt).toLocaleDateString("pt-BR") : undefined,
-            levelLabel: v.level, // <-- ADICIONADO
+            levelLabel: v.level,
             excerpt: v.description,
             fullDescription: v.description,
             image: safeImage(getFigmaImage("video", v)),
@@ -132,9 +135,8 @@ export default function PostDetail() {
           };
         }
 
-        // +++ BLOCO 'class' ATUALIZADO +++
         if (kind === "class") {
-          const c: ClassSlot = await getClassSlotById(id); // <-- TIPO 'ClassSlot'
+          const c: ClassSlot = await getClassSlotById(id);
           unified = {
             id: c._id,
             kind,
@@ -143,7 +145,7 @@ export default function PostDetail() {
             dateLabel: c.dateTime ? new Date(c.dateTime).toLocaleDateString("pt-BR") : undefined,
             timeLabel: c.dateTime ? new Date(c.dateTime).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : undefined,
             duration: typeof c.durationMinutes === "number" ? `${c.durationMinutes} min` : undefined,
-            levelLabel: c.level, // <-- ADICIONADO
+            levelLabel: c.level,
             excerpt: c.description?.trim() ? c.description.slice(0, 180) : undefined,
             fullDescription: c.description,
             image: safeImage(getFigmaImage("class", c)),
@@ -163,6 +165,20 @@ export default function PostDetail() {
     load();
     return () => { alive = false; };
   }, [kind, id, navigate]);
+
+  // +++ LÓGICA DE FAVORITOS ADICIONADA +++
+  const isFavorited = useMemo(() => {
+    if (!item || item.kind !== 'video') return false;
+    return favoriteVideoIds.includes(item.id); //
+  }, [item, favoriteVideoIds]);
+
+  const showFavoriteStar = item?.kind === 'video' && user; //
+
+  const handleFavoriteClick = () => {
+    if (item && item.kind === 'video') {
+      toggleFavorite(item.id); //
+    }
+  };
 
   const isEvent = item?.kind === "event";
   const isClass = item?.kind === "class";
@@ -215,7 +231,7 @@ export default function PostDetail() {
   const timeLabel = item.timeLabel || "";
   const location = item.location || "";
   const duration = item.duration || "";
-  const levelLabel = item.levelLabel || ""; // <-- ADICIONADO
+  const levelLabel = item.levelLabel || "";
   const embedSrc = item.youtubeId ? `https://www.youtube.com/embed/${item.youtubeId}` : "";
 
   return (
@@ -240,14 +256,28 @@ export default function PostDetail() {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
+
+        {/* +++ BOTÃO DE ESTRELA ADICIONADO +++ */}
+        {showFavoriteStar && (
+          <button
+            onClick={handleFavoriteClick}
+            className="absolute top-6 right-8 p-2 bg-black/30 backdrop-blur-sm rounded-full text-white hover:bg-black/50 transition-colors z-20"
+            aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+          >
+            <Star className={`w-6 h-6 transition-colors ${isFavorited
+                ? 'fill-yellow-400 stroke-yellow-400'
+                : 'fill-transparent stroke-white'
+              }`} />
+          </button>
+        )}
+
+        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white z-10">
           <div className="mx-auto max-w-5xl">
             <div className="inline-block bg-purple-600 text-white px-4 py-1 rounded-full text-sm mb-4">
               {categoryLabel}
             </div>
             <h1 className="text-white mb-4">{item.title}</h1>
 
-            {/* +++ DIV DE INFOS ATUALIZADA +++ */}
             <div className="flex flex-wrap items-center gap-4 text-white/90">
               {dateLabel && (
                 <div className="flex items-center gap-2">
@@ -273,7 +303,6 @@ export default function PostDetail() {
                   <span>{duration}</span>
                 </div>
               )}
-              {/* +++ SELO DE NÍVEL ADICIONADO +++ */}
               {levelLabel && (
                 <div className="flex items-center gap-2">
                   <BarChart3 className="w-5 h-5" />

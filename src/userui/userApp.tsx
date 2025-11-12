@@ -5,8 +5,9 @@ import EventsCarousel from "./components/EventCarousel";
 import PostsSection from "./components/PostsSection";
 import FooterPublic from "../components/footer";
 
-// 🔹 Tipo compartilhado com CategoryNav/PostsSection
-export type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
+// 🔹 Tipo compartilhado atualizado para incluir "Favoritos"
+export type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos" | "Favoritos";
+
 export default function UserApp() {
   const [activeCategory, setActiveCategory] = useState<UiCategory>("Recentes");
   const showCarousel = activeCategory === "Recentes" || activeCategory === "Eventos";

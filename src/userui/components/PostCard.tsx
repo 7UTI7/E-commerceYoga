@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// +++ ÍCONE ATUALIZADO +++
-import { Calendar, Tag, BarChart3 } from "lucide-react"; // <-- 'BarChart3' (ou 'Activity') para o nível
+// Ícones
+import { Calendar, Tag, BarChart3, Star } from "lucide-react";
 
 // (Importações do Modal)
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "./ui/button";
 
-// +++ INTERFACE ATUALIZADA +++
+// Hook do AuthContext
+import { useAuth } from "../../contexts/AuthContext"; // (verifique o caminho)
+
 export interface PostCardProps {
   id: string;
   kind: "article" | "video" | "event" | "class" | "group";
@@ -17,7 +19,9 @@ export interface PostCardProps {
   image?: string;
   date?: string;
   joinLink?: string;
-  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; // <-- ADICIONADO
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
+  isFavorited: boolean;
+  onToggleFavorite: (videoId: string) => void;
 }
 
 function mapKindToCategory(kind: PostCardProps["kind"]) {
@@ -39,11 +43,15 @@ export default function PostCard({
   image,
   date,
   joinLink,
-  level // <-- ADICIONADO
+  level,
+  isFavorited,
+  onToggleFavorite
 }: PostCardProps) {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { user } = useAuth(); //
 
   const handleClick = (e: React.MouseEvent) => {
     if (kind === 'group' && joinLink) {
@@ -54,11 +62,16 @@ export default function PostCard({
     }
   };
 
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFavorite(id); //
+  };
+
   const category = mapKindToCategory(kind);
   const formattedDate = date ? new Date(date).toLocaleDateString("pt-BR") : "";
 
-  // Determina se deve mostrar o nível
   const showLevel = (kind === 'video' || kind === 'class') && level;
+  const showFavoriteStar = kind === 'video' && user; //
 
   return (
     <>
@@ -75,7 +88,7 @@ export default function PostCard({
       >
         <div className="flex gap-4">
           {/* Imagem */}
-          <div className="w-48 h-48 flex-shrink-0 overflow-hidden">
+          <div className="w-48 h-48 flex-shrink-0 overflow-hidden"> {/* REMOVIDO 'relative' */}
             {image ? (
               <img
                 src={image}
@@ -90,30 +103,51 @@ export default function PostCard({
                 Sem imagem
               </div>
             )}
+
+            {/* BOTÃO DE ESTRELA FOI MOVIDO DAQUI */}
+
           </div>
 
           {/* Conteúdo */}
           <div className="flex-1 p-6">
+            {/* +++ ESTA É A SEÇÃO ATUALIZADA +++ */}
             <div className="flex items-start justify-between mb-3">
               <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 flex-1 pr-4">
                 {title}
               </h3>
-              <div className="flex items-center gap-1 text-purple-700 text-sm ml-4 flex-shrink-0">
-                <Tag className="w-4 h-4" />
-                <span>{category}</span>
+
+              {/* Contêiner para Categoria e Estrela */}
+              <div className="flex items-center gap-2 text-purple-700 text-sm ml-4 flex-shrink-0">
+                <div className="flex items-center gap-1">
+                  <Tag className="w-4 h-4" />
+                  <span>{category}</span>
+                </div>
+
+                {/* ESTRELA MOVIDA PARA CÁ */}
+                {showFavoriteStar && (
+                  <button
+                    onClick={handleFavoriteClick}
+                    className="p-0.5 rounded-full text-gray-400 hover:text-yellow-500"
+                    aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                  >
+                    <Star className={`w-5 h-5 transition-colors ${isFavorited
+                        ? 'fill-yellow-400 stroke-yellow-400 text-yellow-400'
+                        : 'fill-transparent stroke-currentColor'
+                      }`} />
+                  </button>
+                )}
               </div>
             </div>
+            {/* +++ FIM DA SEÇÃO ATUALIZADA +++ */}
 
             <p className="text-gray-700 mb-4 line-clamp-2">{description || ""}</p>
 
-            {/* +++ DIV DE INFOS ATUALIZADA +++ */}
+            {/* Infos (com Nível) */}
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>{formattedDate}</span>
               </div>
-
-              {/* +++ SELO DE NÍVEL ADICIONADO +++ */}
               {showLevel && (
                 <div className="flex items-center gap-1">
                   <BarChart3 className="w-4 h-4" />

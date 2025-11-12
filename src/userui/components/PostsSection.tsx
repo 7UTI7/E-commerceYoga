@@ -6,6 +6,7 @@ import {
   getEvents,
   getClassSlots,
   getWhatsAppGroups,
+  getMyFavoriteVideos, // <-- ADICIONADO
   type Article,
   type Video,
   type Event,
@@ -14,12 +15,16 @@ import {
 } from "../../lib/api";
 import { getFigmaImage } from "../figmaImages";
 import { Clock } from "lucide-react";
+// +++ Importa o hook do AuthContext +++
+import { useAuth } from "../../contexts/AuthContext"; // <-- ADICIONADO (verifique o caminho)
 
 // Tipos e Interfaces
-type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
-type DataKey = "recent" | "article" | "video" | "event" | "class" | "group";
+// +++ ATUALIZADO (com Favoritos) +++
+type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos" | "Favoritos";
+// +++ ATUALIZADO (com favorites) +++
+type DataKey = "recent" | "article" | "video" | "event" | "class" | "group" | "favorites";
 
-// +++ ATUALIZADO (Interface Item) +++
+// +++ ATUALIZADO (com level) +++
 interface Item {
   id: string;
   kind: "article" | "video" | "event" | "class" | "group";
@@ -28,10 +33,11 @@ interface Item {
   image?: string;
   date?: string;
   joinLink?: string;
-  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; // <-- ADICIONADO
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; // <-- ADICIONADO (da etapa anterior)
 }
 
 // Funções Helper
+// +++ ATUALIZADO (com Favoritos) +++
 function uiToKey(ui?: UiCategory): DataKey {
   switch (ui) {
     case "Artigos": return "article";
@@ -39,6 +45,7 @@ function uiToKey(ui?: UiCategory): DataKey {
     case "Eventos": return "event";
     case "Aulas": return "class";
     case "Grupos": return "group";
+    case "Favoritos": return "favorites"; // <-- ADICIONADO
     default: return "recent";
   }
 }
@@ -59,6 +66,9 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
   const [err, setErr] = useState<string | null>(null);
   const selectedKey = useMemo<DataKey>(() => uiToKey(activeCategory ?? "Recentes"), [activeCategory]);
 
+  // +++ Pega os dados do AuthContext +++
+  const { user, favoriteVideoIds, toggleFavorite } = useAuth(); //
+
   // State da Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const postsPerPage = 5;
@@ -72,93 +82,113 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
       try {
         const items: Item[] = [];
 
-        if (selectedKey === "article" || selectedKey === "recent") {
-          const articles = await getPublishedArticles();
-          items.push(
-            ...articles.map((a: Article): Item => ({
-              id: a.slug,
-              kind: "article",
-              title: a.title,
-              description: a.content?.trim()
-                ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
-                : undefined,
-              image: a.coverImage || getFigmaImage("article", a),
-              date: a.createdAt ?? a.updatedAt,
-            }))
-          );
-        }
+        // +++ LÓGICA ATUALIZADA PARA BUSCAR FAVORITOS +++
+        if (selectedKey === "favorites") {
+          if (!user) { //
+            setErr("Você precisa estar logado para ver seus favoritos.");
+            setPosts([]);
+          } else {
+            // Chama a nova função da API
+            const videos = await getMyFavoriteVideos(); //
+            items.push(
+              ...videos.map((v: Video): Item => ({
+                id: v._id,
+                kind: "video",
+                title: v.title,
+                description: v.description,
+                image: getFigmaImage("video", v),
+                date: v.createdAt ?? v.updatedAt,
+                level: v.level, // Passa o nível (da etapa anterior)
+              }))
+            );
+          }
+        } else {
+          // --- Lógica de busca existente ---
+          if (selectedKey === "article" || selectedKey === "recent") {
+            const articles = await getPublishedArticles();
+            items.push(
+              ...articles.map((a: Article): Item => ({
+                id: a.slug,
+                kind: "article",
+                title: a.title,
+                description: a.content?.trim()
+                  ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
+                  : undefined,
+                image: a.coverImage || getFigmaImage("article", a),
+                date: a.createdAt ?? a.updatedAt,
+              }))
+            );
+          }
 
-        if (selectedKey === "video" || selectedKey === "recent") {
-          const videos = await getVideos();
-          items.push(
-            // +++ ATUALIZADO (map de Vídeos) +++
-            ...videos.map((v: Video): Item => ({
-              id: v._id,
-              kind: "video",
-              title: v.title,
-              description: v.description,
-              image: getFigmaImage("video", v),
-              date: v.createdAt ?? v.updatedAt,
-              level: v.level, // <-- ADICIONADO
-            }))
-          );
-        }
+          if (selectedKey === "video" || selectedKey === "recent") {
+            const videos = await getVideos();
+            items.push(
+              ...videos.map((v: Video): Item => ({
+                id: v._id,
+                kind: "video",
+                title: v.title,
+                description: v.description,
+                image: getFigmaImage("video", v),
+                date: v.createdAt ?? v.updatedAt,
+                level: v.level, // <-- ADICIONADO (da etapa anterior)
+              }))
+            );
+          }
 
-        if (selectedKey === "event" || selectedKey === "recent") {
-          const events = await getEvents();
-          items.push(
-            ...events.map((e: Event): Item => ({
-              id: e._id,
-              kind: "event",
-              title: e.title,
-              description: e.description,
-              image: getFigmaImage("event", e),
-              date: e.date ?? e.createdAt ?? e.updatedAt,
-            }))
-          );
-        }
+          if (selectedKey === "event" || selectedKey === "recent") {
+            const events = await getEvents();
+            items.push(
+              ...events.map((e: Event): Item => ({
+                id: e._id,
+                kind: "event",
+                title: e.title,
+                description: e.description,
+                image: getFigmaImage("event", e),
+                date: e.date ?? e.createdAt ?? e.updatedAt,
+              }))
+            );
+          }
 
-        if (selectedKey === "class" || selectedKey === "recent") {
-          const classes = await getClassSlots();
-          items.push(
-            // +++ ATUALIZADO (map de Aulas) +++
-            ...classes.map((c: ClassSlot): Item => {
-              const hasNewShape = !!c.dateTime || !!c.title || !!c.description;
-              const title = hasNewShape ? (c.title || "Aula de Yoga") : (c.modality ? `Aula de ${c.modality}` : "Aula de Yoga");
-              const desc = hasNewShape
-                ? (c.description && c.description.trim().length > 0
-                  ? c.description
-                  : `${fmtISO(c.dateTime)}${c.durationMinutes ? ` • ${c.durationMinutes} min` : ""}${c.maxStudents ? ` • ${c.maxStudents} vagas` : ""}`)
-                : `${weekdayName(Number(c.weekday ?? 0))} • ${c.time ?? ""}`;
-              const date = hasNewShape ? (c.dateTime ?? c.createdAt ?? c.updatedAt) : (c.createdAt ?? c.updatedAt);
-              return {
-                id: c._id,
-                kind: "class",
-                title,
-                description: desc,
-                image: getFigmaImage("class", c),
-                date,
-                level: c.level, // <-- ADICIONADO
-              };
-            })
-          );
-        }
+          if (selectedKey === "class" || selectedKey === "recent") {
+            const classes = await getClassSlots();
+            items.push(
+              ...classes.map((c: ClassSlot): Item => {
+                const hasNewShape = !!c.dateTime || !!c.title || !!c.description;
+                const title = hasNewShape ? (c.title || "Aula de Yoga") : (c.modality ? `Aula de ${c.modality}` : "Aula de Yoga");
+                const desc = hasNewShape
+                  ? (c.description && c.description.trim().length > 0
+                    ? c.description
+                    : `${fmtISO(c.dateTime)}${c.durationMinutes ? ` • ${c.durationMinutes} min` : ""}${c.maxStudents ? ` • ${c.maxStudents} vagas` : ""}`)
+                  : `${weekdayName(Number(c.weekday ?? 0))} • ${c.time ?? ""}`;
+                const date = hasNewShape ? (c.dateTime ?? c.createdAt ?? c.updatedAt) : (c.createdAt ?? c.updatedAt);
+                return {
+                  id: c._id,
+                  kind: "class",
+                  title,
+                  description: desc,
+                  image: getFigmaImage("class", c),
+                  date,
+                  level: c.level, // <-- ADICIONADO (da etapa anterior)
+                };
+              })
+            );
+          }
 
-        if (selectedKey === "group" || selectedKey === "recent") {
-          const groups = await getWhatsAppGroups();
-          items.push(
-            ...groups.map((g: WhatsAppGroup): Item => ({
-              id: g._id,
-              kind: "group",
-              title: g.name,
-              description: g.description,
-              image: getFigmaImage("group", g),
-              date: g.createdAt ?? g.updatedAt,
-              joinLink: g.joinLink,
-            }))
-          );
+          if (selectedKey === "group" || selectedKey === "recent") {
+            const groups = await getWhatsAppGroups();
+            items.push(
+              ...groups.map((g: WhatsAppGroup): Item => ({
+                id: g._id,
+                kind: "group",
+                title: g.name,
+                description: g.description,
+                image: getFigmaImage("group", g),
+                date: g.createdAt ?? g.updatedAt,
+                joinLink: g.joinLink,
+              }))
+            );
+          }
         }
-
 
         // Ordenar todos os itens por data, mais recente primeiro
         items.sort((a, b) => {
@@ -177,7 +207,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
     }
     fetchData();
     return () => { alive = false; };
-  }, [selectedKey]);
+  }, [selectedKey, user]); // <-- 'user' adicionado como dependência
 
   // Efeito para resetar a paginação quando a categoria muda
   useMemo(() => {
@@ -211,7 +241,6 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
           <>
             {/* Lista de Posts */}
             <div className="space-y-6 mb-8">
-              {/* +++ ATUALIZADO (render do PostCard) +++ */}
               {currentPosts.map((item) => (
                 <PostCard
                   key={`${item.kind}-${item.id}`}
@@ -222,7 +251,13 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
                   image={item.image}
                   date={item.date}
                   joinLink={item.joinLink}
-                  level={item.level} // <-- ADICIONADO
+                  level={item.level} // <-- Passa o Nível (da etapa anterior)
+
+                  // +++ NOVAS PROPS DE FAVORITOS +++
+                  // Compara a lista de favoritos do contexto com o ID do item
+                  isFavorited={item.kind === 'video' && favoriteVideoIds.includes(item.id)}
+                  // Passa a função de 'toggle' do contexto
+                  onToggleFavorite={toggleFavorite}
                 />
               ))}
             </div>

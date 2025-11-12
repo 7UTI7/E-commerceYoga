@@ -34,7 +34,6 @@ export type Video = {
   updatedAt: string
   youtubeUrl?: string
   category?: string
-  // NOVO CAMPO
   level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
 }
 
@@ -55,13 +54,12 @@ export type ClassSlot = {
   dateTime: string
   durationMinutes?: number
   maxStudents?: number
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
   weekday?: number
   time?: string
   modality?: string
   createdAt: string
   updatedAt: string
-  // NOVO CAMPO
-  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
 }
 
 export type User = {
@@ -74,8 +72,6 @@ export type User = {
   updatedAt?: string
 }
 
-// --- AUTH ---
-
 export async function register(name: string, email: string, password: string) {
   const { data } = await api.post("/api/auth/register", { name, email, password })
   return data
@@ -86,23 +82,6 @@ export async function login(email: string, password: string) {
   return data
 }
 
-export async function getMe() {
-  const { data } = await api.get<User>("/api/auth/me")
-  return data
-}
-
-export async function updateMe(payload: { name?: string; phone?: string; email?: string }) {
-  const { data } = await api.put<User>("/api/auth/me", payload)
-  return data
-}
-
-export async function updatePassword(payload: { oldPassword: string; newPassword: string }) {
-  const { data } = await api.put(`/api/auth/updatepassword`, payload)
-  return data
-}
-
-// --- ARTICLES ---
-
 export async function getPublishedArticles() {
   const { data } = await api.get<Article[]>("/api/articles")
   return data
@@ -110,6 +89,21 @@ export async function getPublishedArticles() {
 
 export async function getArticles() {
   return getPublishedArticles()
+}
+
+export async function getVideos() {
+  const { data } = await api.get<Video[]>("/api/videos")
+  return data
+}
+
+export async function getEvents() {
+  const { data } = await api.get<Event[]>("/api/events")
+  return data
+}
+
+export async function getClassSlots() {
+  const { data } = await api.get<ClassSlot[]>("/api/class-slots")
+  return data
 }
 
 export async function getArticleById(id: string) {
@@ -140,6 +134,22 @@ export async function getArticleByIdOrSlug(key: string) {
   }
 }
 
+
+export async function getVideoById(id: string) {
+  const { data } = await api.get<Video>(`/api/videos/${id}`)
+  return data
+}
+
+export async function getEventById(id: string) {
+  const { data } = await api.get<Event>(`/api/events/${id}`)
+  return data
+}
+
+export async function getClassSlotById(id: string) {
+  const { data } = await api.get<ClassSlot>(`/api/class-slots/${id}`)
+  return data
+}
+
 export async function createArticle(payload: Partial<Article>) {
   const { data } = await api.post<Article>("/api/articles", payload)
   return data
@@ -155,19 +165,6 @@ export async function deleteArticle(id: string) {
   return data
 }
 
-// --- VIDEOS ---
-
-export async function getVideos() {
-  const { data } = await api.get<Video[]>("/api/videos")
-  return data
-}
-
-export async function getVideoById(id: string) {
-  const { data } = await api.get<Video>(`/api/videos/${id}`)
-  return data
-}
-
-// (Como Video foi atualizado, Partial<Video> já inclui 'level')
 export async function createVideo(payload: Partial<Video>) {
   const { data } = await api.post<Video>("/api/videos", payload)
   return data
@@ -183,16 +180,11 @@ export async function deleteVideo(id: string) {
   return data
 }
 
-// --- EVENTS ---
-
-export async function getEvents() {
-  const { data } = await api.get<Event[]>("/api/events")
-  return data
-}
-
-export async function getEventById(id: string) {
-  const { data } = await api.get<Event>(`/api/events/${id}`)
-  return data
+// +++ FUNÇÃO ADICIONADA +++
+export async function toggleFavoriteVideo(videoId: string) {
+  // O backend retorna { message: "..." }
+  const { data } = await api.post(`/api/videos/${videoId}/favorite`);
+  return data;
 }
 
 export async function createEvent(payload: Partial<Event>) {
@@ -210,26 +202,13 @@ export async function deleteEvent(id: string) {
   return data
 }
 
-// --- CLASS SLOTS (AULAS) ---
-
-export async function getClassSlots() {
-  const { data } = await api.get<ClassSlot[]>("/api/class-slots")
-  return data
-}
-
-export async function getClassSlotById(id: string) {
-  const { data } = await api.get<ClassSlot>(`/api/class-slots/${id}`)
-  return data
-}
-
-// Atualizado para incluir level opcional no payload
 export async function createClassSlot(payload: {
   title: string
   description?: string
   dateTime: string
   durationMinutes?: number
   maxStudents?: number
-  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; // NOVO
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
 }) {
   const { data } = await api.post("/api/class-slots", payload)
   return data
@@ -245,8 +224,37 @@ export async function deleteClassSlot(id: string) {
   return data
 }
 
-// --- WHATSAPP GROUPS ---
+export async function getMe() {
+  const { data } = await api.get<User>("/api/auth/me")
+  return data
+}
 
+export async function updateMe(payload: { name?: string; phone?: string; email?: string }) {
+  const { data } = await api.put<User>("/api/auth/me", payload)
+  return data
+}
+
+export async function updatePassword(payload: { oldPassword: string; newPassword: string }) {
+  const { data } = await api.put(`/api/auth/updatepassword`, payload)
+  return data
+}
+
+// +++ FUNÇÃO ADICIONADA +++
+export async function getMyFavoriteVideos() {
+  // O backend retorna um array de objetos Video completos
+  const { data } = await api.get<Video[]>("/api/auth/me/favorites");
+  return data;
+}
+
+export function parseApiError(err: any): string {
+  if (err?.response?.data?.message) return err.response.data.message
+  if (err?.message) return err.message
+  return "Erro inesperado. Tente novamente."
+}
+
+export default api
+
+// (O código dos Grupos de WhatsApp permanece o mesmo)
 export type WhatsAppGroup = {
   _id: string;
   name: string;
@@ -281,13 +289,3 @@ export async function deleteWhatsAppGroup(id: string) {
   const { data } = await api.delete(`/api/whatsapp-groups/${id}`);
   return data;
 }
-
-// --- UTIL ---
-
-export function parseApiError(err: any): string {
-  if (err?.response?.data?.message) return err.response.data.message
-  if (err?.message) return err.message
-  return "Erro inesperado. Tente novamente."
-}
-
-export default api
