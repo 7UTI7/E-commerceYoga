@@ -21,15 +21,17 @@ const getVideos = async (req, res) => {
 // @access  Public
 const getVideoById = async (req, res) => {
   try {
-    const video = await Video.findById(req.params.id);
+    // ATUALIZAÇÃO AQUI: Use .populate()
+    const video = await Video.findById(req.params.id)
+      .populate('author', 'name')
+      .populate('comments.author', 'name');
+
     if (video) {
       res.status(200).json(video);
     } else {
       res.status(404).json({ message: 'Vídeo não encontrado.' });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Erro ao buscar vídeo.' });
-  }
+  } catch (error) { /*...*/ }
 };
 
 // --- ROTAS DE ADMIN ---
@@ -138,6 +140,36 @@ const toggleFavorite = async (req, res) => {
   }
 };
 
+const createVideoComment = async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content) {
+      return res.status(400).json({ message: 'O conteúdo do comentário é obrigatório.' });
+    }
+
+    const video = await Video.findById(req.params.id);
+
+    if (video) {
+      const comment = {
+        content: content,
+        author: req.user._id, // Vem do middleware 'protect'
+      };
+
+      video.comments.unshift(comment);
+      await video.save();
+      
+      const populatedVideo = await Video.findById(video._id).populate('comments.author', 'name');
+      
+      res.status(201).json(populatedVideo.comments[0]);
+    } else {
+      res.status(404).json({ message: 'Vídeo não encontrado.' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao criar comentário.' });
+  }
+};
+
 module.exports = {
   getVideos,
   getVideoById,
@@ -145,4 +177,5 @@ module.exports = {
   updateVideo,
   deleteVideo,
   toggleFavorite,
+  createVideoComment,
 };

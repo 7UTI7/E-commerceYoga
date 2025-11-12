@@ -1,5 +1,20 @@
 const mongoose = require('mongoose');
 
+const commentSchema = new mongoose.Schema(
+  {
+    content: {
+      type: String,
+      required: true,
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User',
+    },
+  },
+  { timestamps: true }
+);
+
 const videoSchema = new mongoose.Schema(
   {
     title: {
@@ -32,6 +47,7 @@ const videoSchema = new mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    comments: [commentSchema], // Array de comentários embutidos
   },
   {
     timestamps: true,

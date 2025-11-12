@@ -2,6 +2,21 @@ const mongoose = require('mongoose');
 const slugify = require('slugify');
 const crypto = require('crypto');
 
+const commentSchema = new mongoose.Schema(
+  {
+    content: {
+      type: String,
+      required: true,
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'User', 
+    },
+  },
+  { timestamps: true }
+);
+
 const articleSchema = new mongoose.Schema(
   {
     title: {
@@ -30,6 +45,7 @@ const articleSchema = new mongoose.Schema(
       enum: ['DRAFT', 'PUBLISHED'], // Só pode ser 'Rascunho' ou 'Publicado'
       default: 'DRAFT', // Por padrão, começa como rascunho
     },
+    comments: [commentSchema], // Array de comentários embutidos
   },
   {
     timestamps: true, // Adiciona 'createdAt' e 'updatedAt'
