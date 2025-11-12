@@ -26,6 +26,11 @@ const classSlotSchema = new mongoose.Schema(
       required: [true, 'O limite de vagas é obrigatório.'],
       default: 10,
     },
+    level: {
+      type: String,
+      enum: ['Iniciante', 'Intermediário', 'Avançado', 'Todos'],
+      default: 'Todos',
+    },
     // Referência ao Admin (professora)
     author: {
       type: mongoose.Schema.Types.ObjectId,

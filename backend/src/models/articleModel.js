@@ -7,7 +7,7 @@ const articleSchema = new mongoose.Schema(
     title: {
       type: String,
       required: [true, 'O título é obrigatório.'],
-    },
+        },
     // slug é a URL amigável, ex: "como-meditar-em-5-minutos"
     slug: {
       type: String,
@@ -40,11 +40,11 @@ articleSchema.pre('save', function (next) {
   // Rode APENAS se o 'title' foi modificado
   // OU se for um documento novo (para o caso de updates onde o título não muda)
   if (this.isModified('title') || this.isNew) {
-
+    
     // 1. Gera o slug base
-    const baseSlug = slugify(this.title, {
-      lower: true,
-      strict: true,
+    const baseSlug = slugify(this.title, { 
+      lower: true,  
+      strict: true, 
     });
 
     // 2. Gera 4 caracteres aleatórios (ex: 'a1b2')

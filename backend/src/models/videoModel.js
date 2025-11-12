@@ -21,6 +21,11 @@ const videoSchema = new mongoose.Schema(
       required: [true, 'A categoria é obrigatória.'],
       default: 'Geral',
     },
+    level: {
+      type: String,
+      enum: ['Iniciante', 'Intermediário', 'Avançado', 'Todos'],
+      default: 'Todos',
+    },
     // Referência ao Admin que fez o upload
     author: {
       type: mongoose.Schema.Types.ObjectId,
