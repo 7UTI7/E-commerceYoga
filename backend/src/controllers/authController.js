@@ -222,10 +222,34 @@ const updatePassword = async (req, res) => {
   }
 };
 
+// NOVO: Função de Listar Favoritos
+// @desc    Buscar os vídeos favoritos do usuário logado
+// @route   GET /api/auth/me/favorites
+// @access  Private (Qualquer usuário logado)
+const getMyFavorites = async (req, res) => {
+  try {
+    // 1. Busca o usuário E usa .populate()
+    // .populate('favorites') diz ao Mongoose: "pegue os IDs no array 'favorites'
+    // e substitua-os pelos documentos de vídeo completos"
+    const user = await User.findById(req.user._id).populate('favorites');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Usuário não encontrado.' });
+    }
+
+    // 2. Retorna apenas a lista de vídeos populados
+    res.status(200).json(user.favorites);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar favoritos.' });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
   updateMe,
-  updatePassword
+  updatePassword,
+  getMyFavorites,
 };

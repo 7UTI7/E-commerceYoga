@@ -39,6 +39,12 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false, // O usuário começa como NÃO verificado
     },
+    favorites: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Video', // Faz referência ao nosso 'videoModel'
+      },
+    ],
   },
   {
     // Adiciona campos 'createdAt' e 'updatedAt' automaticamente

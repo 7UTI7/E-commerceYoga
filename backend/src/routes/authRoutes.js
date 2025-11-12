@@ -8,6 +8,7 @@ const {
   getMe,        
   updateMe,
   updatePassword,
+  getMyFavorites,
 } = require('../controllers/authController');
 
 // Rota de Registro
@@ -23,5 +24,6 @@ router.post('/login', loginUser);
 router.get('/me', protect, getMe);
 router.put('/me', protect, updateMe);
 router.put('/updatepassword', protect, updatePassword);
+router.get('/me/favorites', protect, getMyFavorites);
 
 module.exports = router;

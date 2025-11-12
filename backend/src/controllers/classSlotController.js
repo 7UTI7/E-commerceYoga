@@ -41,7 +41,7 @@ const getClassSlotById = async (req, res) => {
 // @access  Private/Admin
 const createClassSlot = async (req, res) => {
   try {
-    const { title, description, dateTime, durationMinutes, maxStudents } = req.body;
+    const { title, description, dateTime, durationMinutes, maxStudents, level } = req.body;
 
     const slot = new ClassSlot({
       title,
@@ -49,6 +49,7 @@ const createClassSlot = async (req, res) => {
       dateTime,
       durationMinutes,
       maxStudents,
+      level,
       author: req.user._id, // Vem do middleware 'protect'
     });
 
@@ -68,7 +69,7 @@ const createClassSlot = async (req, res) => {
 // @access  Private/Admin
 const updateClassSlot = async (req, res) => {
   try {
-    const { title, description, dateTime, durationMinutes, maxStudents } = req.body;
+    const { title, description, dateTime, durationMinutes, maxStudents, level } = req.body;
     const slot = await ClassSlot.findById(req.params.id);
 
     if (slot) {
@@ -82,6 +83,7 @@ const updateClassSlot = async (req, res) => {
       slot.dateTime = dateTime || slot.dateTime;
       slot.durationMinutes = durationMinutes || slot.durationMinutes;
       slot.maxStudents = maxStudents || slot.maxStudents;
+      slot.level = level || slot.level;
 
       const updatedSlot = await slot.save();
       res.status(200).json(updatedSlot);
