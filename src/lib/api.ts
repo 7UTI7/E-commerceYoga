@@ -239,3 +239,40 @@ export function parseApiError(err: any): string {
 }
 
 export default api
+
+// +++ INÍCIO DAS ADIÇÕES +++
+
+export type WhatsAppGroup = {
+  _id: string;
+  name: string;
+  description?: string;
+  joinLink: string;
+  author?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function getWhatsAppGroups() {
+  const { data } = await api.get<WhatsAppGroup[]>("/api/whatsapp-groups");
+  return data;
+}
+
+export async function getWhatsAppGroupById(id: string) {
+  const { data } = await api.get<WhatsAppGroup>(`/api/whatsapp-groups/${id}`);
+  return data;
+}
+
+export async function createWhatsAppGroup(payload: Partial<WhatsAppGroup>) {
+  const { data } = await api.post<WhatsAppGroup>("/api/whatsapp-groups", payload);
+  return data;
+}
+
+export async function updateWhatsAppGroup(id: string, payload: Partial<WhatsAppGroup>) {
+  const { data } = await api.put<WhatsAppGroup>(`/api/whatsapp-groups/${id}`, payload);
+  return data;
+}
+
+export async function deleteWhatsAppGroup(id: string) {
+  const { data } = await api.delete(`/api/whatsapp-groups/${id}`);
+  return data;
+}

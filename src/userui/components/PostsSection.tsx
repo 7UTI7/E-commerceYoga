@@ -5,34 +5,38 @@ import {
   getVideos,
   getEvents,
   getClassSlots,
+  getWhatsAppGroups, // <-- ADICIONADO
   type Article,
   type Video,
   type Event,
   type ClassSlot,
-} from "../../lib/api"; // Verifique se este caminho está correto para seu projeto
-import { getFigmaImage } from "../figmaImages"; // Verifique se este caminho está correto
+  type WhatsAppGroup, // <-- ADICIONADO
+} from "../../lib/api";
+import { getFigmaImage } from "../figmaImages";
 import { Clock } from "lucide-react";
 
 // Tipos e Interfaces
-type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas";
-type DataKey = "recent" | "article" | "video" | "event" | "class";
+type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos"; // <-- 'Grupos' ADICIONADO
+type DataKey = "recent" | "article" | "video" | "event" | "class" | "group"; // <-- 'group' ADICIONADO
 
 interface Item {
   id: string;
-  kind: "article" | "video" | "event" | "class";
+  kind: "article" | "video" | "event" | "class" | "group"; // <-- 'group' ADICIONADO
   title: string;
   description?: string;
   image?: string;
   date?: string;
+  joinLink?: string; // <-- ADICIONADO
 }
 
-// Funções Helper (dentro do arquivo ou importadas)
+// Funções Helper
 function uiToKey(ui?: UiCategory): DataKey {
   switch (ui) {
     case "Artigos": return "article";
     case "Vídeos": return "video";
     case "Eventos": return "event";
     case "Aulas": return "class";
+    case "Grupos": return "group"; // <-- ADICIONADO
     default: return "recent";
   }
 }
@@ -42,7 +46,7 @@ const weekdayName = (i: number) => ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "S
 function fmtISO(iso?: string) {
   if (!iso) return "";
   const d = new Date(iso);
-  return d.toLocaleString(); // Ajuste o formato da data como preferir
+  return d.toLocaleString();
 }
 
 
@@ -55,7 +59,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
 
   // State da Paginação
   const [currentPage, setCurrentPage] = useState(1);
-  const postsPerPage = 5; // 5 itens por página, como no design do Figma
+  const postsPerPage = 5;
 
   // Efeito para buscar os dados da API
   useEffect(() => {
@@ -134,6 +138,23 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
           );
         }
 
+        // +++ INÍCIO DO NOVO BLOCO +++
+        if (selectedKey === "group" || selectedKey === "recent") {
+          const groups = await getWhatsAppGroups();
+          items.push(
+            ...groups.map((g: WhatsAppGroup): Item => ({
+              id: g._id,
+              kind: "group",
+              title: g.name,
+              description: g.description,
+              image: getFigmaImage("group", g), // Crie uma imagem padrão para 'group'
+              date: g.createdAt ?? g.updatedAt,
+              joinLink: g.joinLink, // Passando o link
+            }))
+          );
+        }
+        // +++ FIM DO NOVO BLOCO +++
+
         // Ordenar todos os itens por data, mais recente primeiro
         items.sort((a, b) => {
           const da = a.date ? new Date(a.date).getTime() : 0;
@@ -151,7 +172,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
     }
     fetchData();
     return () => { alive = false; };
-  }, [selectedKey]); // Roda o efeito sempre que a categoria mudar
+  }, [selectedKey]);
 
   // Efeito para resetar a paginação quando a categoria muda
   useMemo(() => {
@@ -162,18 +183,14 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
   const totalPages = Math.ceil(posts.length / postsPerPage);
   const startIndex = (currentPage - 1) * postsPerPage;
   const endIndex = startIndex + postsPerPage;
-  const currentPosts = posts.slice(startIndex, endIndex); // Pega apenas os posts da página atual
+  const currentPosts = posts.slice(startIndex, endIndex);
 
   // Renderização do Componente
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-10">
-
-      {/* Wrapper principal para centralizar e definir a largura máxima */}
-      <div className="mx-auto max-w-7xl"> {/* Você pode mudar de 5xl para 6xl se quiser mais largo */}
-
+      <div className="mx-auto max-w-7xl">
         {err && <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</div>}
 
-        {/* Título da Seção (alinhado com os cards abaixo) */}
         <div className="flex items-center gap-2 mb-6">
           {activeCategory === 'Recentes' && <Clock className="w-6 h-6 text-gray-700" />}
           <h2 className="text-xl font-semibold text-gray-900 tracking-wide">
@@ -181,7 +198,6 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
           </h2>
         </div>
 
-        {/* Conteúdo Condicional (Loading, Erro, Posts) */}
         {loading ? (
           <div className="text-center text-gray-500 py-10">Carregando conteúdo...</div>
         ) : posts.length === 0 ? (
@@ -199,6 +215,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
                   description={item.description}
                   image={item.image}
                   date={item.date}
+                  joinLink={item.joinLink} // <-- ADICIONADO
                 />
               ))}
             </div>
@@ -215,7 +232,6 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
                 </button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                  // Lógica para mostrar apenas números relevantes (primeiro, último, atual e vizinhos)
                   if (
                     page === 1 ||
                     page === totalPages ||
@@ -226,18 +242,17 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
                         key={page}
                         onClick={() => setCurrentPage(page)}
                         className={`px-4 py-2 rounded-md transition-colors ${page === currentPage
-                          ? 'bg-purple-600 text-white' // Botão ativo
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300' // Botão inativo
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                           }`}
                       >
                         {page}
                       </button>
                     );
                   } else if (page === currentPage - 2 || page === currentPage + 2) {
-                    // Adiciona "..."
                     return <span key={page} className="px-2 py-2">...</span>;
                   }
-                  return null; // Oculta os outros números de página
+                  return null;
                 })}
 
                 <button
@@ -251,7 +266,7 @@ export default function PostsSection({ activeCategory }: { activeCategory?: UiCa
             )}
           </>
         )}
-      </div> {/* Fim do wrapper 'max-w-5xl' */}
+      </div>
     </section>
   );
 }

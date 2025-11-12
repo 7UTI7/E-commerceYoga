@@ -133,9 +133,13 @@ export default function Login() {
                 />
                 <span>Lembrar de mim</span>
               </label>
-              <a href="#" className="text-purple-700 font-medium hover:text-purple-800">
+              <button
+                type="button"
+                onClick={() => navigate('/esqueceu-senha')}
+                className="text-purple-700 font-medium hover:text-purple-800"
+              >
                 Esqueceu a senha?
-              </a>
+              </button>
             </div>
 
             {/* Erro */}

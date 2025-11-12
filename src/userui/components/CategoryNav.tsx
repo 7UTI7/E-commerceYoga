@@ -1,4 +1,6 @@
 import React from "react";
+// Lembre-se de atualizar este tipo no arquivo de origem (ex: src/userApp.ts)
+// para incluir "Grupos"
 import type { UiCategory } from "../userApp";
 
 type Props = {
@@ -6,7 +8,8 @@ type Props = {
   onCategoryChange: (category: UiCategory) => void;
 };
 
-const CATEGORIES: UiCategory[] = ["Recentes", "Artigos", "Vídeos", "Eventos", "Aulas"];
+// 'Grupos' ADICIONADO AQUI
+const CATEGORIES: UiCategory[] = ["Recentes", "Artigos", "Vídeos", "Eventos", "Aulas", "Grupos"];
 
 export function CategoryNav({ activeCategory, onCategoryChange }: Props) {
   return (

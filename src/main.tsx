@@ -7,6 +7,7 @@ import Home from "./pages/home";
 import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
 import UserApp from "./userui/userApp";
+import ForgotPasswordPage from "./pages/forgotPassword";
 import Admin from "./pages/admin";
 import ProfilePage from "./pages/profile";
 import PostDetail from "./userui/components/post-detail";
@@ -36,6 +37,7 @@ const appRoutes = {
 const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
+  { path: "/esqueceu-senha", element: <ForgotPasswordPage /> },
   {
     path: "/user",
     element: (

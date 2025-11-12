@@ -1,11 +1,11 @@
 // src/userui/figmaImages.ts
 
-type Kind = "article" | "video" | "event" | "class";
+type Kind = "article" | "video" | "event" | "class" | "group"; // <-- 1. Adicionado 'group'
 type AnyItem = { _id?: string; id?: string; slug?: string; title?: string };
 
 const BASE = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "/");
 
-// Arquivos que EXISTEM em public/figma/<folder>/ (conferido no seu zip)
+// Arquivos que EXISTEM em public/figma/<folder>/
 const files = {
   articles: [
     "photo-1506126613408-eca07ce68773.jpg",
@@ -34,6 +34,16 @@ const files = {
   classes: [
     "photo-1506126613408-eca07ce68773.jpg",
     "photo-1544367567-0f2fcb009e0b.jpg",
+    "photo-1545205597-3d9d02c29597.jpg",
+    "photo-1575052814086-f385e2e2ad1b.jpg",
+    "photo-1599901860904-17e6ed7083a0.jpg",
+    "photo-1616569925882-18e6a431bba9.jpg",
+  ],
+  // 2. Adicionado 'groups' (assumindo que usa as mesmas imagens)
+  // Se você criar uma pasta /public/figma/groups/, adicione os nomes aqui.
+  groups: [
+    "photo-1506126613408-eca07ce68773.jpg", // Imagem genérica de comunidade/conexão
+    "photo-1544367567-0f2fcb009e0b.jpg", // Imagem de yoga em grupo
     "photo-1545205597-3d9d02c29597.jpg",
     "photo-1575052814086-f385e2e2ad1b.jpg",
     "photo-1599901860904-17e6ed7083a0.jpg",
@@ -70,6 +80,13 @@ export function getFigmaImage(kind: Kind, item?: AnyItem) {
       const arr = files.classes;
       const idx = hashSeed(seed) % arr.length;
       return `${BASE}figma/classes/${arr[idx]}`;
+    }
+    // 3. Adicionado o 'case' para 'group'
+    case "group": {
+      const arr = files.groups;
+      const idx = hashSeed(seed) % arr.length;
+      // Certifique-se que a pasta /public/figma/group/ existe!
+      return `${BASE}figma/group/${arr[idx]}`;
     }
     default:
       return undefined;
