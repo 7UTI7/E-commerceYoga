@@ -7,7 +7,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { setSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(true);
+  // const [remember, setRemember] = useState(true); // <-- REMOVIDO
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -35,8 +35,9 @@ export default function Login() {
 
       if (!token || !user) throw new Error("Resposta de login inválida.");
 
-      // salva sessão via contexto (controla remember)
-      setSession(user, token, remember);
+      // salva sessão via contexto
+      // +++ ATUALIZADO: 'remember' foi removido e trocado por 'false' +++
+      setSession(user, token, false); // <-- Sempre usará sessionStorage
 
       // ✅ Admin NÃO vai direto para /admin — todo mundo cai em /user
       navigate("/user");
@@ -122,17 +123,9 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Lembrar / Esqueceu */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  className="size-4 accent-purple-600"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
-                <span>Lembrar de mim</span>
-              </label>
+            {/* +++ ATUALIZADO: "Lembrar" removido, "Esqueceu" alinhado à direita +++ */}
+            <div className="flex items-center justify-end text-sm"> {/* <-- 'justify-between' mudou para 'justify-end' */}
+              {/* O label "Lembrar de mim" foi completamente removido daqui */}
               <button
                 type="button"
                 onClick={() => navigate('/esqueceu-senha')}

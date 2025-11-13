@@ -1,4 +1,3 @@
-// src/pages/cadastro.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { register as apiRegister, login as apiLogin } from "../lib/api";
@@ -52,12 +51,14 @@ export default function Cadastro() {
     const phoneMask = (form.elements.namedItem("phone") as HTMLInputElement)?.value.trim();
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement).value;
-    const termsChecked = (form.elements.namedItem("terms") as HTMLInputElement).checked;
+    // const termsChecked = (form.elements.namedItem("terms") as HTMLInputElement).checked; // <-- REMOVIDO
 
+    /* Bloco de validação dos termos REMOVIDO
     if (!termsChecked) {
       setErrorMsg("Você precisa aceitar os termos para continuar.");
       return;
     }
+    */
 
     if (!isStrongPassword(password)) {
       setErrorMsg("A senha deve ter ao menos 8 caracteres, com letras minúsculas e maiúsculas.");
@@ -279,7 +280,7 @@ export default function Cadastro() {
                 </div>
               )}
 
-              {/* Termos */}
+              {/* Bloco dos Termos REMOVIDO
               <div className="flex items-center gap-3">
                 <input id="terms" name="terms" type="checkbox" className="h-4 w-4 rounded border-gray-300" />
                 <label htmlFor="terms" className="text-sm text-gray-700">
@@ -290,6 +291,7 @@ export default function Cadastro() {
                   .
                 </label>
               </div>
+              */}
 
               {/* Criar conta */}
               <button
