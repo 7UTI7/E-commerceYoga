@@ -316,3 +316,13 @@ export async function deleteWhatsAppGroup(id: string) {
   const { data } = await api.delete(`/api/whatsapp-groups/${id}`);
   return data;
 }
+
+// +++ ADICIONE ESTA FUNÇÃO AO SEU api.ts +++
+// Esta função chama o seu novo searchController
+export async function searchContent(query: string) {
+  const { data } = await api.get('/api/search', {
+    params: { q: query },
+  });
+  // O controller retorna { articles, videos }
+  return data as { articles: Article[]; videos: Video[] };
+}

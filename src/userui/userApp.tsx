@@ -31,7 +31,7 @@ export default function UserApp() {
       {showCarousel && <EventsCarousel />}
 
       {/* PostsSection aceita prop opcional; aqui passamos a categoria ativa */}
-      <PostsSection activeCategory={activeCategory} />
+      <PostsSection activeCategory={activeCategory} searchQuery={searchQuery} />
 
       <FooterPublic />
     </div>

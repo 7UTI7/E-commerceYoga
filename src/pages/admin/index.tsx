@@ -258,7 +258,7 @@ function ArticlesPanel() {
                         </Field>
                         */}
                     </div>
-                    <Field label="Conteúdo (Markdown)">
+                    <Field label="Conteúdo">
                         <Textarea rows={8} value={content} onChange={(e) => setContent(e.target.value)} />
                     </Field>
                     <div className="flex items-center gap-3">

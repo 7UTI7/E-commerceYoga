@@ -43,6 +43,8 @@ app.use('/api/class-slots', classSlotRoutes);
 // Rotas de Grupos do WhatsApp
 app.use('/api/whatsapp-groups', whatsAppGroupRoutes);
 
+app.use('/api/search', searchRoutes);
+
 // --- Inicialização do Servidor ---
 const PORT = process.env.PORT || 3001; 
 app.listen(PORT, () => {
