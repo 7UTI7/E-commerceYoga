@@ -246,6 +246,7 @@ export default function PostDetail() {
 
   return (
     <div className="bg-gradient-to-b from-purple-50 to-white min-h-screen">
+      {/* --- BARRA DE VOLTAR (Sem alteração) --- */}
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="mx-auto max-w-5xl px-4 py-4">
           <Button
@@ -259,7 +260,12 @@ export default function PostDetail() {
         </div>
       </div>
 
-      <div className="relative h-[460px] overflow-hidden">
+      {/* --- CABEÇALHO DA IMAGEM --- */}
+      {/*
+        CELULAR: h-[300px]
+        DESKTOP: md:h-[460px]
+      */}
+      <div className="relative h-[300px] md:h-[460px] overflow-hidden">
         <ImageWithFallback
           src={item.image}
           alt={item.title}
@@ -267,28 +273,39 @@ export default function PostDetail() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent" />
 
-        <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white z-10">
+        {/*
+          CELULAR: p-4
+          DESKTOP: md:p-12
+        */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-12 text-white z-10">
           <div className="mx-auto max-w-5xl">
             <div className="inline-block bg-purple-600 text-white px-4 py-1 rounded-full text-sm mb-4">
               {categoryLabel}
             </div>
 
             <div className="flex items-center gap-3">
-              <h1 className="text-white mb-0">{item.title}</h1>
+              {/*
+                CELULAR: text-2xl
+                DESKTOP: md:text-4xl (aproximando do h1 padrão)
+              */}
+              <h1 className="text-white mb-0 text-2xl md:text-4xl font-semibold">{item.title}</h1>
               {showFavoriteStar && (
                 <button
                   onClick={handleFavoriteClick}
                   className="p-1 rounded-full text-white/70 hover:text-white"
                   aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                 >
-                  <Star className={`w-7 h-7 transition-colors ${isFavorited
-                      ? 'fill-yellow-400 stroke-yellow-400'
-                      : 'fill-transparent stroke-currentColor'
+                  <Star className={`w-6 h-6 md:w-7 md:h-7 transition-colors ${isFavorited
+                    ? 'fill-yellow-400 stroke-yellow-400'
+                    : 'fill-transparent stroke-currentColor'
                     }`} />
                 </button>
               )}
             </div>
 
+            {/*
+              CELULAR: Adicionado 'flex-wrap' para quebrar a linha
+            */}
             <div className="flex flex-wrap items-center gap-4 text-white/90 mt-4">
               {dateLabel && (
                 <div className="flex items-center gap-2">
@@ -325,24 +342,42 @@ export default function PostDetail() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-10">
+      {/* --- CONTEÚDO PRINCIPAL --- */}
+      {/*
+        CELULAR: px-4 py-6
+        DESKTOP: md:px-4 md:py-10 (px-4 mantido do container max-w-5xl)
+      */}
+      <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
+
+        {/*
+          CELULAR: p-4 md:p-8
+          DESKTOP: md:p-8
+        */}
         {item.excerpt && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-8 border-l-4 border-purple-600">
-            <h3 className="text-purple-900 mb-3">Resumo</h3>
-            <p className="text-gray-700 leading-relaxed text-lg">{item.excerpt}</p>
+          <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 mb-6 md:mb-8 border-l-4 border-purple-600">
+            <h3 className="text-purple-900 mb-3 text-lg md:text-xl">Resumo</h3>
+            <p className="text-gray-700 leading-relaxed text-base md:text-lg">{item.excerpt}</p>
           </div>
         )}
 
+        {/*
+          CELULAR: p-4 md:p-8
+          DESKTOP: md:p-8
+        */}
         {item.kind === "article" && item.fullDescription && (
-          <div className="bg-white rounded-2xl shadow-md p-6 md:p-8 space-y-4">
+          <div className="bg-white rounded-2xl shadow-md p-4 md:p-8 space-y-4">
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
               {item.fullDescription}
             </p>
           </div>
         )}
 
+        {/*
+          CELULAR: p-4 md:p-8
+          DESKTOP: md:p-8
+        */}
         {item.kind === "video" && (
-          <div className="bg-white rounded-2xl shadow-md p-6 md:p-8 space-y-5">
+          <div className="bg-white rounded-2xl shadow-md p-4 md:p-8 space-y-5">
             {embedSrc ? (
               <div className="relative w-full overflow-hidden rounded-xl bg-gray-100 aspect-video">
                 <iframe
@@ -359,13 +394,18 @@ export default function PostDetail() {
           </div>
         )}
 
+        {/*
+          CELULAR: p-4 md:p-8
+          DESKTOP: md:p-8
+        */}
         {(isEvent || isClass) && item.fullDescription && (
-          <div className="bg-white rounded-2xl shadow-md p-6 md:p-8">
+          <div className="bg-white rounded-2xl shadow-md p-4 md:p-8">
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">{item.fullDescription}</p>
           </div>
         )}
 
-        {/* +++ SEÇÃO DE COMENTÁRIOS ADICIONADA +++ */}
+        {/* --- SEÇÃO DE COMENTÁRIOS --- */}
+        {/* (CommentsSection.tsx será ajustado separadamente, mas já fica aqui) */}
         {canHaveComments && (
           <CommentsSection
             postId={item.id}
@@ -374,9 +414,14 @@ export default function PostDetail() {
           />
         )}
 
+        {/* --- BLOCO DE CTA --- */}
+        {/*
+          CELULAR: p-6
+          DESKTOP: md:p-8
+        */}
         {ctaBlock && (
-          <div className="mt-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-xl p-8 text-center text-white">
-            <h3 className="text-white mb-3">{ctaBlock.title}</h3>
+          <div className="mt-8 md:mt-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-xl p-6 md:p-8 text-center text-white">
+            <h3 className="text-white mb-3 text-xl md:text-2xl">{ctaBlock.title}</h3>
             <p className="mb-6 text-purple-100">{ctaBlock.text}</p>
 
             <Button
@@ -395,6 +440,7 @@ export default function PostDetail() {
         )}
       </div>
 
+      {/* --- MODAL (Sem alteração) --- */}
       <Dialog open={openWhats} onOpenChange={setOpenWhats}>
         <DialogContent>
           <DialogHeader>

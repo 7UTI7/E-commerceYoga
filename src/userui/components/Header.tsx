@@ -45,6 +45,7 @@ export function Header({ onLogoClick }: HeaderProps) {
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
         <div className={`mx-auto ${CONTENT_MAX} px-4 sm:px-6 lg:px-8`}>
           <div className="h-[72px] flex items-center justify-between gap-3">
+            {/* --- LOGO E TÍTULO --- */}
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={handleLogoClick}
@@ -52,13 +53,19 @@ export function Header({ onLogoClick }: HeaderProps) {
                 aria-label="Atualizar a página"
               >
                 <img src="/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" className="h-10 w-10 rounded" />
-                <span className="text-xl font-semibold text-purple-800 whitespace-nowrap">
+                {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                    O texto do logo fica oculto em telas pequenas (celular)
+                    e reaparece em telas 'md' (desktop)
+                */}
+                <span className="text-xl font-semibold text-purple-800 whitespace-nowrap hidden md:inline">
                   Karla Rodrigues Yoga
                 </span>
               </button>
             </div>
 
-            <div className="flex items-center gap-3 shrink-0">
+            {/* --- BOTÕES DA DIREITA --- */}
+            <div className="flex items-center gap-2 md:gap-3 shrink-0">
+              {/* Ícones de Redes Sociais (Mantidos) */}
               <button
                 onClick={goInstagram}
                 aria-label="Instagram"
@@ -76,50 +83,69 @@ export function Header({ onLogoClick }: HeaderProps) {
                 <i className="fab fa-facebook text-[18px]" />
               </button>
 
+              {/* Botão Agendar (Não-Admin) */}
               {!isAdmin && (
                 <Button
                   className="rounded-lg bg-green-600 hover:bg-green-700 text-white shadow"
                   onClick={() => setOpenWhats(true)}
+                  title="Agendar" // Title é útil para acessibilidade no celular
                 >
-                  <i className="fab fa-whatsapp text-[16px] mr-2" />
-                  Agendar
+                  {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                      Ícone: A margem (mr-2) agora é condicional (md:mr-2)
+                      Texto: Envolvido em span 'hidden md:inline'
+                  */}
+                  <i className="fab fa-whatsapp text-[16px] md:mr-2" />
+                  <span className="hidden md:inline">Agendar</span>
                 </Button>
               )}
 
+              {/* Botão Gerenciar (Admin) */}
               {isAdmin && (
                 <Button
                   className="rounded-lg bg-purple-600 hover:bg-purple-700 text-white shadow"
                   onClick={() => navigate("/admin")}
                   title="Ir para o painel administrativo"
                 >
-                  Gerenciar Conteúdo
+                  {/* (Este botão já é longo, mas podemos aplicar o mesmo padrão se necessário) */}
+                  <span className="hidden md:inline">Gerenciar Conteúdo</span>
+                  {/* (Exemplo de ícone se tivesse um)
+                  <i className="fas fa-cog md:mr-2" />
+                  <span className="hidden md:inline">Gerenciar</span>
+                  */}
                 </Button>
               )}
 
+              {/* Botão Perfil */}
               <Button
                 variant="secondary"
                 className="rounded-lg border-purple-300"
                 onClick={() => navigate("/user/profile")}
                 title="Perfil"
               >
-                <User className="w-4 h-4 mr-2" />
-                {user?.name?.split(" ")[0] || "Aluno"}
+                {/* --- ATUALIZAÇÃO RESPONSIVA --- */}
+                <User className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">
+                  {user?.name?.split(" ")[0] || "Aluno"}
+                </span>
               </Button>
 
+              {/* Botão Sair */}
               <Button
                 variant="secondary"
                 className="rounded-lg border-purple-300"
                 onClick={() => setOpenLogout(true)}
                 title="Sair"
               >
-                <LogOut className="w-4 h-4 mr-2" />
-                Sair
+                {/* --- ATUALIZAÇÃO RESPONSIVA --- */}
+                <LogOut className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Sair</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
+      {/* --- MODAIS (Sem alteração) --- */}
       {!isAdmin && (
         <Dialog open={openWhats} onOpenChange={setOpenWhats}>
           <DialogContent>

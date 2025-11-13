@@ -59,15 +59,32 @@ export default function CommentsSection({ postId, kind, initialComments }: Props
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-md p-6 md:p-8 mt-8">
-            <h3 className="text-2xl font-semibold text-purple-900 mb-6">Comentários</h3>
+        /* --- ATUALIZAÇÃO RESPONSIVA ---
+           CELULAR: p-4 (padding menor)
+           DESKTOP: md:p-8 (padding original)
+        */
+        <div className="bg-white rounded-2xl shadow-md p-4 md:p-8 mt-6 md:mt-8">
+            {/* --- ATUALIZAÇÃO RESPONSIVA ---
+               CELULAR: text-xl (título menor)
+               DESKTOP: md:text-2xl (título original)
+            */
+            }
+            <h3 className="text-xl md:text-2xl font-semibold text-purple-900 mb-6">Comentários</h3>
 
             {/* --- Formulário de Novo Comentário --- */}
             {user ? (
-                <form onSubmit={handleSubmit} className="mb-8">
-                    <div className="flex items-start gap-4">
-                        {/* Simulação de Avatar - pode ser trocado por uma imagem real do usuário se tiver */}
-                        <div className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold flex-shrink-0">
+                <form onSubmit={handleSubmit} className="mb-6 md:mb-8">
+                    {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                       CELULAR: gap-3 (gap menor)
+                       DESKTOP: md:gap-4 (gap original)
+                    */}
+                    <div className="flex items-start gap-3 md:gap-4">
+                        {/* Simulação de Avatar */}
+                        {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                           CELULAR: w-8 h-8 (avatar menor)
+                           DESKTOP: md:w-10 md:h-10 (avatar original)
+                        */}
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold flex-shrink-0">
                             {user.name[0]?.toUpperCase()}
                         </div>
                         <div className="flex-1">
@@ -92,7 +109,7 @@ export default function CommentsSection({ postId, kind, initialComments }: Props
                 </form>
             ) : (
                 // --- Aviso para Fazer Login ---
-                <div className="mb-8 p-4 rounded-lg bg-gray-100 text-center text-gray-700">
+                <div className="mb-6 md:mb-8 p-4 rounded-lg bg-gray-100 text-center text-gray-700">
                     <p>
                         Você precisa estar logado para deixar um comentário.{' '}
                         <Link to="/login" className="text-purple-600 font-semibold hover:underline">
@@ -108,9 +125,13 @@ export default function CommentsSection({ postId, kind, initialComments }: Props
                     <p className="text-gray-500">Ainda não há comentários. Seja o primeiro!</p>
                 ) : (
                     comments.map((comment) => (
-                        <div key={comment._id} className="flex items-start gap-4">
+                        <div key={comment._id} className="flex items-start gap-3 md:gap-4">
                             {/* Avatar do autor do comentário */}
-                            <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold flex-shrink-0">
+                            {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                               CELULAR: w-8 h-8 (avatar menor)
+                               DESKTOP: md:w-10 md:h-10 (avatar original)
+                            */}
+                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold flex-shrink-0">
                                 {comment.author.name[0]?.toUpperCase()}
                             </div>
                             <div className="flex-1">

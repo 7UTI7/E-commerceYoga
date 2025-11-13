@@ -7,6 +7,8 @@ export default function Home() {
   const dotsWrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // ... (Seu useEffect para o carrossel de depoimentos está ótimo e mantido) ...
+    // (Nenhuma alteração de lógica necessária aqui)
     const scroller = scrollerRef.current;
     const dotsWrap = dotsWrapRef.current;
     if (!scroller || !dotsWrap) return;
@@ -89,6 +91,7 @@ export default function Home() {
 
   return (
     <>
+      {/* --- HERO SECTION --- */}
       <section className="relative h-[90vh] min-h-[560px] flex items-center justify-center text-center">
         <img src="/assets/yogatelainicial2.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-black/40"></div>
@@ -97,9 +100,20 @@ export default function Home() {
           <img
             src="/assets/ChatGPT Image 7 de out. de 2025, 23_30_26.png"
             alt="Logo Karla Rodrigues Yoga"
-            className="px-60 mx-auto mt-0 rounded-lg"
+            /* --- ATUALIZAÇÃO RESPONSIVA ---
+               CELULAR: px-16 (padding de 4rem)
+               TABLET: sm:px-32
+               DESKTOP: md:px-60
+            */
+            className="px-16 sm:px-32 md:px-60 mx-auto mt-0 rounded-lg"
           />
-          <h2 className="text-4xl sm:text-5xl font-bold leading-tight text-white">Encontre seu equilíbrio interior</h2>
+          {/* --- ATUALIZAÇÃO RESPONSIVA ---
+               CELULAR: text-3xl
+               TABLET: sm:text-4xl
+               DESKTOP: lg:text-5xl
+            */
+          }
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-white">Encontre seu equilíbrio interior</h2>
           <p className="mt-6 text-lg sm:text-xl text-white/90">
             Descubra a paz e harmonia através da prática do yoga. Transforme corpo, mente e espírito.
           </p>
@@ -112,6 +126,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- SOBRE (Já estava responsivo) --- */}
       <section id="sobre" className="py-20 bg-red-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -148,6 +163,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- ESPECIALIDADES (Já estava responsivo) --- */}
       <section className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
@@ -206,6 +222,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- EVENTOS --- */}
       <section className="py-20 bg-gray-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
@@ -213,11 +230,13 @@ export default function Home() {
           </div>
 
           <div className="mt-12">
+            {/* Este componente (EventCarousel) também precisa de ajustes responsivos */}
             <EventCarousel />
           </div>
         </div>
       </section>
 
+      {/* --- ESTRUTURA (Já estava responsivo) --- */}
       <section id="estrutura" className="py-20 bg-red-100">
         <div className="container mx-auto">
           <h2 className="text-center text-2xl font-bold text-gray-800 mb-8">CONHEÇA NOSSA ESTRUTURA</h2>
@@ -234,6 +253,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* --- DEPOIMENTOS (Já estava responsivo) --- */}
       <section id="depoimentos" className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -245,6 +265,7 @@ export default function Home() {
             <div
               ref={scrollerRef}
               id="testimonial-scroller"
+              // (Este trecho já era perfeitamente responsivo)
               className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
             >
               <article className="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300">

@@ -106,8 +106,12 @@ const EventsCarousel = () => {
   return (
     <div className="bg-gray-50 py-6">
       <div className="container mx-auto px-4">
+        {/* --- ATUALIZAÇÃO RESPONSIVA ---
+            CELULAR: h-[550px] (Mais alto para caber texto)
+            DESKTOP: md:h-[500px] (Altura original)
+        */}
         <div
-          className="relative overflow-hidden rounded-xl shadow-2xl h-[500px]"
+          className="relative overflow-hidden rounded-xl shadow-2xl h-[550px] md:h-[500px]"
           onMouseEnter={stopAuto}
           onMouseLeave={startAuto}
         >
@@ -122,7 +126,11 @@ const EventsCarousel = () => {
                   </div>
 
                   {/* Conteúdo central */}
-                  <div className="relative z-10 w-full p-8 md:p-12 flex flex-col justify-center text-white">
+                  {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                      CELULAR: p-6
+                      DESKTOP: md:p-12
+                  */}
+                  <div className="relative z-10 w-full p-6 md:p-12 flex flex-col justify-center text-white">
                     <div className="max-w-3xl mx-auto text-center">
                       <div className="inline-block bg-white text-purple-700 px-4 py-1 rounded-full text-sm mb-6">
                         EVENTO

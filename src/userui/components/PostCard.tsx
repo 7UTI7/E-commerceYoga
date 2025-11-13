@@ -81,14 +81,23 @@ export default function PostCard({
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
         style={{
+          // (Seu estilo de hover/shadow pode ser mantido)
           transform: isHovered ? 'scale(1.02)' : 'scale(1)',
           boxShadow: isHovered ? '0 10px 40px rgba(147, 51, 234, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
           zIndex: isHovered ? 10 : 1
         }}
       >
-        <div className="flex gap-4">
+        {/* --- ATUALIZAÇÃO RESPONSIVA AQUI ---
+            Por padrão (celular), é flex-col (vertical).
+            No desktop (md:), vira flex-row (horizontal).
+        */}
+        <div className="flex flex-col md:flex-row md:gap-4">
           {/* Imagem */}
-          <div className="w-48 h-48 flex-shrink-0 overflow-hidden"> {/* REMOVIDO 'relative' */}
+          {/*
+            CELULAR: w-full h-48 (imagem no topo)
+            DESKTOP: md:w-48 md:h-48 (imagem na lateral)
+          */}
+          <div className="w-full h-48 md:w-48 md:h-48 md:flex-shrink-0 overflow-hidden">
             {image ? (
               <img
                 src={image}
@@ -103,27 +112,36 @@ export default function PostCard({
                 Sem imagem
               </div>
             )}
-
-            {/* BOTÃO DE ESTRELA FOI MOVIDO DAQUI */}
-
           </div>
 
           {/* Conteúdo */}
-          <div className="flex-1 p-6">
-            {/* +++ ESTA É A SEÇÃO ATUALIZADA +++ */}
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 flex-1 pr-4">
+          {/*
+            CELULAR: p-4
+            DESKTOP: md:p-6
+          */}
+          <div className="flex-1 p-4 md:p-6">
+
+            {/* --- ATUALIZAÇÃO RESPONSIVA (CABEÇALHO INTERNO) ---
+                CELULAR: flex-col (Título em cima, Categoria/Estrela embaixo)
+                DESKTOP: md:flex-row (Título na esquerda, Categoria/Estrela na direita)
+            */}
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 md:flex-1 md:pr-4">
                 {title}
               </h3>
 
               {/* Contêiner para Categoria e Estrela */}
-              <div className="flex items-center gap-2 text-purple-700 text-sm ml-4 flex-shrink-0">
+              {/*
+                CELULAR: mt-2 (margem superior)
+                DESKTOP: md:ml-4 md:flex-shrink-0 md:mt-0 (margem lateral)
+              */}
+              <div className="flex items-center gap-2 text-purple-700 text-sm md:ml-4 md:flex-shrink-0 mt-2 md:mt-0">
                 <div className="flex items-center gap-1">
                   <Tag className="w-4 h-4" />
                   <span>{category}</span>
                 </div>
 
-                {/* ESTRELA MOVIDA PARA CÁ */}
+                {/* Estrela de Favorito */}
                 {showFavoriteStar && (
                   <button
                     onClick={handleFavoriteClick}
@@ -131,19 +149,21 @@ export default function PostCard({
                     aria-label={isFavorited ? "Remover dos favoritos" : "Adicionar aos favoritos"}
                   >
                     <Star className={`w-5 h-5 transition-colors ${isFavorited
-                        ? 'fill-yellow-400 stroke-yellow-400 text-yellow-400'
-                        : 'fill-transparent stroke-currentColor'
+                      ? 'fill-yellow-400 stroke-yellow-400 text-yellow-400'
+                      : 'fill-transparent stroke-currentColor'
                       }`} />
                   </button>
                 )}
               </div>
             </div>
-            {/* +++ FIM DA SEÇÃO ATUALIZADA +++ */}
 
             <p className="text-gray-700 mb-4 line-clamp-2">{description || ""}</p>
 
-            {/* Infos (com Nível) */}
-            <div className="flex items-center gap-4 text-sm text-gray-600">
+            {/* Infos (Nível e Data) */}
+            {/* (Ajuste leve): Adicionado flex-wrap para garantir que
+              os ícones quebrem a linha se não couberem.
+            */}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>{formattedDate}</span>
@@ -156,7 +176,7 @@ export default function PostCard({
               )}
             </div>
 
-            {/* Conteúdo Expandido (Hover) */}
+            {/* Conteúdo Expandido (Hover) - Funcionalidade mantida */}
             <div
               className="mt-4 transition-all duration-300"
               style={{
@@ -173,7 +193,7 @@ export default function PostCard({
         </div>
       </article>
 
-      {/* Modal para Grupos de WhatsApp */}
+      {/* Modal para Grupos de WhatsApp (Sem alteração) */}
       <Dialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}

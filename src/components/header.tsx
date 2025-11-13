@@ -10,7 +10,13 @@ export default function Header() {
           <div className="flex items-center gap-3 min-w-0">
             <Link to="/" className="flex items-center gap-2 shrink-0">
               <img src="/assets/logo.jpg" alt="Logo Karla Rodrigues Yoga" className="h-10 w-10 rounded" />
-              <span className="text-xl font-bold text-purple-700 whitespace-nowrap">Karla Rodrigues Yoga</span>
+              {/* --- ATUALIZAÇÃO RESPONSIVA ---
+                  O texto fica oculto por padrão (celular)
+                  e aparece em telas 'sm' (640px) ou maiores.
+              */}
+              <span className="text-xl font-bold text-purple-700 whitespace-nowrap hidden sm:block">
+                Karla Rodrigues Yoga
+              </span>
             </Link>
           </div>
 
