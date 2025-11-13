@@ -4,21 +4,29 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_URL_API
 })
 
+// +++ ESTE É O BLOCO CORRIGIDO +++
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("auth_token")
+  // 1. Tenta pegar o token do localStorage
+  let token = localStorage.getItem("auth_token");
+
+  // 2. Se não achar, tenta pegar do sessionStorage
+  if (!token) {
+    token = sessionStorage.getItem("auth_token");
+  }
+
+  // 3. Se agora tiver um token (de qualquer um dos locais), anexa ele
   if (token) {
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
+// +++ FIM DO BLOCO CORRIGIDO +++
 
-// +++ NOVO TIPO ADICIONADO +++
-// (Baseado nos seus articleModel.js e videoModel.js)
 export type Comment = {
   _id: string;
   content: string;
-  author: { // O backend já está populando 'name'
+  author: {
     _id: string;
     name: string;
   };
@@ -26,7 +34,6 @@ export type Comment = {
   updatedAt: string;
 }
 
-// +++ TIPO ATUALIZADO +++
 export type Article = {
   _id: string
   title: string
@@ -37,10 +44,9 @@ export type Article = {
   status: "DRAFT" | "PUBLISHED"
   createdAt: string
   updatedAt: string
-  comments?: Comment[]; // <-- ADICIONADO
+  comments?: Comment[];
 }
 
-// +++ TIPO ATUALIZADO +++
 export type Video = {
   _id: string
   title: string
@@ -51,7 +57,7 @@ export type Video = {
   youtubeUrl?: string
   category?: string
   level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
-  comments?: Comment[]; // <-- ADICIONADO
+  comments?: Comment[];
 }
 
 export type Event = {
@@ -89,7 +95,6 @@ export type User = {
   updatedAt?: string
 }
 
-// ... (funções register, login, gets... ) ...
 export async function register(name: string, email: string, password: string) {
   const { data } = await api.post("/api/auth/register", { name, email, password })
   return data
@@ -124,7 +129,6 @@ export async function getClassSlots() {
   return data
 }
 
-// +++ ATUALIZADO (retorno agora inclui comments) +++
 export async function getArticleById(id: string) {
   const { data } = await api.get<Article>(`/api/articles/${id}`)
   return data
@@ -132,8 +136,7 @@ export async function getArticleById(id: string) {
 
 export async function getArticleBySlug(slug: string) {
   try {
-    // +++ ATUALIZADO (retorno agora inclui comments) +++
-    const { data } = await api.get<Article>(`/api/articles/slug/${slug}`) //
+    const { data } = await api.get<Article>(`/api/articles/slug/${slug}`)
     return data
   } catch (err: any) {
     if (err?.response?.status !== 404) throw err
@@ -154,9 +157,8 @@ export async function getArticleByIdOrSlug(key: string) {
   }
 }
 
-// +++ ATUALIZADO (retorno agora inclui comments) +++
 export async function getVideoById(id: string) {
-  const { data } = await api.get<Video>(`/api/videos/${id}`) //
+  const { data } = await api.get<Video>(`/api/videos/${id}`)
   return data
 }
 
@@ -185,10 +187,8 @@ export async function deleteArticle(id: string) {
   return data
 }
 
-// +++ NOVA FUNÇÃO ADICIONADA +++
 export async function createArticleComment(articleId: string, content: string) {
-  // O backend retorna o novo comentário populado
-  const { data } = await api.post<Comment>(`/api/articles/${articleId}/comments`, { content }); //
+  const { data } = await api.post<Comment>(`/api/articles/${articleId}/comments`, { content });
   return data;
 }
 
@@ -208,14 +208,12 @@ export async function deleteVideo(id: string) {
 }
 
 export async function toggleFavoriteVideo(videoId: string) {
-  const { data } = await api.post(`/api/videos/${videoId}/favorite`); //
+  const { data } = await api.post(`/api/videos/${videoId}/favorite`);
   return data;
 }
 
-// +++ NOVA FUNÇÃO ADICIONADA +++
 export async function createVideoComment(videoId: string, content: string) {
-  // O backend retorna o novo comentário populado
-  const { data } = await api.post<Comment>(`/api/videos/${videoId}/comments`, { content }); //
+  const { data } = await api.post<Comment>(`/api/videos/${videoId}/comments`, { content });
   return data;
 }
 
@@ -272,7 +270,7 @@ export async function updatePassword(payload: { oldPassword: string; newPassword
 }
 
 export async function getMyFavoriteVideos() {
-  const { data } = await api.get<Video[]>("/api/auth/me/favorites"); //
+  const { data } = await api.get<Video[]>("/api/auth/me/favorites");
   return data;
 }
 
@@ -284,7 +282,6 @@ export function parseApiError(err: any): string {
 
 export default api
 
-// (O código dos Grupos de WhatsApp permanece o mesmo)
 export type WhatsAppGroup = {
   _id: string;
   name: string;
