@@ -10,6 +10,7 @@ const videoRoutes = require('./routes/videoRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const classSlotRoutes = require('./routes/classSlotRoutes');
 const whatsAppGroupRoutes = require('./routes/whatsAppGroupRoutes');
+const searchRoutes = require('./routes/searchRoutes');
 
 // --- Conexão com o Banco de Dados ---
 connectDB();
