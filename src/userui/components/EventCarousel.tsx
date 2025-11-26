@@ -3,8 +3,7 @@ import { Calendar, MapPin, Clock, ChevronLeft, ChevronRight } from "lucide-react
 import { getEvents, type Event } from "../../lib/api";
 import { getFigmaImage } from "../figmaImages";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
-import { DialogClose } from "@radix-ui/react-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "./ui/dialog";
 import { Button } from "./ui/button";
 
 type Item = {
@@ -32,10 +31,7 @@ function formatTimePt(iso?: string) {
 }
 
 const AUTO_MS = 15000;
-
-// exatamente o mesmo link do Header
-const whatsappHref =
-  "https://wa.me/5511999999999?text=Oi%20Karla!%20Quero%20agendar%20uma%20aula%20de%20Yoga.%20Pode%20me%20ajudar%3F";
+const whatsappHref = "https://wa.me/5511999999999?text=Oi%20Karla!%20Quero%20agendar%20uma%20aula%20de%20Yoga.%20Pode%20me%20ajudar%3F";
 
 const EventsCarousel = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -65,13 +61,11 @@ const EventsCarousel = () => {
           setIndex(0);
         }
       } catch (err) {
-        console.error("Erro ao carregar eventos para o carrossel:", err);
+        console.error("Erro ao carregar eventos:", err);
         if (alive) setItems([]);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
   const total = items.length;
@@ -96,7 +90,6 @@ const EventsCarousel = () => {
     stopAuto();
     startAuto();
     return stopAuto;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, total]);
 
   const translateX = useMemo(() => `translateX(-${index * 100}%)`, [index]);
@@ -104,14 +97,15 @@ const EventsCarousel = () => {
   if (!total) return null;
 
   return (
-    <div className="bg-gray-50 py-6">
+    <div className="bg-gray-50 py-4 md:py-6">
       <div className="container mx-auto px-4">
-        {/* --- ATUALIZAÇÃO RESPONSIVA ---
-            CELULAR: h-[550px] (Mais alto para caber texto)
-            DESKTOP: md:h-[500px] (Altura original)
+
+        {/* --- AJUSTE DE ALTURA ---
+            CELULAR: h-[400px] (Mais compacto, formato paisagem/quadrado)
+            DESKTOP: md:h-[500px] (Mantém o tamanho original grande)
         */}
         <div
-          className="relative overflow-hidden rounded-xl shadow-2xl h-[550px] md:h-[500px]"
+          className="relative overflow-hidden rounded-xl shadow-2xl h-[400px] md:h-[500px]"
           onMouseEnter={stopAuto}
           onMouseLeave={startAuto}
         >
@@ -119,51 +113,56 @@ const EventsCarousel = () => {
             {items.map((ev) => (
               <div key={ev.id} className="w-full flex-shrink-0 h-full">
                 <div className="flex h-full relative">
-                  {/* Imagem + overlay */}
+                  {/* Imagem de Fundo */}
                   <div className="absolute inset-0 z-0">
                     <ImageWithFallback src={ev.image || ""} alt={ev.title} className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/60" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
                   </div>
 
-                  {/* Conteúdo central */}
-                  {/* --- ATUALIZAÇÃO RESPONSIVA ---
-                      CELULAR: p-6
-                      DESKTOP: md:p-12
-                  */}
-                  <div className="relative z-10 w-full p-6 md:p-12 flex flex-col justify-center text-white">
-                    <div className="max-w-3xl mx-auto text-center">
-                      <div className="inline-block bg-white text-purple-700 px-4 py-1 rounded-full text-sm mb-6">
-                        EVENTO
+                  {/* Conteúdo Central */}
+                  <div className="relative z-10 w-full p-4 md:p-12 flex flex-col justify-center text-white h-full">
+                    <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center h-full">
+
+                      {/* Badge "Evento" - Menor margin-bottom no mobile (mb-2) */}
+                      <div className="inline-block bg-white text-purple-700 px-3 py-0.5 md:px-4 md:py-1 rounded-full text-xs md:text-sm font-bold mb-2 md:mb-6 uppercase tracking-wider shadow-sm">
+                        Evento
                       </div>
 
-                      <h2 className="text-white mb-6 text-2xl md:text-3xl font-semibold">{ev.title}</h2>
+                      {/* Título - Menor no mobile (text-xl) */}
+                      <h2 className="text-white mb-2 md:mb-6 text-xl md:text-3xl font-bold leading-tight drop-shadow-md">
+                        {ev.title}
+                      </h2>
 
-                      <div className="space-y-3 mb-6">
-                        <div className="flex items-center justify-center gap-2 text-white">
-                          <Calendar className="w-5 h-5" />
+                      {/* Ícones (Data/Local) - Espaçamento reduzido no mobile (space-y-1) */}
+                      <div className="space-y-1 md:space-y-3 mb-3 md:mb-6 text-sm md:text-base font-medium">
+                        <div className="flex items-center justify-center gap-2 drop-shadow-sm">
+                          <Calendar className="w-4 h-4" />
                           <span>{ev.dateLabel}</span>
                         </div>
                         {ev.location ? (
-                          <div className="flex items-center justify-center gap-2 text-white">
-                            <MapPin className="w-5 h-5" />
+                          <div className="flex items-center justify-center gap-2 drop-shadow-sm">
+                            <MapPin className="w-4 h-4" />
                             <span>{ev.location}</span>
                           </div>
                         ) : null}
-                        <div className="flex items-center justify-center gap-2 text-white">
-                          <Clock className="w-5 h-5" />
+                        <div className="flex items-center justify-center gap-2 drop-shadow-sm">
+                          <Clock className="w-4 h-4" />
                           <span>{ev.timeLabel}</span>
                         </div>
                       </div>
 
+                      {/* Descrição - Corta em 2 linhas no mobile, 4 no PC */}
                       {ev.description ? (
-                        <p className="text-white leading-relaxed mb-6 line-clamp-4">{ev.description}</p>
+                        <p className="text-white/90 leading-snug mb-4 md:mb-6 text-sm md:text-lg line-clamp-2 md:line-clamp-4 max-w-2xl">
+                          {ev.description}
+                        </p>
                       ) : (
-                        <div className="mb-6" />
+                        <div className="mb-4 md:mb-6" />
                       )}
 
                       <Button
                         variant="outline"
-                        className="bg-white hover:bg-gray-50 border-2 border-green-500 text-green-600 px-6 py-3 rounded-lg mx-auto"
+                        className="bg-white hover:bg-gray-100 border-none text-purple-700 font-bold px-6 py-2 md:px-8 md:py-3 rounded-full shadow-lg hover:scale-105 transition-transform"
                         onClick={() => {
                           stopAuto();
                           setConfirmOpen(true);
@@ -178,29 +177,29 @@ const EventsCarousel = () => {
             ))}
           </div>
 
-          {/* Setas */}
+          {/* Setas de Navegação */}
           <button
             onClick={prev}
             aria-label="Anterior"
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 transition-all shadow-lg z-10"
+            className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-2 md:p-3 transition-all text-white border border-white/30 z-20"
           >
-            <ChevronLeft className="w-6 h-6 text-purple-700" />
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
           <button
             onClick={next}
             aria-label="Próximo"
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 transition-all shadow-lg z-10"
+            className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-2 md:p-3 transition-all text-white border border-white/30 z-20"
           >
-            <ChevronRight className="w-6 h-6 text-purple-700" />
+            <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
-          {/* Dots */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {/* Indicadores (Bolinhas) */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {items.map((_, i) => (
               <button
                 key={i}
                 onClick={() => goTo(i)}
-                className={`h-2 rounded-full transition-all ${i === index ? "bg-white w-8" : "bg-white/50 w-2"}`}
+                className={`h-1.5 md:h-2 rounded-full transition-all shadow-sm ${i === index ? "bg-white w-6 md:w-8" : "bg-white/50 w-1.5 md:w-2"}`}
                 aria-label={`Ir para evento ${i + 1}`}
               />
             ))}
@@ -208,14 +207,8 @@ const EventsCarousel = () => {
         </div>
       </div>
 
-      {/* Modal de confirmação (sem fallback que troca a aba atual) */}
-      <Dialog
-        open={confirmOpen}
-        onOpenChange={(open) => {
-          setConfirmOpen(open);
-          if (!open) startAuto();
-        }}
-      >
+      {/* Modal de Confirmação */}
+      <Dialog open={confirmOpen} onOpenChange={(open) => { setConfirmOpen(open); if (!open) startAuto(); }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Abrir WhatsApp?</DialogTitle>
@@ -228,10 +221,9 @@ const EventsCarousel = () => {
               <Button variant="secondary" className="rounded-lg">Cancelar</Button>
             </DialogClose>
             <Button
-              className="rounded-lg"
+              className="rounded-lg bg-green-600 hover:bg-green-700 text-white"
               onClick={(e) => {
                 e.preventDefault();
-                e.stopPropagation();
                 window.open(whatsappHref, "_blank", "noopener,noreferrer");
                 setConfirmOpen(false);
               }}

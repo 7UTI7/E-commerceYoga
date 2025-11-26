@@ -12,28 +12,30 @@ import { SearchBar } from "./components/SearchBar"; //
 export type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos" | "Favoritos";
 
 export default function UserApp() {
-  const [activeCategory, setActiveCategory] = useState<UiCategory>("Recentes");
-  const showCarousel = activeCategory === "Recentes" || activeCategory === "Eventos";
-  const [searchQuery, setSearchQuery] = useState(""); // <-- NOSSO NOVO ESTADO
+  const [activeCategory, setActiveCategory] = useState<UiCategory>("Recentes");
+  const showCarousel = activeCategory === "Recentes" || activeCategory === "Eventos";
+  const [searchQuery, setSearchQuery] = useState(""); // <-- NOSSO NOVO ESTADO
 
-  return (
-    <div className="flex flex-col min-h-screen bg-white text-gray-900">
-      <Header onLogoClick={() => setActiveCategory("Recentes")} activeCategory={activeCategory} />
+  return (
+    <div className="flex flex-col min-h-screen bg-white text-gray-900">
+      <Header onLogoClick={() => setActiveCategory("Recentes")} activeCategory={activeCategory} />
 
-      <CategoryNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+      <CategoryNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
 
       {/* 2. COLOQUE O COMPONENTE AQUI */}
       {/* A prop 'onSearch' do seu SearchBar 
         conecta perfeitamente com o 'setSearchQuery' que você já tem. 
       */}
+
+
+      {showCarousel && <EventsCarousel />}
+
       <SearchBar onSearch={setSearchQuery} />
 
-      {showCarousel && <EventsCarousel />}
+      {/* PostsSection aceita prop opcional; aqui passamos a categoria ativa */}
+      <PostsSection activeCategory={activeCategory} searchQuery={searchQuery} />
 
-      {/* PostsSection aceita prop opcional; aqui passamos a categoria ativa */}
-      <PostsSection activeCategory={activeCategory} searchQuery={searchQuery} />
-
-      <FooterPublic />
-    </div>
-  );
+      <FooterPublic />
+    </div>
+  );
 }

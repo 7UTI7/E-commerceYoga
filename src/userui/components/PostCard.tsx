@@ -9,7 +9,7 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "./ui/button";
 
 // Hook do AuthContext
-import { useAuth } from "../../contexts/AuthContext"; // (verifique o caminho)
+import { useAuth } from "../../contexts/AuthContext";
 
 export interface PostCardProps {
   id: string;
@@ -51,7 +51,7 @@ export default function PostCard({
   const [isHovered, setIsHovered] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const { user } = useAuth(); //
+  const { user } = useAuth();
 
   const handleClick = (e: React.MouseEvent) => {
     if (kind === 'group' && joinLink) {
@@ -64,14 +64,14 @@ export default function PostCard({
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onToggleFavorite(id); //
+    onToggleFavorite(id);
   };
 
   const category = mapKindToCategory(kind);
   const formattedDate = date ? new Date(date).toLocaleDateString("pt-BR") : "";
 
   const showLevel = (kind === 'video' || kind === 'class') && level;
-  const showFavoriteStar = kind === 'video' && user; //
+  const showFavoriteStar = kind === 'video' && user;
 
   return (
     <>
@@ -81,21 +81,20 @@ export default function PostCard({
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
         style={{
-          // (Seu estilo de hover/shadow pode ser mantido)
           transform: isHovered ? 'scale(1.02)' : 'scale(1)',
           boxShadow: isHovered ? '0 10px 40px rgba(147, 51, 234, 0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
           zIndex: isHovered ? 10 : 1
         }}
       >
-        {/* --- ATUALIZAÇÃO RESPONSIVA AQUI ---
-            Por padrão (celular), é flex-col (vertical).
-            No desktop (md:), vira flex-row (horizontal).
+        {/* LAYOUT PRINCIPAL: 
+            Mobile: flex-col (Vertical)
+            Desktop: md:flex-row (Horizontal) - Mantido Original
         */}
         <div className="flex flex-col md:flex-row md:gap-4">
-          {/* Imagem */}
-          {/*
-            CELULAR: w-full h-48 (imagem no topo)
-            DESKTOP: md:w-48 md:h-48 (imagem na lateral)
+
+          {/* IMAGEM: 
+              Mobile: w-full h-48
+              Desktop: md:w-48 md:h-48 - Mantido Original
           */}
           <div className="w-full h-48 md:w-48 md:h-48 md:flex-shrink-0 overflow-hidden">
             {image ? (
@@ -114,30 +113,36 @@ export default function PostCard({
             )}
           </div>
 
-          {/* Conteúdo */}
-          {/*
-            CELULAR: p-4
-            DESKTOP: md:p-6
+          {/* CONTEÚDO: 
+              Mobile: p-4
+              Desktop: md:p-6 - Mantido Original
           */}
-          <div className="flex-1 p-4 md:p-6">
+          <div className="flex-1 p-4 md:p-6 flex flex-col">
 
-            {/* --- ATUALIZAÇÃO RESPONSIVA (CABEÇALHO INTERNO) ---
-                CELULAR: flex-col (Título em cima, Categoria/Estrela embaixo)
-                DESKTOP: md:flex-row (Título na esquerda, Categoria/Estrela na direita)
+            {/* --- CABEÇALHO DO CARD (TÍTULO + ESTRELA) --- 
+                Aqui está a "mágica" para o celular:
+                - flex justify-between: Garante que fiquem lado a lado (esquerda/direita) sempre.
+                - items-start: Alinha no topo caso o título quebre linha.
             */}
-            <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 md:flex-1 md:pr-4">
+            <div className="flex justify-between items-start gap-3 mb-3">
+
+              {/* TÍTULO:
+                  flex-1: Ocupa todo espaço disponível empurrando a estrela pro canto.
+                  md:pr-4: Espaçamento extra no PC.
+              */}
+              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 flex-1 leading-tight md:pr-4">
                 {title}
               </h3>
 
-              {/* Contêiner para Categoria e Estrela */}
-              {/*
-                CELULAR: mt-2 (margem superior)
-                DESKTOP: md:ml-4 md:flex-shrink-0 md:mt-0 (margem lateral)
+              {/* GRUPO CATEGORIA + ESTRELA:
+                  flex-shrink-0: Garante que não diminua de tamanho.
+                  Mantém a categoria e a estrela juntas na direita.
               */}
-              <div className="flex items-center gap-2 text-purple-700 text-sm md:ml-4 md:flex-shrink-0 mt-2 md:mt-0">
+              <div className="flex items-center gap-2 text-purple-700 text-sm flex-shrink-0">
                 <div className="flex items-center gap-1">
                   <Tag className="w-4 h-4" />
+                  {/* Se quiser esconder o TEXTO da categoria no celular pra economizar espaço, adicione 'hidden sm:inline' aqui. 
+                      Por enquanto deixei visível conforme o original. */}
                   <span>{category}</span>
                 </div>
 
@@ -157,13 +162,11 @@ export default function PostCard({
               </div>
             </div>
 
-            <p className="text-gray-700 mb-4 line-clamp-2">{description || ""}</p>
+            {/* DESCRIÇÃO */}
+            <p className="text-gray-700 mb-4 line-clamp-2 flex-grow">{description || ""}</p>
 
-            {/* Infos (Nível e Data) */}
-            {/* (Ajuste leve): Adicionado flex-wrap para garantir que
-              os ícones quebrem a linha se não couberem.
-            */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            {/* RODAPÉ (DATA E NÍVEL) */}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-auto">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 <span>{formattedDate}</span>
@@ -176,13 +179,15 @@ export default function PostCard({
               )}
             </div>
 
-            {/* Conteúdo Expandido (Hover) - Funcionalidade mantida */}
+            {/* CONTEÚDO EXPANDIDO (HOVER - DESKTOP ONLY EFFECTIVELY) */}
             <div
-              className="mt-4 transition-all duration-300"
+              className="mt-0 transition-all duration-300"
               style={{
                 maxHeight: isHovered ? '200px' : '0',
                 opacity: isHovered ? 1 : 0,
-                overflow: 'hidden'
+                overflow: 'hidden',
+                // Pequeno ajuste de margem só quando abrir
+                marginTop: isHovered ? '1rem' : '0'
               }}
             >
               <div className="border-t border-gray-200 pt-4">
@@ -193,7 +198,7 @@ export default function PostCard({
         </div>
       </article>
 
-      {/* Modal para Grupos de WhatsApp (Sem alteração) */}
+      {/* MODAL WHATSAPP (Mantido Original) */}
       <Dialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
