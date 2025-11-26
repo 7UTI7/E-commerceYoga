@@ -1,151 +1,111 @@
-import { useState } from 'react';
-import { type Comment, createArticleComment, createVideoComment, parseApiError } from '../../lib/api'; // Ajuste o caminho se necessário
-import { useAuth } from '../../contexts/AuthContext'; // Ajuste o caminho se necessário
-import { Button } from './ui/button'; // Importando o botão do seu design system
-import { Link } from 'react-router-dom'; // Para o link de login
+import { useState } from "react";
+import { useAuth } from "../../contexts/AuthContext";
+import { createArticleComment, createVideoComment, type Comment } from "../../lib/api";
+import { Button } from "./ui/button";
+import { User } from "lucide-react";
 
-// Helper para formatar datas (você pode ajustar)
-function formatCommentDate(dateString: string) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+interface CommentsSectionProps {
+    postId: string;
+    kind: 'article' | 'video';
+    initialComments: Comment[];
 }
 
-type Props = {
-    // O ID do post (seja article ou video)
-    postId: string;
-    // O tipo, para sabermos qual API chamar
-    kind: 'article' | 'video';
-    // A lista de comentários que vem do post-detail.tsx
-    initialComments: Comment[];
-};
+export default function CommentsSection({ postId, kind, initialComments }: CommentsSectionProps) {
+    const { user } = useAuth();
+    const [comments, setComments] = useState<Comment[]>(initialComments);
+    const [newComment, setNewComment] = useState("");
+    const [loading, setLoading] = useState(false);
 
-export default function CommentsSection({ postId, kind, initialComments }: Props) {
-    const { user } = useAuth(); // Pega o usuário do contexto
-    const [comments, setComments] = useState(initialComments);
-    const [newComment, setNewComment] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!newComment.trim() || !user) return; // Não envia se estiver vazio ou se (por algum motivo) o usuário não estiver logado
+        if (!newComment.trim()) return;
 
-        setIsSubmitting(true);
-        setError(null);
-
+        setLoading(true);
         try {
-            let createdComment: Comment;
-            // Chama a função correta da API com base no 'kind'
+            let createdComment;
             if (kind === 'article') {
-                createdComment = await createArticleComment(postId, newComment); //
+                createdComment = await createArticleComment(postId, newComment);
             } else {
-                createdComment = await createVideoComment(postId, newComment); //
+                createdComment = await createVideoComment(postId, newComment);
             }
-
-            // Adiciona o novo comentário no topo da lista (atualização local)
             setComments([createdComment, ...comments]);
-            setNewComment(''); // Limpa a caixa de texto
-        } catch (err: any) {
-            setError(parseApiError(err));
+            setNewComment("");
+        } catch (error) {
+            console.error("Erro ao comentar:", error);
         } finally {
-            setIsSubmitting(false);
+            setLoading(false);
         }
-    };
+    }
 
     return (
-        /* --- ATUALIZAÇÃO RESPONSIVA ---
-           CELULAR: p-4 (padding menor)
-           DESKTOP: md:p-8 (padding original)
-        */
-        <div className="bg-white rounded-2xl shadow-md p-4 md:p-8 mt-6 md:mt-8">
-            {/* --- ATUALIZAÇÃO RESPONSIVA ---
-               CELULAR: text-xl (título menor)
-               DESKTOP: md:text-2xl (título original)
-            */
-            }
-            <h3 className="text-xl md:text-2xl font-semibold text-purple-900 mb-6">Comentários</h3>
+        <div className="bg-white rounded-2xl shadow-md p-6 md:p-8 mt-8">
+            <h3 className="text-purple-900 mb-6 text-xl font-semibold">Comentários</h3>
 
-            {/* --- Formulário de Novo Comentário --- */}
+            {/* Área de Criar Comentário */}
             {user ? (
-                <form onSubmit={handleSubmit} className="mb-6 md:mb-8">
-                    {/* --- ATUALIZAÇÃO RESPONSIVA ---
-                       CELULAR: gap-3 (gap menor)
-                       DESKTOP: md:gap-4 (gap original)
-                    */}
-                    <div className="flex items-start gap-3 md:gap-4">
-                        {/* Simulação de Avatar */}
-                        {/* --- ATUALIZAÇÃO RESPONSIVA ---
-                           CELULAR: w-8 h-8 (avatar menor)
-                           DESKTOP: md:w-10 md:h-10 (avatar original)
-                        */}
-                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold flex-shrink-0">
-                            {user.name[0]?.toUpperCase()}
+                <form onSubmit={handleSubmit} className="mb-8">
+                    <div className="flex gap-4 items-start">
+                        {/* FOTO DO USUÁRIO LOGADO */}
+                        <div className="shrink-0">
+                            {user.avatar ? (
+                                <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-purple-100" />
+                            ) : (
+                                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                                    <User className="w-6 h-6" />
+                                </div>
+                            )}
                         </div>
+
                         <div className="flex-1">
                             <textarea
+                                className="w-full rounded-xl border border-gray-200 bg-gray-50 p-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
+                                rows={3}
+                                placeholder={`Deixe seu comentário como ${user.name}...`}
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
-                                placeholder={`Deixe seu comentário como ${user.name}...`}
-                                className="w-full rounded-xl border px-3 py-2.5 bg-gray-50 outline-none focus:ring-2 focus:ring-purple-200"
-                                rows={3}
-                                disabled={isSubmitting}
                             />
-                            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-                            <Button
-                                type="submit"
-                                disabled={isSubmitting || !newComment.trim()}
-                                className="rounded-lg mt-3 bg-purple-600 hover:bg-purple-700 text-white"
-                            >
-                                {isSubmitting ? 'Publicando...' : 'Publicar Comentário'}
-                            </Button>
+                            <div className="mt-2 flex justify-end">
+                                <Button type="submit" className="bg-purple-500 hover:bg-purple-600 text-white rounded-lg" disabled={loading || !newComment.trim()}>
+                                    {loading ? "Publicando..." : "Publicar Comentário"}
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </form>
             ) : (
-                // --- Aviso para Fazer Login ---
-                <div className="mb-6 md:mb-8 p-4 rounded-lg bg-gray-100 text-center text-gray-700">
-                    <p>
-                        Você precisa estar logado para deixar um comentário.{' '}
-                        <Link to="/login" className="text-purple-600 font-semibold hover:underline">
-                            Fazer login
-                        </Link>
-                    </p>
+                <div className="mb-8 p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+                    Faça login para participar da conversa.
                 </div>
             )}
 
-            {/* --- Lista de Comentários Existentes --- */}
+            {/* Lista de Comentários */}
             <div className="space-y-6">
-                {comments.length === 0 ? (
-                    <p className="text-gray-500">Ainda não há comentários. Seja o primeiro!</p>
-                ) : (
-                    comments.map((comment) => (
-                        <div key={comment._id} className="flex items-start gap-3 md:gap-4">
-                            {/* Avatar do autor do comentário */}
-                            {/* --- ATUALIZAÇÃO RESPONSIVA ---
-                               CELULAR: w-8 h-8 (avatar menor)
-                               DESKTOP: md:w-10 md:h-10 (avatar original)
-                            */}
-                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-bold flex-shrink-0">
-                                {comment.author.name[0]?.toUpperCase()}
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex items-baseline gap-2">
-                                    <span className="font-semibold text-gray-900">{comment.author.name}</span>
-                                    <span className="text-xs text-gray-500">
-                                        {formatCommentDate(comment.createdAt)}
-                                    </span>
+                {comments.map((comment, idx) => (
+                    <div key={comment._id || idx} className="flex gap-4">
+                        <div className="shrink-0">
+                            {comment.author && comment.author.avatar ? (
+                                // FOTO DO AUTOR DO COMENTÁRIO
+                                <img src={comment.author.avatar} alt={comment.author.name} className="w-10 h-10 rounded-full object-cover border border-gray-100" />
+                            ) : (
+                                // INICIAL DO NOME
+                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold">
+                                    {comment.author?.name?.charAt(0).toUpperCase() || "?"}
                                 </div>
-                                <p className="text-gray-700 mt-1 whitespace-pre-line">{comment.content}</p>
-                            </div>
+                            )}
                         </div>
-                    ))
-                )}
+
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="font-semibold text-gray-900">{comment.author?.name || "Usuário"}</span>
+                                <span className="text-xs text-gray-500">
+                                    {comment.createdAt && new Date(comment.createdAt).toLocaleDateString('pt-BR')}
+                                </span>
+                            </div>
+                            <p className="text-gray-700 leading-relaxed">{comment.content}</p>
+                        </div>
+                    </div>
+                ))}
+                {comments.length === 0 && <p className="text-gray-500 italic">Seja o primeiro a comentar!</p>}
             </div>
         </div>
     );

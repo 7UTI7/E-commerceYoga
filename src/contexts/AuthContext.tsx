@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // Recupera a sessão ao carregar a página
   useEffect(() => {
     try {
       const storage = localStorage.getItem("auth_token") ? localStorage : sessionStorage;
@@ -41,14 +42,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (t && u) {
         setToken(t);
-        const parsedUser = JSON.parse(u);
-        setUser(parsedUser);
+        setUser(JSON.parse(u)); // Aqui ele recupera o Avatar e a Role
         fetchFavorites();
       } else {
         setIsFavoritesLoading(false);
       }
     } catch (e) {
-      console.error("Erro ao restaurar sessão, limpando dados corrompidos.", e);
+      console.error("Erro na sessão, limpando...", e);
       localStorage.clear();
       sessionStorage.clear();
       setUser(null);
@@ -56,13 +56,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchFavorites]);
 
+  // Salva a sessão (com o Avatar novo)
   const setSession = (u: User, t: string, remember = true) => {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem("auth_token", t);
-    storage.setItem("auth_user", JSON.stringify(u));
+    storage.setItem("auth_user", JSON.stringify(u)); // Salva o objeto completo
     setUser(u);
     setToken(t);
-    // Busca favoritos ao logar
     fetchFavorites();
   };
 
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const toggleFavorite = useCallback(async (videoId: string) => {
     if (!token) return;
     const isCurrentlyFavorited = favoriteVideoIds.includes(videoId);
-    let newFavoritesList = isCurrentlyFavorited
+    const newFavoritesList = isCurrentlyFavorited
       ? favoriteVideoIds.filter(id => id !== videoId)
       : [...favoriteVideoIds, videoId];
 

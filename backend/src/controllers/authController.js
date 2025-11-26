@@ -231,6 +231,7 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatar: user.avatar,
       token: token,
       message: 'Login realizado com sucesso!'
     });
@@ -257,6 +258,7 @@ const getMe = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatar: user.avatar,
     });
   } catch (error) {
     res.status(500).json({ message: 'Erro no servidor.' });
