@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
-import { getMyFavoriteVideos, toggleFavoriteVideo, type Video, type User } from "../lib/api";
+// Importamos getMe para validar a sessão com o servidor e User para tipagem
+import { getMyFavoriteVideos, toggleFavoriteVideo, getMe, type Video, type User } from "../lib/api";
 
 type AuthContextType = {
   user: User | null;
@@ -35,25 +36,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Recupera a sessão ao carregar a página
   useEffect(() => {
-    try {
-      const storage = localStorage.getItem("auth_token") ? localStorage : sessionStorage;
-      const t = storage.getItem("auth_token");
-      const u = storage.getItem("auth_user");
+    const initSession = async () => {
+      try {
+        const storage = localStorage.getItem("auth_token") ? localStorage : sessionStorage;
+        const t = storage.getItem("auth_token");
 
-      if (t && u) {
-        setToken(t);
-        setUser(JSON.parse(u)); // Aqui ele recupera o Avatar e a Role
-        fetchFavorites();
-      } else {
-        setIsFavoritesLoading(false);
+        if (t) {
+          setToken(t);
+
+          // Tenta buscar dados frescos do backend (incluindo avatar novo)
+          try {
+            const freshUser = await getMe();
+            setUser(freshUser);
+            storage.setItem("auth_user", JSON.stringify(freshUser));
+          } catch (err) {
+            // Se falhar (backend off ou token expirado), tenta usar o cache
+            const cachedUser = storage.getItem("auth_user");
+            if (cachedUser) {
+              setUser(JSON.parse(cachedUser));
+            } else {
+              // Se não tem cache nem backend, limpa tudo
+              localStorage.clear();
+              sessionStorage.clear();
+              setUser(null);
+              setToken(null);
+            }
+          }
+          fetchFavorites();
+        } else {
+          setIsFavoritesLoading(false);
+        }
+      } catch (e) {
+        console.error("Erro ao restaurar sessão, limpando...", e);
+        localStorage.clear();
+        sessionStorage.clear();
+        setUser(null);
+        setToken(null);
       }
-    } catch (e) {
-      console.error("Erro na sessão, limpando...", e);
-      localStorage.clear();
-      sessionStorage.clear();
-      setUser(null);
-      setToken(null);
-    }
+    };
+
+    initSession();
   }, [fetchFavorites]);
 
   // Salva a sessão (com o Avatar novo)
