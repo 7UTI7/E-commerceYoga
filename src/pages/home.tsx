@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react"; // Adicionei useState
 import { Link } from "react-router-dom";
 import EventCarousel from "../userui/components/EventCarousel";
 
@@ -6,9 +6,11 @@ export default function Home() {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const dotsWrapRef = useRef<HTMLDivElement | null>(null);
 
+  // Estado para controlar o Zoom da imagem (Lightbox)
+  const [imagemZoom, setImagemZoom] = useState<string | null>(null);
+
   useEffect(() => {
-    // ... (Seu useEffect para o carrossel de depoimentos está ótimo e mantido) ...
-    // (Nenhuma alteração de lógica necessária aqui)
+    // --- LÓGICA DO CARROSSEL DE DEPOIMENTOS (MANTIDA) ---
     const scroller = scrollerRef.current;
     const dotsWrap = dotsWrapRef.current;
     if (!scroller || !dotsWrap) return;
@@ -91,6 +93,30 @@ export default function Home() {
 
   return (
     <>
+      {/* --- LIGHTBOX (ZOOM) --- 
+          Fica invisível até imagemZoom ter um valor.
+          Cobre a tela toda (fixed inset-0).
+      */}
+      {imagemZoom && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+          onClick={() => setImagemZoom(null)} // Clicar fora fecha
+        >
+          <button
+            className="absolute top-4 right-4 text-white text-4xl font-bold p-2"
+            onClick={() => setImagemZoom(null)}
+          >
+            &times;
+          </button>
+          <img
+            src={imagemZoom}
+            alt="Zoom"
+            className="max-h-full max-w-full rounded-lg shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()} // Clicar na imagem não fecha
+          />
+        </div>
+      )}
+
       {/* --- HERO SECTION --- */}
       <section className="relative h-[90vh] min-h-[560px] flex items-center justify-center text-center">
         <img src="/assets/yogatelainicial2.jpg" alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -100,19 +126,10 @@ export default function Home() {
           <img
             src="/assets/ChatGPT Image 7 de out. de 2025, 23_30_26.png"
             alt="Logo Karla Rodrigues Yoga"
-            /* --- ATUALIZAÇÃO RESPONSIVA ---
-               CELULAR: px-16 (padding de 4rem)
-               TABLET: sm:px-32
-               DESKTOP: md:px-60
-            */
-            className="px-16 sm:px-32 md:px-60 mx-auto mt-0 rounded-lg"
+            // MUDANÇA 1: Logo menor no celular (w-48) e tamanho original no PC (md:px-60 md:w-auto)
+            className="w-48 mx-auto md:w-auto md:px-60 mt-0 rounded-lg mb-6"
           />
-          {/* --- ATUALIZAÇÃO RESPONSIVA ---
-               CELULAR: text-3xl
-               TABLET: sm:text-4xl
-               DESKTOP: lg:text-5xl
-            */
-          }
+
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-white">Encontre seu equilíbrio interior</h2>
           <p className="mt-6 text-lg sm:text-xl text-white/90">
             Descubra a paz e harmonia através da prática do yoga. Transforme corpo, mente e espírito.
@@ -126,13 +143,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- SOBRE (Já estava responsivo) --- */}
+      {/* --- SOBRE A INSTRUTORA --- */}
       <section id="sobre" className="py-20 bg-red-100">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-10 items-center">
-            <div className="overflow-hidden rounded-2xl shadow-xl max-h-[600px] max-w-[550px]">
-              <img className="h-[650px] w-[550px] object-cover" src="/assets/karla.jpeg" alt="Instrutora de Yoga" />
+
+            {/* MUDANÇA 2: Foto da professora */}
+            {/* Celular: w-3/4 (menor e centralizada), h-auto (proporcional) */}
+            {/* PC (md): Volta a ser grande fixa */}
+            <div className="mx-auto w-3/4 md:w-full overflow-hidden rounded-2xl shadow-xl md:max-h-[600px] md:max-w-[550px]">
+              <img
+                className="w-full h-auto md:h-[650px] md:w-[550px] object-cover"
+                src="/assets/karla.jpeg"
+                alt="Instrutora de Yoga"
+              />
             </div>
+
             <div>
               <h3 className="text-3xl font-bold text-gray-900">Sobre nossa instrutora</h3>
               <h4 className="mt-2 text-xl font-semibold text-purple-700">Karla Rodrigues</h4>
@@ -163,7 +189,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* --- ESPECIALIDADES (Já estava responsivo) --- */}
+      {/* --- ESPECIALIDADES --- */}
       <section className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
@@ -171,6 +197,7 @@ export default function Home() {
           </div>
 
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+            {/* Mantido igual, pois já estava responsivo (grid-cols-1 sm:grid-cols-2) */}
             <div className="group rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition h-full flex flex-col">
               <img src="/assets/especialidade1.jpg" alt="Hatha Yoga" className="h-40 w-full object-cover rounded-2xl" />
               <h4 className="mt-4 text-xl font-bold text-gray-900 text-center">Hatha Yoga</h4>
@@ -228,32 +255,40 @@ export default function Home() {
           <div className="text-center max-w-2xl mx-auto">
             <h3 className="text-3xl font-bold text-gray-900">EVENTOS</h3>
           </div>
-
           <div className="mt-12">
-            {/* Este componente (EventCarousel) também precisa de ajustes responsivos */}
             <EventCarousel />
           </div>
         </div>
       </section>
 
-      {/* --- ESTRUTURA (Já estava responsivo) --- */}
+      {/* --- CONHEÇA NOSSA ESTRUTURA (GALERIA) --- */}
       <section id="estrutura" className="py-20 bg-red-100">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-4">
           <h2 className="text-center text-2xl font-bold text-gray-800 mb-8">CONHEÇA NOSSA ESTRUTURA</h2>
-          <div className="flex flex-wrap justify-center gap-4">
-            {Array.from({ length: 23 }).map((_, i) => (
-              <img
-                key={i}
-                src={`/assets/estudio-yoga-${i + 1}.jpg`}
-                alt={`Foto ${i + 1}`}
-                className="w-64 h-40 object-cover rounded-lg shadow-md"
-              />
-            ))}
+
+          {/* MUDANÇA 3: Grid Layout */}
+          {/* Celular: grid-cols-2 (lado a lado) */}
+          {/* PC (md): grid-cols-4 (4 lado a lado) ou flex-wrap como antes */}
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-4">
+            {Array.from({ length: 23 }).map((_, i) => {
+              const src = `/assets/estudio-yoga-${i + 1}.jpg`;
+              return (
+                <img
+                  key={i}
+                  src={src}
+                  alt={`Foto ${i + 1}`}
+                  // MUDANÇA 4: Clique para Zoom
+                  onClick={() => setImagemZoom(src)}
+                  // Ajuste visual: h-32 no celular, h-48 no PC. w-full para preencher a coluna.
+                  className="w-full h-32 md:h-48 object-cover rounded-lg shadow-md cursor-pointer hover:opacity-90 transition"
+                />
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* --- DEPOIMENTOS (Já estava responsivo) --- */}
+      {/* --- DEPOIMENTOS --- */}
       <section id="depoimentos" className="py-20 bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -265,7 +300,6 @@ export default function Home() {
             <div
               ref={scrollerRef}
               id="testimonial-scroller"
-              // (Este trecho já era perfeitamente responsivo)
               className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']"
             >
               <article className="flex-none w-[88%] sm:w-[70%] md:w-[32%] snap-start rounded-2xl bg-white p-8 shadow-[0_12px_45px_-10px_rgba(0,0,0,0.25)] hover:shadow-[0_18px_60px_-8px_rgba(0,0,0,0.30)] transition-shadow duration-300">
