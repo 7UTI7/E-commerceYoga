@@ -34,26 +34,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const storage = localStorage.getItem("auth_token") ? localStorage : sessionStorage;
-    const t = storage.getItem("auth_token");
-    const u = storage.getItem("auth_user");
+    try {
+      const storage = localStorage.getItem("auth_token") ? localStorage : sessionStorage;
+      const t = storage.getItem("auth_token");
+      const u = storage.getItem("auth_user");
 
-    if (t && u) {
-      setToken(t);
-      try { setUser(JSON.parse(u)); } catch { }
-      fetchFavorites();
-    } else {
-      setIsFavoritesLoading(false);
+      if (t && u) {
+        setToken(t);
+        const parsedUser = JSON.parse(u);
+        setUser(parsedUser);
+        fetchFavorites();
+      } else {
+        setIsFavoritesLoading(false);
+      }
+    } catch (e) {
+      console.error("Erro ao restaurar sessão, limpando dados corrompidos.", e);
+      localStorage.clear();
+      sessionStorage.clear();
+      setUser(null);
+      setToken(null);
     }
   }, [fetchFavorites]);
 
-  // AQUI É ONDE A MÁGICA ACONTECE: Salvamos o usuário (com avatar e role) no storage
   const setSession = (u: User, t: string, remember = true) => {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem("auth_token", t);
     storage.setItem("auth_user", JSON.stringify(u));
     setUser(u);
     setToken(t);
+    // Busca favoritos ao logar
     fetchFavorites();
   };
 

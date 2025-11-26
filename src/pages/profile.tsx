@@ -78,6 +78,8 @@ export default function ProfilePage() {
       reader.addEventListener("load", () => {
         setImageSrc(reader.result as string);
         setOpenCropModal(true);
+        setZoom(1);
+        setCrop({ x: 0, y: 0 });
       });
       reader.readAsDataURL(file);
     }
@@ -90,7 +92,7 @@ export default function ProfilePage() {
       const croppedImageBlob = await getCroppedImg(imageSrc!, croppedAreaPixels);
       const response = await uploadImage(croppedImageBlob);
       setAvatar(response.imageUrl);
-      setSuccessMsg("Foto enviada! Clique em 'Salvar alterações' para finalizar.");
+      setSuccessMsg("Foto pronta! Clique em 'Salvar alterações' para gravar.");
     } catch (e) {
       setErrorMsg("Erro ao enviar imagem.");
     } finally {
@@ -110,14 +112,13 @@ export default function ProfilePage() {
         name: name.trim(),
         phone: phone.replace(/\D/g, ""),
         email: me?.email,
-        avatar: avatar // Envia URL da foto
+        avatar: avatar // Envia URL
       };
 
-      // Chama a API
       const updatedUser = await updateMe(payload);
       setMe(updatedUser);
 
-      // ATUALIZA A SESSÃO SEM DESLOGAR
+      // ATUALIZA A SESSÃO - Importante para refletir no Header na hora
       const currentToken = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token") || "";
       setSession(updatedUser, currentToken, true);
 
