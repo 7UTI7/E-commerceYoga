@@ -24,7 +24,7 @@ const getVideoById = async (req, res) => {
     // ATUALIZAÇÃO AQUI: Use .populate()
     const video = await Video.findById(req.params.id)
       .populate('author', 'name')
-      .populate('comments.author', 'name');
+      .populate('comments.author', 'name avatar');
 
     if (video) {
       res.status(200).json(video);
@@ -49,7 +49,7 @@ const createVideo = async (req, res) => {
       youtubeUrl,
       category,
       level,
-      author: req.user._id, 
+      author: req.user._id,
     });
 
     const createdVideo = await video.save();
@@ -157,9 +157,9 @@ const createVideoComment = async (req, res) => {
 
       video.comments.unshift(comment);
       await video.save();
-      
+
       const populatedVideo = await Video.findById(video._id).populate('comments.author', 'name');
-      
+
       res.status(201).json(populatedVideo.comments[0]);
     } else {
       res.status(404).json({ message: 'Vídeo não encontrado.' });

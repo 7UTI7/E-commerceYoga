@@ -1,4 +1,3 @@
-// src/userui/components/post-detail.tsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock, MapPin, BarChart3, Star } from "lucide-react";
@@ -12,7 +11,7 @@ import {
   type Event,
   type Video,
   type ClassSlot,
-  type Comment, // <-- ADICIONADO (para a prop 'comments')
+  type Comment,
 } from "../../lib/api";
 
 import { Button } from "./ui/button";
@@ -20,10 +19,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import { getFigmaImage } from "../figmaImages";
 
-import { useAuth } from "../../contexts/AuthContext"; //
-
-// +++ IMPORTAÇÃO DO NOVO COMPONENTE +++
-import CommentsSection from "./CommentsSection"; // <-- ADICIONADO (verifique o caminho)
+import { useAuth } from "../../contexts/AuthContext";
+import CommentsSection from "./CommentsSection";
 
 type Kind = "article" | "video" | "event" | "class" | "group";
 type UiCategory = "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos";
@@ -38,7 +35,6 @@ function kindToUi(kind: Kind): UiCategory {
   }
 }
 
-// +++ TIPO 'Unified' ATUALIZADO +++
 type Unified = {
   id: string;
   kind: Kind;
@@ -53,7 +49,7 @@ type Unified = {
   fullDescription?: string;
   image: string;
   youtubeId?: string;
-  comments?: Comment[]; // <-- ADICIONADO
+  comments?: Comment[];
 };
 
 function youtubeIdFromAny(url?: string): string | undefined {
@@ -71,11 +67,10 @@ export default function PostDetail() {
   const [item, setItem] = useState<Unified | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { user, favoriteVideoIds, toggleFavorite } = useAuth(); //
+  const { user, favoriteVideoIds, toggleFavorite } = useAuth();
 
   const [openWhats, setOpenWhats] = useState(false);
-  const whatsappHref =
-    "https://wa.me/5511999999999?text=Oi%20Karla!%20Quero%20agendar%20uma%20aula%20de%20Yoga.%20Pode%20me%20ajudar%3F";
+  const whatsappHref = "https://wa.me/5511999999999?text=Oi%20Karla!%20Quero%20agendar%20uma%20aula%20de%20Yoga.%20Pode%20me%20ajudar%3F";
 
   useEffect(() => {
     let alive = true;
@@ -92,9 +87,8 @@ export default function PostDetail() {
       try {
         let unified: Unified | null = null;
 
-        // Os 'comments' já estão sendo incluídos na busca
         if (kind === "article") {
-          const a: Article = await getArticleByIdOrSlug(id); //
+          const a: Article = await getArticleByIdOrSlug(id);
           unified = {
             id: a._id,
             kind,
@@ -104,12 +98,12 @@ export default function PostDetail() {
             excerpt: a.content?.trim() ? a.content.slice(0, 180) : undefined,
             fullDescription: a.content,
             image: safeImage(a.coverImage || getFigmaImage("article", a)),
-            comments: a.comments || [], // <-- ADICIONADO
+            comments: a.comments || [],
           };
         }
 
         if (kind === "video") {
-          const v: Video = await getVideoById(id); //
+          const v: Video = await getVideoById(id);
           const ytId = youtubeIdFromAny(v.youtubeUrl || v.url);
           unified = {
             id: v._id,
@@ -122,7 +116,7 @@ export default function PostDetail() {
             fullDescription: v.description,
             image: safeImage(getFigmaImage("video", v)),
             youtubeId: ytId,
-            comments: v.comments || [], // <-- ADICIONADO
+            comments: v.comments || [],
           };
         }
 
@@ -138,7 +132,6 @@ export default function PostDetail() {
             excerpt: e.description?.trim() ? e.description.slice(0, 180) : undefined,
             fullDescription: e.description,
             image: safeImage(getFigmaImage("event", e)),
-            // (Eventos não têm comentários)
           };
         }
 
@@ -156,7 +149,6 @@ export default function PostDetail() {
             excerpt: c.description?.trim() ? c.description.slice(0, 180) : undefined,
             fullDescription: c.description,
             image: safeImage(getFigmaImage("class", c)),
-            // (Aulas não têm comentários)
           };
         }
 
@@ -176,20 +168,19 @@ export default function PostDetail() {
 
   const isFavorited = useMemo(() => {
     if (!item || item.kind !== 'video') return false;
-    return favoriteVideoIds.includes(item.id); //
+    return favoriteVideoIds.includes(item.id);
   }, [item, favoriteVideoIds]);
 
-  const showFavoriteStar = item?.kind === 'video' && user; //
+  const showFavoriteStar = item?.kind === 'video' && user;
 
   const handleFavoriteClick = () => {
     if (item && item.kind === 'video') {
-      toggleFavorite(item.id); //
+      toggleFavorite(item.id);
     }
   };
 
   const isEvent = item?.kind === "event";
   const isClass = item?.kind === "class";
-  // +++ ATUALIZADO (para verificar se é artigo ou vídeo) +++
   const canHaveComments = item?.kind === 'article' || item?.kind === 'video';
 
   const categoryLabel = item?.category || "";
@@ -246,7 +237,7 @@ export default function PostDetail() {
 
   return (
     <div className="bg-gradient-to-b from-purple-50 to-white min-h-screen">
-      {/* --- BARRA DE VOLTAR (Sem alteração) --- */}
+      {/* --- BARRA DE VOLTAR --- */}
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="mx-auto max-w-5xl px-4 py-4">
           <Button
@@ -261,10 +252,6 @@ export default function PostDetail() {
       </div>
 
       {/* --- CABEÇALHO DA IMAGEM --- */}
-      {/*
-        CELULAR: h-[300px]
-        DESKTOP: md:h-[460px]
-      */}
       <div className="relative h-[300px] md:h-[460px] overflow-hidden">
         <ImageWithFallback
           src={item.image}
@@ -273,10 +260,6 @@ export default function PostDetail() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent" />
 
-        {/*
-          CELULAR: p-4
-          DESKTOP: md:p-12
-        */}
         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-12 text-white z-10">
           <div className="mx-auto max-w-5xl">
             <div className="inline-block bg-purple-600 text-white px-4 py-1 rounded-full text-sm mb-4">
@@ -284,10 +267,6 @@ export default function PostDetail() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/*
-                CELULAR: text-2xl
-                DESKTOP: md:text-4xl (aproximando do h1 padrão)
-              */}
               <h1 className="text-white mb-0 text-2xl md:text-4xl font-semibold">{item.title}</h1>
               {showFavoriteStar && (
                 <button
@@ -303,9 +282,6 @@ export default function PostDetail() {
               )}
             </div>
 
-            {/*
-              CELULAR: Adicionado 'flex-wrap' para quebrar a linha
-            */}
             <div className="flex flex-wrap items-center gap-4 text-white/90 mt-4">
               {dateLabel && (
                 <div className="flex items-center gap-2">
@@ -343,16 +319,7 @@ export default function PostDetail() {
       </div>
 
       {/* --- CONTEÚDO PRINCIPAL --- */}
-      {/*
-        CELULAR: px-4 py-6
-        DESKTOP: md:px-4 md:py-10 (px-4 mantido do container max-w-5xl)
-      */}
       <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
-
-        {/*
-          CELULAR: p-4 md:p-8
-          DESKTOP: md:p-8
-        */}
         {item.excerpt && (
           <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 mb-6 md:mb-8 border-l-4 border-purple-600">
             <h3 className="text-purple-900 mb-3 text-lg md:text-xl">Resumo</h3>
@@ -360,10 +327,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/*
-          CELULAR: p-4 md:p-8
-          DESKTOP: md:p-8
-        */}
         {item.kind === "article" && item.fullDescription && (
           <div className="bg-white rounded-2xl shadow-md p-4 md:p-8 space-y-4">
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">
@@ -372,10 +335,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/*
-          CELULAR: p-4 md:p-8
-          DESKTOP: md:p-8
-        */}
         {item.kind === "video" && (
           <div className="bg-white rounded-2xl shadow-md p-4 md:p-8 space-y-5">
             {embedSrc ? (
@@ -394,10 +353,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/*
-          CELULAR: p-4 md:p-8
-          DESKTOP: md:p-8
-        */}
         {(isEvent || isClass) && item.fullDescription && (
           <div className="bg-white rounded-2xl shadow-md p-4 md:p-8">
             <p className="text-gray-700 leading-relaxed whitespace-pre-line">{item.fullDescription}</p>
@@ -405,20 +360,15 @@ export default function PostDetail() {
         )}
 
         {/* --- SEÇÃO DE COMENTÁRIOS --- */}
-        {/* (CommentsSection.tsx será ajustado separadamente, mas já fica aqui) */}
         {canHaveComments && (
           <CommentsSection
             postId={item.id}
-            kind={item.kind as 'article' | 'video'} // Nós sabemos que é um desses
+            kind={item.kind as 'article' | 'video'}
             initialComments={item.comments || []}
           />
         )}
 
-        {/* --- BLOCO DE CTA --- */}
-        {/*
-          CELULAR: p-6
-          DESKTOP: md:p-8
-        */}
+        {/* --- CTA --- */}
         {ctaBlock && (
           <div className="mt-8 md:mt-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-xl p-6 md:p-8 text-center text-white">
             <h3 className="text-white mb-3 text-xl md:text-2xl">{ctaBlock.title}</h3>
@@ -440,12 +390,10 @@ export default function PostDetail() {
         )}
       </div>
 
-      {/* --- MODAL (Sem alteração) --- */}
       <Dialog open={openWhats} onOpenChange={setOpenWhats}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Abrir WhatsApp?</DialogTitle>
-            {/* Corrigido o typo */}
             <DialogDescription>
               Este link abrirá o WhatsApp em uma nova aba para {isEvent ? "participar do evento" : "agendar sua aula"}. Deseja continuar?
             </DialogDescription>

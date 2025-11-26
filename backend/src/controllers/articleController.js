@@ -19,16 +19,16 @@ const getPublishedArticles = async (req, res) => {
 const getArticleBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    
+
     // ATUALIZAÇÃO AQUI: Use .populate()
     const article = await Article.findOne({
       slug: slug,
       status: 'PUBLISHED',
     })
-    // Popular o 'author' (quem escreveu o artigo)
-    .populate('author', 'name') 
-    // Popular o 'author' DENTRO do array 'comments'
-    .populate('comments.author', 'name'); 
+      // Popular o 'author' (quem escreveu o artigo)
+      .populate('author', 'name')
+      // Popular o 'author' DENTRO do array 'comments'
+      .populate('comments.author', 'name avatar');
 
     if (article) {
       res.status(200).json(article);
@@ -123,7 +123,7 @@ const deleteArticle = async (req, res) => {
 
     await article.deleteOne(); // Novo método do Mongoose >= 7
     // ou: await article.remove(); (para Mongoose mais antigo)
-    
+
     res.status(200).json({ message: 'Artigo deletado com sucesso.' });
   } catch (error) {
     console.error(error);
@@ -153,11 +153,11 @@ const createArticleComment = async (req, res) => {
       article.comments.unshift(comment);
 
       await article.save();
-      
+
       // Popula o autor do comentário recém-criado para devolvê-lo
       // (Opcional, mas bom para o frontend)
       const populatedArticle = await Article.findById(article._id).populate('comments.author', 'name');
-      
+
       res.status(201).json(populatedArticle.comments[0]);
     } else {
       res.status(404).json({ message: 'Artigo não encontrado.' });

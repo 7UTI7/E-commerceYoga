@@ -35,7 +35,7 @@ const registerUser = async (req, res) => {
 
     // Cria a URL que será enviada no e-mail
     // (Aponta para uma rota do backend que vamos criar no próximo passo)
-// Define a URL do Frontend (Local ou Produção)
+    // Define a URL do Frontend (Local ou Produção)
     // Se tiver uma variável de ambiente (no Render), usa ela. Se não, usa o localhost:5173
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
@@ -48,7 +48,7 @@ const registerUser = async (req, res) => {
       await sendEmail({
         email: user.email,
         subject: 'Bem-vindo! Confirme seu e-mail - Yoga App',
-        html: htmlMessage, 
+        html: htmlMessage,
       });
       res.status(200).json({
         success: true,
@@ -180,7 +180,7 @@ const resetPassword = async (req, res) => {
 
     // 3. Define a nova senha (o pre-save vai criptografar)
     user.password = req.body.password;
-    
+
     // 4. Limpa os campos de token (já usou, não serve mais)
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -196,7 +196,7 @@ const resetPassword = async (req, res) => {
   } catch (error) {
     // Se a senha for fraca, o erro de validação cai aqui
     if (error.name === 'ValidationError') {
-        return res.status(400).json({ message: error.message });
+      return res.status(400).json({ message: error.message });
     }
     console.error(error);
     res.status(500).json({ message: 'Erro ao redefinir senha.' });
@@ -268,31 +268,32 @@ const getMe = async (req, res) => {
 // @access  Private (Qualquer usuário logado)
 const updateMe = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    // 1. ADICIONE 'avatar' AQUI NA DESESTRUTURAÇÃO
+    const { name, email, avatar } = req.body;
 
-    // Pega o usuário do banco (o 'req.user' do token)
     const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ message: 'Usuário não encontrado.' });
     }
 
-    // Lógica de mudança de e-mail
-    // Se o e-mail mudou, precisamos verificar se o novo já existe
     if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
       if (emailExists) {
-        return res.status(400).json({ message: 'Este e-mail já está em uso por outra conta.' });
+        return res.status(400).json({ message: 'Este e-mail já está em uso.' });
       }
       user.email = email;
     }
 
-    // Lógica de mudança de nome
     if (name) {
       user.name = name;
     }
 
-    // Salva as alterações
+    // 2. ADICIONE ESTE BLOCO PARA SALVAR A FOTO
+    if (avatar) {
+      user.avatar = avatar;
+    }
+
     const updatedUser = await user.save();
 
     res.status(200).json({
@@ -300,6 +301,7 @@ const updateMe = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
+      avatar: updatedUser.avatar, // Retorna a foto atualizada
     });
   } catch (error) {
     console.error(error);
@@ -332,7 +334,7 @@ const updatePassword = async (req, res) => {
 
     // 4. Salva o usuário
     await user.save();
-    
+
     res.status(200).json({ message: 'Senha atualizada com sucesso.' });
 
   } catch (error) {
@@ -367,6 +369,9 @@ const getMyFavorites = async (req, res) => {
     res.status(500).json({ message: 'Erro ao buscar favoritos.' });
   }
 };
+
+
+
 
 module.exports = {
   registerUser,

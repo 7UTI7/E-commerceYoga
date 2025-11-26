@@ -6,6 +6,9 @@ import App from "./App";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
+// Importação da nova página de verificação
+import VerificacaoCadastro from "./pages/verificacaoCadastro";
+import ResetPasswordPage from "./pages/ResetPassword"; // <--- Importe aqui
 import UserApp from "./userui/userApp";
 import ForgotPasswordPage from "./pages/forgotPassword";
 import Admin from "./pages/admin";
@@ -16,7 +19,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import GlobalErrorBoundary from "./userui/components/GlobalErrorBoundary";
 import "./index.css";
 
-// Logs globais
+// Logs globais para debug
 window.addEventListener("error", (e) => {
   console.error("[window.error]", (e as ErrorEvent).error || (e as ErrorEvent).message);
 });
@@ -24,19 +27,21 @@ window.addEventListener("unhandledrejection", (e) => {
   console.error("[unhandledrejection]", (e as PromiseRejectionEvent).reason);
 });
 
-// Rotas
+// Definição das rotas
 const appRoutes = {
   path: "/",
   element: <App />,
   children: [{ index: true, element: <Home /> }],
 };
 
-
-
-
 const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
+
+  // Rota de Verificação de E-mail
+  { path: "/verify-email/:token", element: <VerificacaoCadastro /> },
+  { path: "/reset-password/:token", element: <ResetPasswordPage /> },
+
   { path: "/esqueceu-senha", element: <ForgotPasswordPage /> },
   {
     path: "/user",
@@ -83,10 +88,10 @@ const bareRoutes = [
   },
 ];
 
+// Combina as rotas
 const router = createBrowserRouter([appRoutes, ...bareRoutes]);
 
-// Guard de bootstrap: se *qualquer* erro acontecer antes de montar,
-// a gente mostra na tela em vez de ficar branco.
+// Renderização
 function renderApp() {
   try {
     ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -102,14 +107,18 @@ function renderApp() {
     const msg =
       (err && (err.message || String(err))) || "Erro desconhecido durante o bootstrap do app.";
     console.error("[bootstrap error]", err);
+
+    // Fallback simples caso o React não consiga nem montar
     const box = document.createElement("pre");
-    box.style.whiteSpace = "pre-wrap";
-    box.style.padding = "16px";
-    box.style.margin = "24px";
-    box.style.border = "1px solid #fecaca";
-    box.style.background = "#fef2f2";
-    box.style.color = "#991b1b";
-    box.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    Object.assign(box.style, {
+      whiteSpace: "pre-wrap",
+      padding: "16px",
+      margin: "24px",
+      border: "1px solid #fecaca",
+      background: "#fef2f2",
+      color: "#991b1b",
+      fontFamily: "monospace"
+    });
     box.textContent = `Falha ao iniciar a UI:\n\n${msg}`;
     document.body.innerHTML = "";
     document.body.appendChild(box);
