@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
-
+const { verifyEmailTemplate, forgotPasswordTemplate } = require('../utils/emailTemplates');
 
 // @desc    Registrar um novo usuário
 // @route   POST /api/auth/register
@@ -37,15 +37,14 @@ const registerUser = async (req, res) => {
     // (Aponta para uma rota do backend que vamos criar no próximo passo)
     const verifyUrl = `${req.protocol}://${req.get('host')}/api/auth/verifyemail/${verificationToken}`;
 
-    const message = `Olá ${user.name},\n\nPor favor, verifique seu e-mail clicando no link abaixo:\n\n${verifyUrl}`;
+    const htmlMessage = verifyEmailTemplate(user.name, verifyUrl);
 
     try {
       await sendEmail({
         email: user.email,
-        subject: 'Verificação de E-mail - Yoga App',
-        message,
+        subject: 'Bem-vindo! Confirme seu e-mail - Yoga App',
+        html: htmlMessage, 
       });
-
       res.status(200).json({
         success: true,
         message: 'Cadastro realizado! Por favor, verifique seu e-mail para ativar a conta.',
@@ -130,13 +129,13 @@ const forgotPassword = async (req, res) => {
     // Por enquanto, vamos deixar hardcoded para teste local ou usar variável.
     const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
 
-    const message = `Você solicitou a redefinição de senha.\n\nPor favor, acesse o link para criar uma nova senha:\n\n${resetUrl}`;
+    const htmlMessage = forgotPasswordTemplate(resetUrl);
 
     try {
       await sendEmail({
         email: user.email,
-        subject: 'Recuperação de Senha - Yoga App',
-        message,
+        subject: 'Redefinição de Senha - Yoga App',
+        html: htmlMessage, // Mudamos de 'message' para 'html'
       });
 
       res.status(200).json({ success: true, data: 'E-mail de recuperação enviado!' });

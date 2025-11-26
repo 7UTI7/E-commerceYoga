@@ -17,11 +17,12 @@ const sendEmail = async (options) => {
 
 
   const message = {
-    from: '"Yoga App" <noreply@yogaapp.com>',
-    to: options.email, 
-    subject: options.subject, 
-    text: options.message, 
+    from: '"Yoga App 🧘‍♀️" <noreply@yogaapp.com>',
+    to: options.email,
+    subject: options.subject,
     
+    html: options.html, 
+    text: options.message, 
   };
 
   
