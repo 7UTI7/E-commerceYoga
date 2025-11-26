@@ -107,6 +107,100 @@ const verifyEmail = async (req, res) => {
   }
 };
 
+// @desc    Esqueci a senha (Envia e-mail com token)
+// @route   POST /api/auth/forgotpassword
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'Não há usuário com este e-mail.' });
+    }
+
+    // 1. Gera o token de reset (usando o método do userModel)
+    const resetToken = user.getResetPasswordToken();
+
+    // 2. Salva o token no banco (sem validar outros campos)
+    await user.save({ validateBeforeSave: false });
+
+    // 3. Cria a URL de reset (Link para o FRONTEND)
+    // Localmente será localhost:5173. Em produção será a URL do site.
+    // Por enquanto, vamos deixar hardcoded para teste local ou usar variável.
+    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+
+    const message = `Você solicitou a redefinição de senha.\n\nPor favor, acesse o link para criar uma nova senha:\n\n${resetUrl}`;
+
+    try {
+      await sendEmail({
+        email: user.email,
+        subject: 'Recuperação de Senha - Yoga App',
+        message,
+      });
+
+      res.status(200).json({ success: true, data: 'E-mail de recuperação enviado!' });
+    } catch (error) {
+      // Se o e-mail falhar, limpa o token do banco para não travar o usuário
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({ message: 'O e-mail não pôde ser enviado.' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro no servidor.' });
+  }
+};
+
+// @desc    Redefinir Senha (Nova senha via Token)
+// @route   PUT /api/auth/resetpassword/:resettoken
+// @access  Public
+const resetPassword = async (req, res) => {
+  try {
+    // 1. O token vem na URL. Precisamos fazer o Hash dele para comparar com o banco
+    // (Pois no banco salvamos apenas o hash por segurança)
+    const resetPasswordToken = crypto
+      .createHash('sha256')
+      .update(req.params.resettoken)
+      .digest('hex');
+
+    // 2. Busca usuário que tenha esse token E que não esteja expirado
+    const user = await User.findOne({
+      resetPasswordToken,
+      resetPasswordExpire: { $gt: Date.now() }, // $gt = maior que agora
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Token inválido ou expirado.' });
+    }
+
+    // 3. Define a nova senha (o pre-save vai criptografar)
+    user.password = req.body.password;
+    
+    // 4. Limpa os campos de token (já usou, não serve mais)
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+
+    // 5. Retorna sucesso (Frontend redireciona para login)
+    res.status(200).json({
+      success: true,
+      message: 'Senha atualizada com sucesso! Faça login com a nova senha.',
+    });
+
+  } catch (error) {
+    // Se a senha for fraca, o erro de validação cai aqui
+    if (error.name === 'ValidationError') {
+        return res.status(400).json({ message: error.message });
+    }
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao redefinir senha.' });
+  }
+};
+
 // @desc    Login
 // @route   POST /api/auth/login
 const loginUser = async (req, res) => {
@@ -279,5 +373,7 @@ module.exports = {
   updateMe,
   updatePassword,
   getMyFavorites,
-  verifyEmail
+  verifyEmail,
+  forgotPassword,
+  resetPassword,
 };

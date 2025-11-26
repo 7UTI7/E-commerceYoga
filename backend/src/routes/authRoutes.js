@@ -9,7 +9,9 @@ const {
   updateMe,
   updatePassword,
   getMyFavorites,
-  verifyEmail
+  verifyEmail,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/authController');
 
 // Rota de Registro
@@ -29,5 +31,8 @@ router.get('/me/favorites', protect, getMyFavorites);
 
 // Rota para o link do e-mail (GET)
 router.get('/verifyemail/:token', verifyEmail);
+
+router.post('/forgotpassword', forgotPassword);
+router.put('/resetpassword/:resettoken', resetPassword);
 
 module.exports = router;
