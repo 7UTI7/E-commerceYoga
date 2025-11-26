@@ -35,7 +35,12 @@ const registerUser = async (req, res) => {
 
     // Cria a URL que será enviada no e-mail
     // (Aponta para uma rota do backend que vamos criar no próximo passo)
-    const verifyUrl = `${req.protocol}://${req.get('host')}/api/auth/verifyemail/${verificationToken}`;
+// Define a URL do Frontend (Local ou Produção)
+    // Se tiver uma variável de ambiente (no Render), usa ela. Se não, usa o localhost:5173
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
+    // Cria o link apontando para a rota do React
+    const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
 
     const htmlMessage = verifyEmailTemplate(user.name, verifyUrl);
 
@@ -124,10 +129,8 @@ const forgotPassword = async (req, res) => {
     // 2. Salva o token no banco (sem validar outros campos)
     await user.save({ validateBeforeSave: false });
 
-    // 3. Cria a URL de reset (Link para o FRONTEND)
-    // Localmente será localhost:5173. Em produção será a URL do site.
-    // Por enquanto, vamos deixar hardcoded para teste local ou usar variável.
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     const htmlMessage = forgotPasswordTemplate(resetUrl);
 
