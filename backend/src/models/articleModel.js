@@ -34,6 +34,9 @@ const articleSchema = new mongoose.Schema(
       type: String, // Aqui virá o conteúdo (seja Markdown ou HTML)
       required: [true, 'O conteúdo é obrigatório.'],
     },
+    coverImage: {
+      type: String, // URL da imagem de capa
+    },
     // 'author' será o _id do Usuário (ADMIN) que criou o post
     author: {
       type: mongoose.Schema.Types.ObjectId,
