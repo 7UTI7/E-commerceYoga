@@ -11,6 +11,7 @@ const eventRoutes = require('./routes/eventRoutes');
 const classSlotRoutes = require('./routes/classSlotRoutes');
 const whatsAppGroupRoutes = require('./routes/whatsAppGroupRoutes');
 const searchRoutes = require('./routes/searchRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 
 // --- Conexão com o Banco de Dados ---
 connectDB();
@@ -44,6 +45,8 @@ app.use('/api/class-slots', classSlotRoutes);
 app.use('/api/whatsapp-groups', whatsAppGroupRoutes);
 
 app.use('/api/search', searchRoutes);
+
+app.use('/api/upload', uploadRoutes);
 
 // --- Inicialização do Servidor ---
 const PORT = process.env.PORT || 3001; 

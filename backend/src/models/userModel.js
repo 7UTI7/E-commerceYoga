@@ -38,7 +38,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false, 
     },
-    // --- AQUI ESTAVA FALTANDO ---
+    avatar: {
+      type: String, // Aqui vai a URL do Cloudinary
+      default: ''   // Começa sem foto
+    },
     verificationToken: String, 
     // ---------------------------
     resetPasswordToken: String,
