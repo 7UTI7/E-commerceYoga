@@ -12,6 +12,7 @@ import Login from "../pages/login";
 import Cadastro from "../pages/cadastro";
 import User from "../pages/user";
 import Admin from "../pages/admin";
+import VerificacaoCadastro from "../pages/verificacaoCadastro";
 
 // 404 simples
 function NotFound() {
@@ -49,6 +50,11 @@ const bareRoutes = [
       </ProtectedRoute>
     ),
   },
+
+  {
+  path: "/verify-email/:token", // <--- O link do e-mail aponta pra cá
+  element: <VerificacaoCadastro />
+},
 
   // admin: precisa estar logado e ter role ADMIN
   {
