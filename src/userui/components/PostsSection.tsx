@@ -1,31 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import PostCard from "./PostCard";
 import {
-  // Funções de categoria
   getPublishedArticles,
   getVideos,
   getEvents,
   getClassSlots,
   getWhatsAppGroups,
   getMyFavoriteVideos,
-
-  // +++ NOSSA NOVA FUNÇÃO DE BUSCA +++
-  searchContent, // <-- ADICIONADO
-
-  // Tipos
+  searchContent,
   type Article,
   type Video,
   type Event,
   type ClassSlot,
   type WhatsAppGroup,
-} from "../../lib/api"; //
-import { getFigmaImage } from "../figmaImages"; //
-import { Clock } from "lucide-react"; //
-import { useAuth } from "../../contexts/AuthContext"; //
+} from "../../lib/api";
+import { getFigmaImage } from "../figmaImages";
+import { Clock } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
-// (Tipos e Interfaces - Sem alteração, vindos do seu arquivo)
-type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos" | "Favoritos"; //
-type DataKey = "recent" | "article" | "video" | "event" | "class" | "group" | "favorites"; //
+type UiCategory = "Recentes" | "Artigos" | "Vídeos" | "Eventos" | "Aulas" | "Grupos" | "Favoritos";
+type DataKey = "recent" | "article" | "video" | "event" | "class" | "group" | "favorites";
+
 interface Item {
   id: string;
   kind: "article" | "video" | "event" | "class" | "group";
@@ -34,11 +29,10 @@ interface Item {
   image?: string;
   date?: string;
   joinLink?: string;
-  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos'; //
+  level?: 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
 }
 
-// (Funções Helper uiToKey, weekdayName, fmtISO - Sem alteração)
-function uiToKey(ui?: UiCategory): DataKey { //
+function uiToKey(ui?: UiCategory): DataKey {
   switch (ui) {
     case "Artigos": return "article";
     case "Vídeos": return "video";
@@ -49,31 +43,28 @@ function uiToKey(ui?: UiCategory): DataKey { //
     default: return "recent";
   }
 }
-const weekdayName = (i: number) => ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][i] ?? ""; //
-function fmtISO(iso?: string) { //
+const weekdayName = (i: number) => ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][i] ?? "";
+function fmtISO(iso?: string) {
   if (!iso) return "";
   const d = new Date(iso);
   return d.toLocaleString();
 }
 
-
-// --- ATUALIZAÇÃO NAS PROPS ---
 export default function PostsSection({
   activeCategory,
-  searchQuery // <-- NOVA PROP
+  searchQuery
 }: {
   activeCategory?: UiCategory;
-  searchQuery?: string; // <-- NOVA PROP
+  searchQuery?: string;
 }) {
-  const [posts, setPosts] = useState<Item[]>([]); //
-  const [loading, setLoading] = useState(true); //
-  const [err, setErr] = useState<string | null>(null); //
-  const selectedKey = useMemo<DataKey>(() => uiToKey(activeCategory ?? "Recentes"), [activeCategory]); //
-  const { user, favoriteVideoIds, toggleFavorite } = useAuth(); //
-  const [currentPage, setCurrentPage] = useState(1); //
-  const postsPerPage = 5; //
+  const [posts, setPosts] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+  const selectedKey = useMemo<DataKey>(() => uiToKey(activeCategory ?? "Recentes"), [activeCategory]);
+  const { user, favoriteVideoIds, toggleFavorite } = useAuth();
+  const [currentPage, setCurrentPage] = useState(1);
+  const postsPerPage = 5;
 
-  // --- ATUALIZAÇÃO PRINCIPAL NO USEEFFECT ---
   useEffect(() => {
     let alive = true;
     async function fetchData() {
@@ -81,18 +72,12 @@ export default function PostsSection({
       setErr(null);
       
       const items: Item[] = [];
-      // Pega o termo de busca, limpando espaços
       const query = searchQuery?.trim() || "";
 
       try {
-        // --- LÓGICA DE BUSCA (Prioridade 1) ---
-        // Se o usuário digitou algo...
         if (query) {
-          
-          // 1. Chama a nova API de busca
-          const results = await searchContent(query); //
+          const results = await searchContent(query);
 
-          // 2. Mapeia os Artigos encontrados
           items.push(
             ...results.articles.map((a: Article): Item => ({
               id: a.slug,
@@ -101,12 +86,12 @@ export default function PostsSection({
               description: a.content?.trim()
                 ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
                 : undefined,
+              // CORREÇÃO AQUI: Prioriza coverImage
               image: a.coverImage || getFigmaImage("article", a),
               date: a.createdAt ?? a.updatedAt,
             }))
           );
           
-          // 3. Mapeia os Vídeos encontrados
           items.push(
             ...results.videos.map((v: Video): Item => ({
               id: v._id,
@@ -120,17 +105,15 @@ export default function PostsSection({
           );
 
         } else {
-          // --- LÓGICA DE CATEGORIA (Prioridade 2) ---
-          // Se a busca está vazia, usa a sua lógica original
           
-          if (selectedKey === "favorites") { //
-            if (!user) { //
-              setErr("Você precisa estar logado para ver seus favoritos."); //
-              setPosts([]); //
+          if (selectedKey === "favorites") {
+            if (!user) {
+              setErr("Você precisa estar logado para ver seus favoritos.");
+              setPosts([]);
             } else {
-              const videos = await getMyFavoriteVideos(); //
+              const videos = await getMyFavoriteVideos();
               items.push(
-                ...videos.map((v: Video): Item => ({ //
+                ...videos.map((v: Video): Item => ({
                   id: v._id,
                   kind: "video",
                   title: v.title,
@@ -142,27 +125,27 @@ export default function PostsSection({
               );
             }
           } else {
-            // Lógica de busca existente
-            if (selectedKey === "article" || selectedKey === "recent") { //
-              const articles = await getPublishedArticles(); //
+            if (selectedKey === "article" || selectedKey === "recent") {
+              const articles = await getPublishedArticles();
               items.push(
-                ...articles.map((a: Article): Item => ({ //
+                ...articles.map((a: Article): Item => ({
                   id: a.slug,
                   kind: "article",
                   title: a.title,
                   description: a.content?.trim()
                     ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
                     : undefined,
+                  // CORREÇÃO AQUI: Prioriza coverImage
                   image: a.coverImage || getFigmaImage("article", a),
                   date: a.createdAt ?? a.updatedAt,
                 }))
               );
             }
 
-            if (selectedKey === "video" || selectedKey === "recent") { //
-              const videos = await getVideos(); //
+            if (selectedKey === "video" || selectedKey === "recent") {
+              const videos = await getVideos();
               items.push(
-                ...videos.map((v: Video): Item => ({ //
+                ...videos.map((v: Video): Item => ({
                   id: v._id,
                   kind: "video",
                   title: v.title,
@@ -174,24 +157,25 @@ export default function PostsSection({
               );
             }
 
-            if (selectedKey === "event" || selectedKey === "recent") { //
-              const events = await getEvents(); //
+            if (selectedKey === "event" || selectedKey === "recent") {
+              const events = await getEvents();
               items.push(
-                ...events.map((e: Event): Item => ({ //
+                ...events.map((e: Event): Item => ({
                   id: e._id,
                   kind: "event",
                   title: e.title,
                   description: e.description,
-                  image: getFigmaImage("event", e),
+                  // CORREÇÃO AQUI: Prioriza coverImage
+                  image: e.coverImage || getFigmaImage("event", e),
                   date: e.date ?? e.createdAt ?? e.updatedAt,
                 }))
               );
             }
 
-            if (selectedKey === "class" || selectedKey === "recent") { //
-              const classes = await getClassSlots(); //
+            if (selectedKey === "class" || selectedKey === "recent") {
+              const classes = await getClassSlots();
               items.push(
-                ...classes.map((c: ClassSlot): Item => { //
+                ...classes.map((c: ClassSlot): Item => {
                   const hasNewShape = !!c.dateTime || !!c.title || !!c.description;
                   const title = hasNewShape ? (c.title || "Aula de Yoga") : (c.modality ? `Aula de ${c.modality}` : "Aula de Yoga");
                   const desc = hasNewShape
@@ -213,10 +197,10 @@ export default function PostsSection({
               );
             }
 
-            if (selectedKey === "group" || selectedKey === "recent") { //
-              const groups = await getWhatsAppGroups(); //
+            if (selectedKey === "group" || selectedKey === "recent") {
+              const groups = await getWhatsAppGroups();
               items.push(
-                ...groups.map((g: WhatsAppGroup): Item => ({ //
+                ...groups.map((g: WhatsAppGroup): Item => ({
                   id: g._id,
                   kind: "group",
                   title: g.name,
@@ -229,46 +213,40 @@ export default function PostsSection({
             }
           }
         }
-        // --- FIM DA LÓGICA DE BUSCA/CATEGORIA ---
 
-        // Ordenar todos os itens por data, mais recente primeiro
-        items.sort((a, b) => { //
+        items.sort((a, b) => {
           const da = a.date ? new Date(a.date).getTime() : 0;
           const db = b.date ? new Date(b.date).getTime() : 0;
           return db - da;
         });
 
-        if (alive) setPosts(items); //
+        if (alive) setPosts(items);
       } catch (e: any) {
-        if (alive) setErr(e?.response?.data?.message || "Erro ao carregar conteúdos."); //
-        if (alive) setPosts([]); //
+        if (alive) setErr(e?.response?.data?.message || "Erro ao carregar conteúdos.");
+        if (alive) setPosts([]);
       } finally {
-        if (alive) setLoading(false); //
+        if (alive) setLoading(false);
       }
     }
     
     fetchData();
     return () => { alive = false; };
-  }, [selectedKey, user, searchQuery]); // <-- 'searchQuery' ADICIONADO À DEPENDÊNCIA
+  }, [selectedKey, user, searchQuery]);
 
-  // Efeito para resetar a paginação
   useMemo(() => {
-    setCurrentPage(1); //
-  }, [selectedKey, searchQuery]); // <-- 'searchQuery' ADICIONADO AQUI
+    setCurrentPage(1);
+  }, [selectedKey, searchQuery]);
 
-  
-  // (Lógica de Paginação e Render)
-  const totalPages = Math.ceil(posts.length / postsPerPage); //
-  const startIndex = (currentPage - 1) * postsPerPage; //
-  const endIndex = startIndex + postsPerPage; //
-  const currentPosts = posts.slice(startIndex, endIndex); //
+  const totalPages = Math.ceil(posts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const currentPosts = posts.slice(startIndex, endIndex);
 
   return (
     <section className="w-full px-4 sm:px-6 lg:px-8 py-10">
       <div className="mx-auto max-w-7xl">
         {err && <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{err}</div>}
 
-        {/* Se estiver buscando, esconde o título da categoria */}
         {!searchQuery && (
           <div className="flex items-center gap-2 mb-6">
             {activeCategory === 'Recentes' && <Clock className="w-6 h-6 text-gray-700" />}
@@ -282,12 +260,10 @@ export default function PostsSection({
           <div className="text-center text-gray-500 py-10">Carregando conteúdo...</div>
         ) : posts.length === 0 ? (
           <div className="text-center text-gray-500 py-10">
-            {/* Mensagem de "nenhum resultado" personalizada */}
             {searchQuery ? "Nenhum resultado encontrado para sua busca." : "Nenhum conteúdo encontrado."}
           </div>
         ) : (
           <>
-            {/* Lista de Posts */}
             <div className="space-y-6 mb-8">
               {currentPosts.map((item) => (
                 <PostCard
@@ -300,14 +276,13 @@ export default function PostsSection({
                   date={item.date}
                   joinLink={item.joinLink}
                   level={item.level}
-                  isFavorited={item.kind === 'video' && favoriteVideoIds.includes(item.id)} //
-                  onToggleFavorite={toggleFavorite} //
+                  isFavorited={item.kind === 'video' && favoriteVideoIds.includes(item.id)}
+                  onToggleFavorite={toggleFavorite}
                 />
               ))}
             </div>
 
-            {/* Controles de Paginação (Seu código original) */}
-            {totalPages > 1 && ( //
+            {totalPages > 1 && (
               <div className="flex items-center justify-center gap-2">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
@@ -317,7 +292,7 @@ export default function PostsSection({
                   Anterior
                 </button>
 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => { //
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
                   if (
                     page === 1 ||
                     page === totalPages ||

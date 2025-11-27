@@ -53,7 +53,8 @@ const EventsCarousel = () => {
             dateLabel: formatDatePt(e.date || e.createdAt || e.updatedAt),
             timeLabel: formatTimePt(e.date || e.createdAt || e.updatedAt),
             location: e.location || "",
-            image: getFigmaImage("event", e),
+            // CORREÇÃO AQUI: Prioriza a capa enviada pelo admin
+            image: e.coverImage || getFigmaImage("event", e),
           }))
           .sort((a, b) => new Date(a.dateISO).getTime() - new Date(b.dateISO).getTime());
         if (alive) {
@@ -100,10 +101,6 @@ const EventsCarousel = () => {
     <div className="bg-gray-50 py-4 md:py-6">
       <div className="container mx-auto px-4">
 
-        {/* --- AJUSTE DE ALTURA ---
-            CELULAR: h-[400px] (Mais compacto, formato paisagem/quadrado)
-            DESKTOP: md:h-[500px] (Mantém o tamanho original grande)
-        */}
         <div
           className="relative overflow-hidden rounded-xl shadow-2xl h-[400px] md:h-[500px]"
           onMouseEnter={stopAuto}
@@ -113,27 +110,22 @@ const EventsCarousel = () => {
             {items.map((ev) => (
               <div key={ev.id} className="w-full flex-shrink-0 h-full">
                 <div className="flex h-full relative">
-                  {/* Imagem de Fundo */}
                   <div className="absolute inset-0 z-0">
                     <ImageWithFallback src={ev.image || ""} alt={ev.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-black/70" />
                   </div>
 
-                  {/* Conteúdo Central */}
                   <div className="relative z-10 w-full p-4 md:p-12 flex flex-col justify-center text-white h-full">
                     <div className="max-w-3xl mx-auto text-center flex flex-col items-center justify-center h-full">
 
-                      {/* Badge "Evento" - Menor margin-bottom no mobile (mb-2) */}
                       <div className="inline-block bg-white text-purple-700 px-3 py-0.5 md:px-4 md:py-1 rounded-full text-xs md:text-sm font-bold mb-2 md:mb-6 uppercase tracking-wider shadow-sm">
                         Evento
                       </div>
 
-                      {/* Título - Menor no mobile (text-xl) */}
                       <h2 className="text-white mb-2 md:mb-6 text-xl md:text-3xl font-bold leading-tight drop-shadow-md">
                         {ev.title}
                       </h2>
 
-                      {/* Ícones (Data/Local) - Espaçamento reduzido no mobile (space-y-1) */}
                       <div className="space-y-1 md:space-y-3 mb-3 md:mb-6 text-sm md:text-base font-medium">
                         <div className="flex items-center justify-center gap-2 drop-shadow-sm">
                           <Calendar className="w-4 h-4" />
@@ -151,7 +143,6 @@ const EventsCarousel = () => {
                         </div>
                       </div>
 
-                      {/* Descrição - Corta em 2 linhas no mobile, 4 no PC */}
                       {ev.description ? (
                         <p className="text-white/90 leading-snug mb-4 md:mb-6 text-sm md:text-lg line-clamp-2 md:line-clamp-4 max-w-2xl">
                           {ev.description}
@@ -177,7 +168,6 @@ const EventsCarousel = () => {
             ))}
           </div>
 
-          {/* Setas de Navegação */}
           <button
             onClick={prev}
             aria-label="Anterior"
@@ -193,7 +183,6 @@ const EventsCarousel = () => {
             <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
-          {/* Indicadores (Bolinhas) */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
             {items.map((_, i) => (
               <button
@@ -207,7 +196,6 @@ const EventsCarousel = () => {
         </div>
       </div>
 
-      {/* Modal de Confirmação */}
       <Dialog open={confirmOpen} onOpenChange={(open) => { setConfirmOpen(open); if (!open) startAuto(); }}>
         <DialogContent>
           <DialogHeader>

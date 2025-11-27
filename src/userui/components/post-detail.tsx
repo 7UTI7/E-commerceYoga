@@ -70,7 +70,8 @@ export default function PostDetail() {
   const { user, favoriteVideoIds, toggleFavorite } = useAuth();
 
   const [openWhats, setOpenWhats] = useState(false);
-  const whatsappHref = "https://wa.me/5511999999999?text=Oi%20Karla!%20Quero%20agendar%20uma%20aula%20de%20Yoga.%20Pode%20me%20ajudar%3F";
+  const whatsappHref =
+    "https://wa.me/5511999999999?text=Oi%20Karla!%20Quero%20agendar%20uma%20aula%20de%20Yoga.%20Pode%20me%20ajudar%3F";
 
   useEffect(() => {
     let alive = true;
@@ -97,6 +98,7 @@ export default function PostDetail() {
             dateLabel: a.createdAt ? new Date(a.createdAt).toLocaleDateString("pt-BR") : undefined,
             excerpt: a.content?.trim() ? a.content.slice(0, 180) : undefined,
             fullDescription: a.content,
+            // CORREÇÃO: Prioriza coverImage
             image: safeImage(a.coverImage || getFigmaImage("article", a)),
             comments: a.comments || [],
           };
@@ -131,7 +133,8 @@ export default function PostDetail() {
             location: e.location,
             excerpt: e.description?.trim() ? e.description.slice(0, 180) : undefined,
             fullDescription: e.description,
-            image: safeImage(getFigmaImage("event", e)),
+            // CORREÇÃO: Prioriza coverImage
+            image: safeImage(e.coverImage || getFigmaImage("event", e)),
           };
         }
 
@@ -237,7 +240,6 @@ export default function PostDetail() {
 
   return (
     <div className="bg-gradient-to-b from-purple-50 to-white min-h-screen">
-      {/* --- BARRA DE VOLTAR --- */}
       <div className="bg-white border-b sticky top-0 z-40">
         <div className="mx-auto max-w-5xl px-4 py-4">
           <Button
@@ -251,7 +253,6 @@ export default function PostDetail() {
         </div>
       </div>
 
-      {/* --- CABEÇALHO DA IMAGEM --- */}
       <div className="relative h-[300px] md:h-[460px] overflow-hidden">
         <ImageWithFallback
           src={item.image}
@@ -318,8 +319,8 @@ export default function PostDetail() {
         </div>
       </div>
 
-      {/* --- CONTEÚDO PRINCIPAL --- */}
       <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
+
         {item.excerpt && (
           <div className="bg-white rounded-2xl shadow-lg p-4 md:p-8 mb-6 md:mb-8 border-l-4 border-purple-600">
             <h3 className="text-purple-900 mb-3 text-lg md:text-xl">Resumo</h3>
@@ -359,7 +360,6 @@ export default function PostDetail() {
           </div>
         )}
 
-        {/* --- SEÇÃO DE COMENTÁRIOS --- */}
         {canHaveComments && (
           <CommentsSection
             postId={item.id}
@@ -368,7 +368,6 @@ export default function PostDetail() {
           />
         )}
 
-        {/* --- CTA --- */}
         {ctaBlock && (
           <div className="mt-8 md:mt-12 bg-gradient-to-r from-purple-600 to-purple-800 rounded-2xl shadow-xl p-6 md:p-8 text-center text-white">
             <h3 className="text-white mb-3 text-xl md:text-2xl">{ctaBlock.title}</h3>

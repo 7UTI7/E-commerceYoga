@@ -3,16 +3,11 @@ const Event = require('../models/eventModel');
 // --- ROTAS PÚBLICAS ---
 
 // @desc    Buscar todos os eventos futuros
-// @route   GET /api/events
-// @access  Public
 const getEvents = async (req, res) => {
   try {
-    // Filtra para mostrar apenas eventos cuja data
-    // seja 'maior ou igual' ($gte) a data de HOJE.
-    // Ordena pela data do evento (os mais próximos primeiro)
     const events = await Event.find({
       date: { $gte: new Date() },
-    }).sort({ date: 1 }); // 1 = ordem ascendente
+    }).sort({ date: 1 });
 
     res.status(200).json(events);
   } catch (error) {
@@ -21,11 +16,9 @@ const getEvents = async (req, res) => {
 };
 
 // @desc    Buscar um único evento pelo ID
-// @route   GET /api/events/:id
-// @access  Public
 const getEventById = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate('author', 'name avatar');
     if (event) {
       res.status(200).json(event);
     } else {
@@ -39,18 +32,18 @@ const getEventById = async (req, res) => {
 // --- ROTAS DE ADMIN ---
 
 // @desc    Criar um novo evento
-// @route   POST /api/events
-// @access  Private/Admin
 const createEvent = async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
+    // 1. ADICIONADO coverImage
+    const { title, description, date, location, coverImage } = req.body;
 
     const event = new Event({
       title,
       description,
       date,
       location,
-      author: req.user._id, // Vem do middleware 'protect'
+      coverImage, // 2. ADICIONADO
+      author: req.user._id, 
     });
 
     const createdEvent = await event.save();
@@ -61,11 +54,10 @@ const createEvent = async (req, res) => {
 };
 
 // @desc    Atualizar um evento
-// @route   PUT /api/events/:id
-// @access  Private/Admin
 const updateEvent = async (req, res) => {
   try {
-    const { title, description, date, location } = req.body;
+    // 1. ADICIONADO coverImage
+    const { title, description, date, location, coverImage } = req.body;
     const event = await Event.findById(req.params.id);
 
     if (event) {
@@ -73,6 +65,11 @@ const updateEvent = async (req, res) => {
       event.description = description || event.description;
       event.date = date || event.date;
       event.location = location || event.location;
+      
+      // 2. ADICIONADO
+      if (coverImage) {
+        event.coverImage = coverImage;
+      }
 
       const updatedEvent = await event.save();
       res.status(200).json(updatedEvent);
@@ -85,8 +82,6 @@ const updateEvent = async (req, res) => {
 };
 
 // @desc    Deletar um evento
-// @route   DELETE /api/events/:id
-// @access  Private/Admin
 const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);

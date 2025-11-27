@@ -24,8 +24,13 @@ export function Header() {
         <div className={`mx-auto ${CONTENT_MAX} px-4 h-full flex items-center justify-between`}>
 
           {/* LOGO (Esquerda) */}
+          {/* LOGO (Esquerda) */}
           <div className="flex items-center gap-3">
-            <button onClick={() => window.location.reload()} className="flex items-center gap-2 hover:opacity-80 transition">
+            <button 
+                // MUDANÇA AQUI: Em vez de reload, navega para a home do usuário
+                onClick={() => navigate("/user")} 
+                className="flex items-center gap-2 hover:opacity-80 transition"
+            >
               <img src="/assets/logo.jpg" alt="Logo" className="h-10 w-10 rounded-md object-cover" />
               <span className="text-xl font-semibold text-purple-800 hidden sm:block">Karla Rodrigues Yoga</span>
             </button>

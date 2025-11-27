@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// Ícones
 import { Calendar, Tag, BarChart3, Star } from "lucide-react";
-
-// (Importações do Modal)
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "./ui/button";
-
-// Hook do AuthContext
 import { useAuth } from "../../contexts/AuthContext";
 
 export interface PostCardProps {
@@ -86,16 +81,7 @@ export default function PostCard({
           zIndex: isHovered ? 10 : 1
         }}
       >
-        {/* LAYOUT PRINCIPAL: 
-            Mobile: flex-col (Vertical)
-            Desktop: md:flex-row (Horizontal) - Mantido Original
-        */}
         <div className="flex flex-col md:flex-row md:gap-4">
-
-          {/* IMAGEM: 
-              Mobile: w-full h-48
-              Desktop: md:w-48 md:h-48 - Mantido Original
-          */}
           <div className="w-full h-48 md:w-48 md:h-48 md:flex-shrink-0 overflow-hidden">
             {image ? (
               <img
@@ -113,40 +99,16 @@ export default function PostCard({
             )}
           </div>
 
-          {/* CONTEÚDO: 
-              Mobile: p-4
-              Desktop: md:p-6 - Mantido Original
-          */}
           <div className="flex-1 p-4 md:p-6 flex flex-col">
-
-            {/* --- CABEÇALHO DO CARD (TÍTULO + ESTRELA) --- 
-                Aqui está a "mágica" para o celular:
-                - flex justify-between: Garante que fiquem lado a lado (esquerda/direita) sempre.
-                - items-start: Alinha no topo caso o título quebre linha.
-            */}
             <div className="flex justify-between items-start gap-3 mb-3">
-
-              {/* TÍTULO:
-                  flex-1: Ocupa todo espaço disponível empurrando a estrela pro canto.
-                  md:pr-4: Espaçamento extra no PC.
-              */}
               <h3 className="text-lg font-semibold text-gray-900 group-hover:text-purple-700 flex-1 leading-tight md:pr-4">
                 {title}
               </h3>
-
-              {/* GRUPO CATEGORIA + ESTRELA:
-                  flex-shrink-0: Garante que não diminua de tamanho.
-                  Mantém a categoria e a estrela juntas na direita.
-              */}
               <div className="flex items-center gap-2 text-purple-700 text-sm flex-shrink-0">
                 <div className="flex items-center gap-1">
                   <Tag className="w-4 h-4" />
-                  {/* Se quiser esconder o TEXTO da categoria no celular pra economizar espaço, adicione 'hidden sm:inline' aqui. 
-                      Por enquanto deixei visível conforme o original. */}
                   <span>{category}</span>
                 </div>
-
-                {/* Estrela de Favorito */}
                 {showFavoriteStar && (
                   <button
                     onClick={handleFavoriteClick}
@@ -162,10 +124,8 @@ export default function PostCard({
               </div>
             </div>
 
-            {/* DESCRIÇÃO */}
             <p className="text-gray-700 mb-4 line-clamp-2 flex-grow">{description || ""}</p>
 
-            {/* RODAPÉ (DATA E NÍVEL) */}
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-auto">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
@@ -179,14 +139,12 @@ export default function PostCard({
               )}
             </div>
 
-            {/* CONTEÚDO EXPANDIDO (HOVER - DESKTOP ONLY EFFECTIVELY) */}
             <div
               className="mt-0 transition-all duration-300"
               style={{
                 maxHeight: isHovered ? '200px' : '0',
                 opacity: isHovered ? 1 : 0,
                 overflow: 'hidden',
-                // Pequeno ajuste de margem só quando abrir
                 marginTop: isHovered ? '1rem' : '0'
               }}
             >
@@ -198,7 +156,6 @@ export default function PostCard({
         </div>
       </article>
 
-      {/* MODAL WHATSAPP (Mantido Original) */}
       <Dialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}

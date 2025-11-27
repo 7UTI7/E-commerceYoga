@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     getArticles, createArticle, updateArticle, deleteArticle,
     getVideos, createVideo, updateVideo, deleteVideo,
@@ -11,7 +11,7 @@ import {
 } from "../../lib/api";
 import { Button } from "../../userui/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "../../userui/components/ui/dialog";
-import { ChevronLeft, Calendar, Video as VideoIcon, FileText, Users, Link, BarChart3, Camera, Loader2, ZoomIn, Image as ImageIcon } from "lucide-react";
+import { ChevronLeft, Calendar, Video as VideoIcon, FileText, Users, Link, BarChart3, Camera, Loader2, ZoomIn, Image as ImageIcon, CheckCircle, AlertCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Cropper from "react-easy-crop";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -125,12 +125,28 @@ function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
 function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
     return <select {...props} className={`rounded-xl border px-3 py-2.5 bg-gray-50 outline-none focus:ring-2 focus:ring-purple-200 ${props.className || ""}`} />;
 }
-function ErrorBanner({ message }: { message: string | null }) {
-    if (!message) return null;
-    return <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 mb-4">{message}</div>;
+
+// --- NOVO COMPONENTE DE FEEDBACK (O Alerta Colorido) ---
+type FeedbackType = 'success' | 'error' | null;
+interface FeedbackState { type: FeedbackType; message: string; }
+
+function FeedbackBanner({ feedback, onClose }: { feedback: FeedbackState | null, onClose: () => void }) {
+    if (!feedback) return null;
+    const isSuccess = feedback.type === 'success';
+    const Icon = isSuccess ? CheckCircle : AlertCircle;
+    const styleClass = isSuccess ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800';
+    const iconColor = isSuccess ? 'text-green-600' : 'text-red-600';
+
+    return (
+        <div className={`rounded-xl border p-4 mb-6 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${styleClass}`}>
+            <Icon className={`w-5 h-5 mt-0.5 shrink-0 ${iconColor}`} />
+            <div className="flex-1 text-sm font-medium">{feedback.message}</div>
+            <button onClick={onClose} className="text-current opacity-60 hover:opacity-100"><X className="w-5 h-5" /></button>
+        </div>
+    );
 }
 
-// --- COMPONENTE DE UPLOAD DE CAPA (16:9) ---
+// --- COMPONENTE DE UPLOAD DE CAPA ---
 function CoverUpload({ value, onChange, loading }: { value: string, onChange: (url: string) => void, loading?: boolean }) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -161,7 +177,7 @@ function CoverUpload({ value, onChange, loading }: { value: string, onChange: (u
             onChange(response.imageUrl);
         } catch (e) {
             console.error(e);
-            alert("Erro ao enviar imagem.");
+            alert("Erro ao enviar imagem. Verifique as chaves do Cloudinary.");
         } finally {
             setUploading(false);
             setImageSrc(null);
@@ -217,7 +233,7 @@ function CoverUpload({ value, onChange, loading }: { value: string, onChange: (u
 }
 
 // ====================================================================
-// --- PAINEL DE RELATÓRIOS (NOVO) ---
+// --- PAINEL DE RELATÓRIOS (COMPLETO COM ARTIGOS RECENTES) ---
 // ====================================================================
 function ReportsPanel() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -236,25 +252,57 @@ function ReportsPanel() {
                 <div className="rounded-2xl border bg-white p-6 shadow-sm flex items-center gap-4"><div className="p-3 bg-purple-100 text-purple-600 rounded-xl"><VideoIcon className="w-8 h-8" /></div><div><p className="text-sm text-gray-500 font-medium">Conteúdos</p><h2 className="text-3xl font-bold text-gray-800">{stats?.counts.content || 0}</h2></div></div>
                 <div className="rounded-2xl border bg-white p-6 shadow-sm flex items-center gap-4"><div className="p-3 bg-green-100 text-green-600 rounded-xl"><Calendar className="w-8 h-8" /></div><div><p className="text-sm text-gray-500 font-medium">Aulas</p><h2 className="text-3xl font-bold text-gray-800">{stats?.counts.classes || 0}</h2></div></div>
             </div>
-            <Card title="Novos Alunos (6 Meses)">
-                <div className="h-[300px] w-full mt-4">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#666' }} dy={10} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666' }} allowDecimals={false} />
-                            <Tooltip cursor={{ fill: '#f3f4f6' }} />
-                            <Bar dataKey="Alunos" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
-                        </BarChart>
-                    </ResponsiveContainer>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <Card title="Novos Alunos (6 Meses)">
+                        <div className="h-[300px] w-full mt-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={chartData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#666' }} dy={10} />
+                                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#666' }} allowDecimals={false} />
+                                    <Tooltip cursor={{ fill: '#f3f4f6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                    <Bar dataKey="Alunos" fill="#8b5cf6" radius={[4, 4, 0, 0]} barSize={40} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </Card>
                 </div>
-            </Card>
+                <div className="lg:col-span-1">
+                    <Card title="Últimas Publicações">
+                        <div className="space-y-4">
+                            {(!stats?.recentActivity?.articles || stats.recentActivity.articles.length === 0) ? (
+                                <div className="text-gray-400 text-sm text-center py-8">Nenhuma atividade recente.</div>
+                            ) : (
+                                stats.recentActivity.articles.map((article) => (
+                                    <div key={article._id} className="flex items-start justify-between pb-3 border-b border-gray-50 last:border-0 last:pb-0">
+                                        <div className="flex items-start gap-3 min-w-0">
+                                            <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${article.status === 'PUBLISHED' ? 'bg-green-500' : 'bg-amber-400'}`} />
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-medium text-gray-800 truncate block" title={article.title}>
+                                                    {article.title}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {new Date(article.createdAt).toLocaleDateString('pt-BR')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${article.status === 'PUBLISHED' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+                                            {article.status === 'PUBLISHED' ? 'PUBL' : 'RASC'}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </Card>
+                </div>
+            </div>
         </div>
     );
 }
 
 // ====================================================================
-// --- PAINEL DE ARTIGOS (Com Upload) ---
+// --- PAINEL DE ARTIGOS (Com Upload e Feedback) ---
 // ====================================================================
 function ArticlesPanel() {
     const [list, setList] = useState<Article[]>([]);
@@ -264,8 +312,15 @@ function ArticlesPanel() {
     const [status, setStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED");
     const [coverImage, setCoverImage] = useState(""); 
     const [creating, setCreating] = useState(false);
-    const [createError, setCreateError] = useState<string | null>(null);
-    const [listError, setListError] = useState<string | null>(null);
+    
+    // Feedback
+    const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+    const feedbackTimerRef = useRef<any>(null);
+    const showFeedback = (type: FeedbackType, message: string) => {
+        if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+        setFeedback({ type, message });
+        feedbackTimerRef.current = setTimeout(() => setFeedback(null), 4000);
+    };
 
     const [openEdit, setOpenEdit] = useState(false);
     const [editing, setEditing] = useState<Article | null>(null);
@@ -275,23 +330,24 @@ function ArticlesPanel() {
     const [eStatus, setEStatus] = useState<"PUBLISHED" | "DRAFT">("PUBLISHED");
     const [eCoverImage, setECoverImage] = useState(""); 
     const [saving, setSaving] = useState(false);
-
     const [confirmDelete, setConfirmDelete] = useState<Article | null>(null);
 
     useEffect(() => {
-        getArticles().then(setList).catch(e => setListError("Erro ao carregar artigos")).finally(() => setLoading(false));
+        getArticles().then(setList).catch(e => showFeedback('error', "Erro ao carregar artigos")).finally(() => setLoading(false));
+        return () => { if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current); };
     }, []);
 
     async function onCreate(e: React.FormEvent) {
         e.preventDefault();
-        setCreateError(null);
-        if (!title.trim() || !content.trim()) return setCreateError("Preencha título e conteúdo.");
+        setFeedback(null);
+        if (!title.trim() || !content.trim()) return showFeedback('error', "Preencha título e conteúdo obrigatórios.");
         setCreating(true);
         try {
             const created = await createArticle({ title, content, status, coverImage }); 
             setList(p => [created, ...p]);
             setTitle(""); setContent(""); setStatus("PUBLISHED"); setCoverImage("");
-        } catch (err: any) { setCreateError("Erro ao criar artigo."); } 
+            showFeedback('success', "Artigo publicado com sucesso!");
+        } catch (err: any) { showFeedback('error', err?.response?.data?.message || "Erro ao criar artigo."); } 
         finally { setCreating(false); }
     }
 
@@ -307,7 +363,8 @@ function ArticlesPanel() {
             const updated = await updateArticle(editing._id, { title: eTitle, slug: eSlug, content: eContent, status: eStatus, coverImage: eCoverImage }); 
             setList(p => p.map(x => x._id === editing._id ? updated : x));
             setOpenEdit(false);
-        } catch (err) { alert("Erro ao salvar."); } 
+            showFeedback('success', "Artigo atualizado com sucesso!");
+        } catch (err) { showFeedback('error', "Erro ao salvar alterações."); } 
         finally { setSaving(false); }
     }
 
@@ -317,18 +374,19 @@ function ArticlesPanel() {
             await deleteArticle(confirmDelete._id);
             setList(p => p.filter(x => x._id !== confirmDelete._id));
             setConfirmDelete(null);
-        } catch { setListError("Erro ao excluir."); }
+            showFeedback('success', "Artigo excluído.");
+        } catch { showFeedback('error', "Erro ao excluir artigo."); }
     }
 
     return (
         <>
+            <FeedbackBanner feedback={feedback} onClose={() => setFeedback(null)} />
             <Card title="Novo Artigo">
                 <form onSubmit={onCreate} className="grid gap-6">
-                    <ErrorBanner message={createError} />
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="md:col-span-2 space-y-4">
-                            <Field label="Título"><Input value={title} onChange={e => setTitle(e.target.value)} /></Field>
-                            <Field label="Conteúdo"><Textarea rows={8} value={content} onChange={e => setContent(e.target.value)} /></Field>
+                            <Field label="Título *"><Input value={title} onChange={e => setTitle(e.target.value)} required /></Field>
+                            <Field label="Conteúdo *"><Textarea rows={8} value={content} onChange={e => setContent(e.target.value)} required /></Field>
                         </div>
                         <div>
                             <CoverUpload value={coverImage} onChange={setCoverImage} loading={creating} />
@@ -407,7 +465,7 @@ function ArticlesPanel() {
 }
 
 // ====================================================================
-// --- PAINEL DE EVENTOS (Com Upload) ---
+// --- PAINEL DE EVENTOS (Com Upload e Feedback) ---
 // ====================================================================
 function EventsPanel() {
     const [list, setList] = useState<Event[]>([]);
@@ -418,6 +476,15 @@ function EventsPanel() {
     const [description, setDescription] = useState("");
     const [coverImage, setCoverImage] = useState(""); 
     const [creating, setCreating] = useState(false);
+
+    // Feedback
+    const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+    const feedbackTimerRef = useRef<any>(null);
+    const showFeedback = (type: FeedbackType, message: string) => {
+        if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+        setFeedback({ type, message });
+        feedbackTimerRef.current = setTimeout(() => setFeedback(null), 4000);
+    };
     
     const [openEdit, setOpenEdit] = useState(false);
     const [editing, setEditing] = useState<Event | null>(null);
@@ -429,17 +496,19 @@ function EventsPanel() {
     const [saving, setSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState<Event | null>(null);
 
-    useEffect(() => { getEvents().then(setList).finally(() => setLoading(false)); }, []);
+    useEffect(() => { getEvents().then(setList).finally(() => setLoading(false)); return () => { if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current); }; }, []);
 
     async function onCreate(e: React.FormEvent) {
         e.preventDefault();
-        if (!title || !date) return alert("Preencha título e data");
+        setFeedback(null);
+        if (!title || !date) return showFeedback('error', "Título e Data são obrigatórios.");
         setCreating(true);
         try {
             const created = await createEvent({ title, date: toISO(date)!, location, description, coverImage });
             setList(p => [created, ...p]);
             setTitle(""); setDate(""); setLocation(""); setDescription(""); setCoverImage("");
-        } catch { alert("Erro ao criar evento"); } 
+            showFeedback('success', "Evento criado com sucesso!");
+        } catch { showFeedback('error', "Erro ao criar evento."); } 
         finally { setCreating(false); }
     }
 
@@ -455,26 +524,31 @@ function EventsPanel() {
             const updated = await updateEvent(editing._id, { title: eTitle, date: toISO(eDate)!, location: eLocation, description: eDescription, coverImage: eCoverImage });
             setList(p => p.map(x => x._id === editing._id ? updated : x));
             setOpenEdit(false);
-        } catch { alert("Erro ao salvar"); } 
+            showFeedback('success', "Evento atualizado!");
+        } catch { showFeedback('error', "Erro ao salvar evento."); } 
         finally { setSaving(false); }
     }
 
     async function doDelete() {
         if (!confirmDelete) return;
-        await deleteEvent(confirmDelete._id);
-        setList(p => p.filter(x => x._id !== confirmDelete._id));
-        setConfirmDelete(null);
+        try {
+            await deleteEvent(confirmDelete._id);
+            setList(p => p.filter(x => x._id !== confirmDelete._id));
+            setConfirmDelete(null);
+            showFeedback('success', "Evento excluído.");
+        } catch { showFeedback('error', "Erro ao excluir evento."); }
     }
 
     return (
         <>
+             <FeedbackBanner feedback={feedback} onClose={() => setFeedback(null)} />
             <Card title="Novo Evento">
                 <form onSubmit={onCreate} className="grid gap-6">
                     <div className="grid md:grid-cols-3 gap-6">
                         <div className="md:col-span-2 space-y-4">
                             <div className="grid md:grid-cols-2 gap-4">
-                                <Field label="Título"><Input value={title} onChange={e => setTitle(e.target.value)} /></Field>
-                                <Field label="Data"><Input type="datetime-local" value={date} onChange={e => setDate(e.target.value)} /></Field>
+                                <Field label="Título *"><Input value={title} onChange={e => setTitle(e.target.value)} required /></Field>
+                                <Field label="Data *"><Input type="datetime-local" value={date} onChange={e => setDate(e.target.value)} required /></Field>
                             </div>
                             <Field label="Local"><Input value={location} onChange={e => setLocation(e.target.value)} /></Field>
                             <Field label="Descrição"><Textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} /></Field>
@@ -546,6 +620,16 @@ function VideosPanel() {
     const [category, setCategory] = useState("");
     const [level, setLevel] = useState<Level>("Todos");
     const [creating, setCreating] = useState(false);
+
+    // Feedback
+    const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+    const feedbackTimerRef = useRef<any>(null);
+    const showFeedback = (type: FeedbackType, message: string) => {
+        if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+        setFeedback({ type, message });
+        feedbackTimerRef.current = setTimeout(() => setFeedback(null), 4000);
+    };
+
     const [openEdit, setOpenEdit] = useState(false);
     const [editing, setEditing] = useState<Video | null>(null);
     const [eTitle, setETitle] = useState("");
@@ -556,17 +640,19 @@ function VideosPanel() {
     const [saving, setSaving] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState<Video | null>(null);
 
-    useEffect(() => { getVideos().then(setList).finally(() => setLoading(false)); }, []);
+    useEffect(() => { getVideos().then(setList).finally(() => setLoading(false)); return () => { if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current); };}, []);
     async function onCreate(e: React.FormEvent) {
         e.preventDefault();
-        if (!title || !url) return alert("Preencha campos");
+        setFeedback(null);
+        if (!title || !url) return showFeedback('error', "Título e URL são obrigatórios.");
         setCreating(true);
         try {
             const ytId = ytIdFrom(url);
             const created = await createVideo({ title, description, youtubeUrl: ytId ? `https://www.youtube.com/watch?v=${ytId}` : url, level, category });
             setList(p => [created, ...p]);
             setTitle(""); setUrl(""); setDescription(""); setCategory("");
-        } catch { alert("Erro"); } finally { setCreating(false); }
+            showFeedback('success', "Vídeo publicado!");
+        } catch { showFeedback('error', "Erro ao publicar vídeo."); } finally { setCreating(false); }
     }
     function openEditor(v: Video) { setEditing(v); setETitle(v.title); setEUrl(v.youtubeUrl || ""); setEDescription(v.description || ""); setECategory(v.category || ""); setELevel(v.level as Level || "Todos"); setOpenEdit(true); }
     async function onSaveEdit() {
@@ -576,15 +662,17 @@ function VideosPanel() {
             const updated = await updateVideo(editing._id, { title: eTitle, description: eDescription, youtubeUrl: eUrl, level: eLevel, category: eCategory });
             setList(p => p.map(x => x._id === editing._id ? updated : x));
             setOpenEdit(false);
-        } catch { alert("Erro"); } finally { setSaving(false); }
+            showFeedback('success', "Vídeo atualizado!");
+        } catch { showFeedback('error', "Erro ao salvar vídeo."); } finally { setSaving(false); }
     }
-    async function doDelete() { if (!confirmDelete) return; await deleteVideo(confirmDelete._id); setList(p => p.filter(x => x._id !== confirmDelete._id)); setConfirmDelete(null); }
+    async function doDelete() { if (!confirmDelete) return; try { await deleteVideo(confirmDelete._id); setList(p => p.filter(x => x._id !== confirmDelete._id)); setConfirmDelete(null); showFeedback('success', "Vídeo excluído."); } catch { showFeedback('error', "Erro ao excluir."); } }
 
     return (
         <>
+            <FeedbackBanner feedback={feedback} onClose={() => setFeedback(null)} />
             <Card title="Novo Vídeo">
                 <form onSubmit={onCreate} className="grid gap-4">
-                    <div className="grid md:grid-cols-2 gap-4"><Field label="Título"><Input value={title} onChange={e => setTitle(e.target.value)} /></Field><Field label="YouTube URL"><Input value={url} onChange={e => setUrl(e.target.value)} /></Field></div>
+                    <div className="grid md:grid-cols-2 gap-4"><Field label="Título *"><Input value={title} onChange={e => setTitle(e.target.value)} required /></Field><Field label="YouTube URL *"><Input value={url} onChange={e => setUrl(e.target.value)} required /></Field></div>
                     <Field label="Descrição"><Textarea value={description} onChange={e => setDescription(e.target.value)} /></Field>
                     <div className="grid md:grid-cols-2 gap-4"><Field label="Categoria"><Input value={category} onChange={e => setCategory(e.target.value)} /></Field><Field label="Nível"><Select value={level} onChange={e => setLevel(e.target.value as any)}>{levelOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select></Field></div>
                     <div className="flex justify-end"><Button type="submit" disabled={creating} className="bg-purple-600 text-white">Publicar</Button></div>
@@ -615,20 +703,34 @@ function ClassesPanel() {
     const [loading, setLoading] = useState(true);
     const [title, setTitle] = useState(""); const [dt, setDt] = useState(""); const [desc, setDesc] = useState(""); const [dur, setDur] = useState(""); const [max, setMax] = useState(""); const [lvl, setLvl] = useState<Level>("Todos");
     const [creating, setCreating] = useState(false);
+    
+    // Feedback
+    const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+    const feedbackTimerRef = useRef<any>(null);
+    const showFeedback = (type: FeedbackType, message: string) => {
+        if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+        setFeedback({ type, message });
+        feedbackTimerRef.current = setTimeout(() => setFeedback(null), 4000);
+    };
+
     const [confirmDelete, setConfirmDelete] = useState<ClassSlot | null>(null);
 
-    useEffect(() => { getClassSlots().then(setList).finally(() => setLoading(false)); }, []);
+    useEffect(() => { getClassSlots().then(setList).finally(() => setLoading(false)); return () => { if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current); };}, []);
     async function onCreate(e: React.FormEvent) {
-        e.preventDefault(); setCreating(true);
-        try { const created = await createClassSlot({ title, description: desc, dateTime: toISO(dt), durationMinutes: Number(dur), maxStudents: Number(max), level: lvl } as any); setList(p => [created, ...p]); setTitle(""); setDt(""); setDesc(""); setDur(""); setMax(""); } catch { alert("Erro"); } finally { setCreating(false); }
+        e.preventDefault();
+        setFeedback(null);
+        if (!title || !dt) return showFeedback('error', "Preencha os campos obrigatórios.");
+        setCreating(true);
+        try { const created = await createClassSlot({ title, description: desc, dateTime: toISO(dt), durationMinutes: Number(dur), maxStudents: Number(max), level: lvl } as any); setList(p => [created, ...p]); setTitle(""); setDt(""); setDesc(""); setDur(""); setMax(""); showFeedback('success', "Aula agendada!"); } catch { showFeedback('error', "Erro ao agendar aula."); } finally { setCreating(false); }
     }
-    async function doDelete() { if (!confirmDelete) return; await deleteClassSlot(confirmDelete._id); setList(p => p.filter(x => x._id !== confirmDelete._id)); setConfirmDelete(null); }
+    async function doDelete() { if (!confirmDelete) return; try { await deleteClassSlot(confirmDelete._id); setList(p => p.filter(x => x._id !== confirmDelete._id)); setConfirmDelete(null); showFeedback('success', "Aula excluída."); } catch { showFeedback('error', "Erro ao excluir."); } }
 
     return (
         <>
+            <FeedbackBanner feedback={feedback} onClose={() => setFeedback(null)} />
             <Card title="Nova Aula">
                 <form onSubmit={onCreate} className="grid gap-4">
-                    <div className="grid md:grid-cols-2 gap-4"><Field label="Título"><Input value={title} onChange={e => setTitle(e.target.value)} /></Field><Field label="Data"><Input type="datetime-local" value={dt} onChange={e => setDt(e.target.value)} /></Field></div>
+                    <div className="grid md:grid-cols-2 gap-4"><Field label="Título *"><Input value={title} onChange={e => setTitle(e.target.value)} required /></Field><Field label="Data *"><Input type="datetime-local" value={dt} onChange={e => setDt(e.target.value)} required /></Field></div>
                     <Field label="Descrição"><Textarea value={desc} onChange={e => setDesc(e.target.value)} /></Field>
                     <div className="grid md:grid-cols-3 gap-4"><Field label="Duração (min)"><Input type="number" value={dur} onChange={e => setDur(e.target.value)} /></Field><Field label="Vagas"><Input type="number" value={max} onChange={e => setMax(e.target.value)} /></Field><Field label="Nível"><Select value={lvl} onChange={e => setLvl(e.target.value as any)}>{levelOptions.map(o => <option key={o} value={o}>{o}</option>)}</Select></Field></div>
                     <div className="flex justify-end"><Button type="submit" disabled={creating} className="bg-purple-600 text-white">Agendar Aula</Button></div>
@@ -647,16 +749,27 @@ function GroupsPanel() {
     const [loading, setLoading] = useState(true);
     const [name, setName] = useState(""); const [link, setLink] = useState(""); const [desc, setDesc] = useState("");
     const [creating, setCreating] = useState(false);
+    
+    // Feedback
+    const [feedback, setFeedback] = useState<FeedbackState | null>(null);
+    const feedbackTimerRef = useRef<any>(null);
+    const showFeedback = (type: FeedbackType, message: string) => {
+        if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+        setFeedback({ type, message });
+        feedbackTimerRef.current = setTimeout(() => setFeedback(null), 4000);
+    };
+
     const [confirmDelete, setConfirmDelete] = useState<WhatsAppGroup | null>(null);
 
-    useEffect(() => { getWhatsAppGroups().then(setList).finally(() => setLoading(false)); }, []);
-    async function onCreate(e: React.FormEvent) { e.preventDefault(); setCreating(true); try { const created = await createWhatsAppGroup({ name, joinLink: link, description: desc }); setList(p => [created, ...p]); setName(""); setLink(""); setDesc(""); } catch { alert("Erro"); } finally { setCreating(false); } }
-    async function doDelete() { if (!confirmDelete) return; await deleteWhatsAppGroup(confirmDelete._id); setList(p => p.filter(x => x._id !== confirmDelete._id)); setConfirmDelete(null); }
+    useEffect(() => { getWhatsAppGroups().then(setList).finally(() => setLoading(false)); return () => { if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current); };}, []);
+    async function onCreate(e: React.FormEvent) { e.preventDefault(); setFeedback(null); if (!name || !link) return showFeedback('error', "Preencha os campos obrigatórios."); setCreating(true); try { const created = await createWhatsAppGroup({ name, joinLink: link, description: desc }); setList(p => [created, ...p]); setName(""); setLink(""); setDesc(""); showFeedback('success', "Grupo criado!"); } catch { showFeedback('error', "Erro ao criar grupo."); } finally { setCreating(false); } }
+    async function doDelete() { if (!confirmDelete) return; try { await deleteWhatsAppGroup(confirmDelete._id); setList(p => p.filter(x => x._id !== confirmDelete._id)); setConfirmDelete(null); showFeedback('success', "Grupo excluído."); } catch { showFeedback('error', "Erro ao excluir."); } }
 
     return (
         <>
+            <FeedbackBanner feedback={feedback} onClose={() => setFeedback(null)} />
             <Card title="Novo Grupo">
-                <form onSubmit={onCreate} className="grid gap-4"><div className="grid md:grid-cols-2 gap-4"><Field label="Nome"><Input value={name} onChange={e => setName(e.target.value)} /></Field><Field label="Link"><Input value={link} onChange={e => setLink(e.target.value)} /></Field></div><Field label="Descrição"><Textarea value={desc} onChange={e => setDesc(e.target.value)} /></Field><div className="flex justify-end"><Button type="submit" disabled={creating} className="bg-purple-600 text-white">Criar Grupo</Button></div></form>
+                <form onSubmit={onCreate} className="grid gap-4"><div className="grid md:grid-cols-2 gap-4"><Field label="Nome *"><Input value={name} onChange={e => setName(e.target.value)} required /></Field><Field label="Link *"><Input value={link} onChange={e => setLink(e.target.value)} required /></Field></div><Field label="Descrição"><Textarea value={desc} onChange={e => setDesc(e.target.value)} /></Field><div className="flex justify-end"><Button type="submit" disabled={creating} className="bg-purple-600 text-white">Criar Grupo</Button></div></form>
             </Card>
             <Card title="Grupos"><ul className="space-y-3">{list.map(g => <li key={g._id} className="border p-4 rounded-xl flex justify-between bg-white"><div><div className="font-medium">{g.name}</div><div className="text-xs text-gray-500">{g.joinLink}</div></div><Button variant="destructive" onClick={() => setConfirmDelete(g)}>Excluir</Button></li>)}</ul></Card>
             <Dialog open={!!confirmDelete} onOpenChange={() => setConfirmDelete(null)}>
