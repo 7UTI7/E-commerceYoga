@@ -29,8 +29,15 @@ const registerUser = async (req, res) => {
     const verificationToken = user.getVerificationToken();
     await user.save({ validateBeforeSave: false });
 
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    // 4. Link de Verificação
+    
+    // Pega a URL do .env ou usa o padrão, e remove a barra do final se tiver
+    const rawFrontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = rawFrontendUrl.replace(/\/$/, ''); // <--- O SEGREDO ESTÁ AQUI
+    
+    // Agora o link sempre terá apenas uma barra
     const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
+    
     const htmlMessage = verifyEmailTemplate(user.name, verifyUrl);
 
     try {
