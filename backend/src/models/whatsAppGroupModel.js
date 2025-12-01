@@ -14,7 +14,6 @@ const whatsAppGroupSchema = new mongoose.Schema(
       type: String,
       required: [true, 'O link de convite é obrigatório.'],
     },
-    // Referência ao Admin que criou o grupo
     author: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

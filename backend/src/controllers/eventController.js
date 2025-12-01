@@ -1,8 +1,5 @@
 const Event = require('../models/eventModel');
 
-// --- ROTAS PÚBLICAS ---
-
-// @desc    Buscar todos os eventos futuros
 const getEvents = async (req, res) => {
   try {
     const events = await Event.find({
@@ -15,7 +12,6 @@ const getEvents = async (req, res) => {
   }
 };
 
-// @desc    Buscar um único evento pelo ID
 const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate('author', 'name avatar');
@@ -29,12 +25,10 @@ const getEventById = async (req, res) => {
   }
 };
 
-// --- ROTAS DE ADMIN ---
 
-// @desc    Criar um novo evento
 const createEvent = async (req, res) => {
   try {
-    // 1. ADICIONADO coverImage
+    
     const { title, description, date, location, coverImage } = req.body;
 
     const event = new Event({
@@ -42,7 +36,7 @@ const createEvent = async (req, res) => {
       description,
       date,
       location,
-      coverImage, // 2. ADICIONADO
+      coverImage, 
       author: req.user._id, 
     });
 
@@ -53,10 +47,9 @@ const createEvent = async (req, res) => {
   }
 };
 
-// @desc    Atualizar um evento
 const updateEvent = async (req, res) => {
   try {
-    // 1. ADICIONADO coverImage
+    
     const { title, description, date, location, coverImage } = req.body;
     const event = await Event.findById(req.params.id);
 
@@ -66,7 +59,7 @@ const updateEvent = async (req, res) => {
       event.date = date || event.date;
       event.location = location || event.location;
       
-      // 2. ADICIONADO
+     
       if (coverImage) {
         event.coverImage = coverImage;
       }
@@ -81,7 +74,6 @@ const updateEvent = async (req, res) => {
   }
 };
 
-// @desc    Deletar um evento
 const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);

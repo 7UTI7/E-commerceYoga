@@ -25,8 +25,6 @@ const videoSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A descrição é obrigatória.'],
     },
-    // Aqui a professora vai colar a URL do YouTube
-    // Ex: https://www.youtube.com/watch?v=dQw4w9WgXcQ
     youtubeUrl: {
       type: String,
       required: [true, 'A URL do YouTube é obrigatória.'],
@@ -41,13 +39,13 @@ const videoSchema = new mongoose.Schema(
       enum: ['Iniciante', 'Intermediário', 'Avançado', 'Todos'],
       default: 'Todos',
     },
-    // Referência ao Admin que fez o upload
+    
     author: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'User',
     },
-    comments: [commentSchema], // Array de comentários embutidos
+    comments: [commentSchema], 
   },
   {
     timestamps: true,

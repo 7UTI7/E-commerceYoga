@@ -3,7 +3,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-// Definimos o "Schema" (a estrutura) do nosso Usuário
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -39,11 +38,10 @@ const userSchema = new mongoose.Schema(
       default: false, 
     },
     avatar: {
-      type: String, // Aqui vai a URL do Cloudinary
-      default: ''   // Começa sem foto
+      type: String, 
+      default: ''   
     },
     verificationToken: String, 
-    // ---------------------------
     resetPasswordToken: String,
     resetPasswordExpire: Date,
     favorites: [
@@ -58,7 +56,6 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hook (gancho) do Mongoose que roda ANTES de salvar o 'User'
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     next();
@@ -68,7 +65,6 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-// Método para gerar o Token JWT
 userSchema.methods.getSignedJwtToken = function () {
   return jwt.sign(
     { id: this._id, role: this.role }, 
@@ -77,12 +73,11 @@ userSchema.methods.getSignedJwtToken = function () {
   );
 };
 
-// Método para comparar a senha
+
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-// Método para gerar token de Verificação de E-mail
 userSchema.methods.getVerificationToken = function () {
   const verificationToken = crypto.randomBytes(20).toString('hex');
 
@@ -94,7 +89,6 @@ userSchema.methods.getVerificationToken = function () {
   return verificationToken;
 };
 
-// Método para gerar token de Reset de Senha
 userSchema.methods.getResetPasswordToken = function () {
   const resetToken = crypto.randomBytes(20).toString('hex');
 

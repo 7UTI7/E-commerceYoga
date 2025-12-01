@@ -1,14 +1,10 @@
 const Article = require('../models/articleModel.js');
 
-// @desc    Buscar todos os artigos PUBLICADOS
-// @route   GET /api/articles
-// @access  Public
 const getPublishedArticles = async (req, res) => {
   try {
-    // Traz a coverImage junto
     const articles = await Article.find({ status: 'PUBLISHED' })
       .sort({ createdAt: -1 })
-      .populate('author', 'name avatar'); // Traz foto do autor tbm
+      .populate('author', 'name avatar');
 
     res.status(200).json(articles);
   } catch (error) {
@@ -38,14 +34,8 @@ const getArticleBySlug = async (req, res) => {
   }
 };
 
-// --- ADMIN ---
-
-// @desc    Criar um novo artigo
-// @route   POST /api/articles
-// @access  Private/Admin
 const createArticle = async (req, res) => {
   try {
-    // 1. ADICIONADO: coverImage aqui
     const { title, content, slug, status, coverImage } = req.body;
 
     const slugExists = await Article.findOne({ slug });
@@ -58,7 +48,7 @@ const createArticle = async (req, res) => {
       slug,
       content,
       status, 
-      coverImage, // 2. ADICIONADO: Salva a imagem no banco
+      coverImage,
       author: req.user._id,
     });
 
@@ -70,12 +60,8 @@ const createArticle = async (req, res) => {
   }
 };
 
-// @desc    Atualizar um artigo
-// @route   PUT /api/articles/:id
-// @access  Private/Admin
 const updateArticle = async (req, res) => {
   try {
-    // 1. ADICIONADO: coverImage aqui
     const { title, content, slug, status, coverImage } = req.body;
     const { id } = req.params;
 
@@ -93,12 +79,10 @@ const updateArticle = async (req, res) => {
       article.slug = slug;
     }
 
-    // Atualiza os campos
     article.title = title || article.title;
     article.content = content || article.content;
     article.status = status || article.status;
     
-    // 2. ADICIONADO: Atualiza a imagem se ela vier
     if (coverImage) {
         article.coverImage = coverImage;
     }
@@ -111,9 +95,6 @@ const updateArticle = async (req, res) => {
   }
 }
 
-// @desc    Deletar um artigo
-// @route   DELETE /api/articles/:id
-// @access  Private/Admin
 const deleteArticle = async (req, res) => {
   try {
     const { id } = req.params;
@@ -132,7 +113,6 @@ const deleteArticle = async (req, res) => {
   }
 };
 
-// @desc    Criar um novo comentário
 const createArticleComment = async (req, res) => {
   try {
     const { content } = req.body;
@@ -152,7 +132,6 @@ const createArticleComment = async (req, res) => {
 
       await article.save();
       
-      // Popula avatar também
       const populatedArticle = await Article.findById(article._id).populate('comments.author', 'name avatar');
       
       res.status(201).json(populatedArticle.comments[0]);
