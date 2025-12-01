@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+@media (max-width: 768px) {
+  body .uwy.userway_p1 .userway_buttons_wrapper {
+    top: 52rem !important;
+  }
+}

@@ -23,6 +23,9 @@ const eventSchema = new mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    coverImage: {
+      type: String,
+    },
   },
   {
     timestamps: true,
