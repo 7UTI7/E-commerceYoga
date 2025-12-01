@@ -6,9 +6,8 @@ import App from "./App";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Cadastro from "./pages/cadastro";
-// Importação da nova página de verificação
 import VerificacaoCadastro from "./pages/verificacaoCadastro";
-import ResetPasswordPage from "./pages/ResetPassword"; // <--- Importe aqui
+import ResetPasswordPage from "./pages/ResetPassword";
 import UserApp from "./userui/userApp";
 import ForgotPasswordPage from "./pages/forgotPassword";
 import Admin from "./pages/admin";
@@ -19,7 +18,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import GlobalErrorBoundary from "./userui/components/GlobalErrorBoundary";
 import "./index.css";
 
-// Logs globais para debug
+// Logs globais
 window.addEventListener("error", (e) => {
   console.error("[window.error]", (e as ErrorEvent).error || (e as ErrorEvent).message);
 });
@@ -27,7 +26,7 @@ window.addEventListener("unhandledrejection", (e) => {
   console.error("[unhandledrejection]", (e as PromiseRejectionEvent).reason);
 });
 
-// Definição das rotas
+// --- DEFINIÇÃO DE ROTAS ---
 const appRoutes = {
   path: "/",
   element: <App />,
@@ -38,11 +37,12 @@ const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
 
-  // Rota de Verificação de E-mail
+  // --- ROTAS DE RECUPERAÇÃO E VERIFICAÇÃO ---
   { path: "/verify-email/:token", element: <VerificacaoCadastro /> },
   { path: "/reset-password/:token", element: <ResetPasswordPage /> },
-
   { path: "/esqueceu-senha", element: <ForgotPasswordPage /> },
+
+  // --- ROTAS PROTEGIDAS ---
   {
     path: "/user",
     element: (
@@ -88,10 +88,9 @@ const bareRoutes = [
   },
 ];
 
-// Combina as rotas
 const router = createBrowserRouter([appRoutes, ...bareRoutes]);
 
-// Renderização
+// --- RENDERIZAÇÃO ---
 function renderApp() {
   try {
     ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -108,7 +107,6 @@ function renderApp() {
       (err && (err.message || String(err))) || "Erro desconhecido durante o bootstrap do app.";
     console.error("[bootstrap error]", err);
 
-    // Fallback simples caso o React não consiga nem montar
     const box = document.createElement("pre");
     Object.assign(box.style, {
       whiteSpace: "pre-wrap",

@@ -1,10 +1,10 @@
-import { useState } from "react"; // Importante para controlar o abrir/fechar
+import { useState } from "react"; 
 import { Link } from "react-router-dom";
 
 const CONTENT_MAX = "max-w-[800px]";
 
 export default function Header() {
-  // Estado para controlar se o menu mobile está aberto ou fechado
+  
   const [menuAberto, setMenuAberto] = useState(false);
 
   return (
@@ -26,9 +26,7 @@ export default function Header() {
             {/* --- ÁREA DA DIREITA --- */}
             <div className="flex items-center gap-3 shrink-0">
 
-              {/* VERSÃO DESKTOP:
-                 hidden md:flex -> Escondido no celular, aparece Flex no PC
-              */}
+              {/* VERSÃO DESKTOP */}
               <div className="hidden md:flex items-center gap-3">
                 {/* Ícones Sociais */}
                 <div className="flex items-center gap-3 text-purple-600 mr-2">
@@ -49,15 +47,12 @@ export default function Header() {
                 </Link>
               </div>
 
-              {/* VERSÃO MOBILE (Botão Hambúrguer):
-                 block md:hidden -> Aparece no celular, Escondido no PC
-              */}
+              {/* VERSÃO MOBILE (Botão Hambúrguer) */}
               <button
                 onClick={() => setMenuAberto(true)}
                 className="block md:hidden text-purple-700 p-2 focus:outline-none"
                 aria-label="Abrir menu"
               >
-                {/* Ícone de 3 riscos (SVG direto para não depender de libs) */}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-8 h-8">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
@@ -69,23 +64,20 @@ export default function Header() {
       </header>
 
       {/* --- MENU MOBILE (OVERLAY / GAVETA) --- */}
-      {/* Só renderiza se menuAberto for true */}
       <div
         className={`fixed inset-0 z-[60] flex justify-end transition-opacity duration-300 ${menuAberto ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
           }`}
       >
-        {/* Fundo escuro (clicar nele fecha o menu) */}
         <div
           className="absolute inset-0 bg-black/50 backdrop-blur-sm"
           onClick={() => setMenuAberto(false)}
         ></div>
 
-        {/* Conteúdo da Gaveta (Branco) */}
         <div
           className={`relative bg-white w-64 h-full shadow-2xl p-6 flex flex-col gap-6 transform transition-transform duration-300 ${menuAberto ? "translate-x-0" : "translate-x-full"
             }`}
         >
-          {/* Botão Fechar (X) */}
+          {/* Botão Fechar */}
           <button
             onClick={() => setMenuAberto(false)}
             className="self-end text-gray-500 hover:text-purple-700"
@@ -101,7 +93,7 @@ export default function Header() {
 
             <Link
               to="/login"
-              onClick={() => setMenuAberto(false)} // Fecha ao clicar
+              onClick={() => setMenuAberto(false)}
               className="text-lg font-medium text-gray-700 hover:text-purple-600 border-b pb-2"
             >
               Entrar
@@ -115,7 +107,7 @@ export default function Header() {
               Cadastrar
             </Link>
 
-            {/* Redes Sociais no Mobile também */}
+            {/* Redes Sociais no Mobile */}
             <div className="flex gap-4 mt-4 justify-center">
               <a href="https://www.instagram.com/karlarodriguesyoga/" target="_blank" rel="noopener" className="text-purple-600 text-2xl">
                 <i className="fab fa-instagram" />

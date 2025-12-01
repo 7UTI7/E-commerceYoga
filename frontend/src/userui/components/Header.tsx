@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, LogOut, Menu, X } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -23,20 +23,18 @@ export function Header() {
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200 shadow-sm h-[72px]">
         <div className={`mx-auto ${CONTENT_MAX} px-4 h-full flex items-center justify-between`}>
 
-          {/* LOGO (Esquerda) */}
-          {/* LOGO (Esquerda) */}
+          {/* --- LOGO (Esquerda) --- */}
           <div className="flex items-center gap-3">
             <button 
-                // MUDANÇA AQUI: Em vez de reload, navega para a home do usuário
-                onClick={() => navigate("/user")} 
-                className="flex items-center gap-2 hover:opacity-80 transition"
+              onClick={() => navigate("/user")} 
+              className="flex items-center gap-2 hover:opacity-80 transition"
             >
               <img src="/assets/logo.jpg" alt="Logo" className="h-10 w-10 rounded-md object-cover" />
               <span className="text-xl font-semibold text-purple-800 hidden sm:block">Karla Rodrigues Yoga</span>
             </button>
           </div>
 
-          {/* MENU DESKTOP (Direita - Hidden no Mobile) */}
+          {/* --- MENU DESKTOP (Direita) --- */}
           <div className="hidden md:flex items-center gap-3">
             <button onClick={() => window.open("https://instagram.com", "_blank")} className="text-purple-600 hover:text-purple-800"><i className="fab fa-instagram text-[20px]" /></button>
             <button onClick={() => window.open("https://facebook.com", "_blank")} className="text-purple-600 hover:text-purple-800"><i className="fab fa-facebook text-[20px]" /></button>
@@ -53,7 +51,7 @@ export function Header() {
               </Button>
             )}
 
-            {/* Perfil Desktop com FOTO */}
+            {/* Perfil Desktop */}
             <Button
               variant="secondary"
               className="border border-purple-200 bg-purple-50 text-purple-900 h-9 pl-1 pr-3 gap-2 hover:bg-purple-100 flex items-center"
@@ -72,7 +70,7 @@ export function Header() {
             </button>
           </div>
 
-          {/* BOTÃO MOBILE (Direita) */}
+          {/* --- BOTÃO MOBILE (Direita) --- */}
           <div className="md:hidden">
             <button onClick={() => setMenuOpen(true)} className="p-2 text-purple-800">
               <Menu className="w-7 h-7" />
@@ -81,12 +79,10 @@ export function Header() {
         </div>
       </header>
 
-      {/* --- GAVETA MOBILE (CORRIGIDA) --- */}
+      {/* --- GAVETA MOBILE --- */}
       <div className={`fixed inset-0 z-50 flex justify-end transition-all duration-300 ${menuOpen ? "visible opacity-100" : "invisible opacity-0"}`}>
-        {/* Fundo Escuro */}
         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMenuOpen(false)} />
 
-        {/* Painel Branco Deslizante */}
         <div className={`absolute top-0 right-0 w-[80%] max-w-[300px] h-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"}`}>
 
           {/* Header da Gaveta */}

@@ -53,7 +53,7 @@ const EventsCarousel = () => {
             dateLabel: formatDatePt(e.date || e.createdAt || e.updatedAt),
             timeLabel: formatTimePt(e.date || e.createdAt || e.updatedAt),
             location: e.location || "",
-            // CORREÇÃO AQUI: Prioriza a capa enviada pelo admin
+            
             image: e.coverImage || getFigmaImage("event", e),
           }))
           .sort((a, b) => new Date(a.dateISO).getTime() - new Date(b.dateISO).getTime());

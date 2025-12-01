@@ -98,7 +98,6 @@ export default function PostDetail() {
             dateLabel: a.createdAt ? new Date(a.createdAt).toLocaleDateString("pt-BR") : undefined,
             excerpt: a.content?.trim() ? a.content.slice(0, 180) : undefined,
             fullDescription: a.content,
-            // CORREÇÃO: Prioriza coverImage
             image: safeImage(a.coverImage || getFigmaImage("article", a)),
             comments: a.comments || [],
           };
@@ -133,7 +132,6 @@ export default function PostDetail() {
             location: e.location,
             excerpt: e.description?.trim() ? e.description.slice(0, 180) : undefined,
             fullDescription: e.description,
-            // CORREÇÃO: Prioriza coverImage
             image: safeImage(e.coverImage || getFigmaImage("event", e)),
           };
         }
@@ -394,7 +392,7 @@ export default function PostDetail() {
           <DialogHeader>
             <DialogTitle>Abrir WhatsApp?</DialogTitle>
             <DialogDescription>
-              Este link abrirá o WhatsApp em uma nova aba para {isEvent ? "participar do evento" : "agendar sua aula"}. Deseja continuar?
+              Este link abrirá o WhatsApp em uma nova aba para realizar seu agendamento. Deseja continuar?
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex justify-end gap-2">
@@ -402,7 +400,7 @@ export default function PostDetail() {
               <Button variant="secondary" className="rounded-lg">Cancelar</Button>
             </DialogClose>
             <Button
-              className="rounded-lg"
+              className="rounded-lg bg-green-600 hover:bg-green-700 text-white"
               onClick={() => {
                 window.open(whatsappHref, "_blank", "noopener,noreferrer");
                 setOpenWhats(false);

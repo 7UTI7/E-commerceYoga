@@ -86,7 +86,6 @@ export default function PostsSection({
               description: a.content?.trim()
                 ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
                 : undefined,
-              // CORREÇÃO AQUI: Prioriza coverImage
               image: a.coverImage || getFigmaImage("article", a),
               date: a.createdAt ?? a.updatedAt,
             }))
@@ -135,7 +134,6 @@ export default function PostsSection({
                   description: a.content?.trim()
                     ? (a.content.length > 140 ? a.content.slice(0, 140) + "…" : a.content)
                     : undefined,
-                  // CORREÇÃO AQUI: Prioriza coverImage
                   image: a.coverImage || getFigmaImage("article", a),
                   date: a.createdAt ?? a.updatedAt,
                 }))
@@ -165,7 +163,6 @@ export default function PostsSection({
                   kind: "event",
                   title: e.title,
                   description: e.description,
-                  // CORREÇÃO AQUI: Prioriza coverImage
                   image: e.coverImage || getFigmaImage("event", e),
                   date: e.date ?? e.createdAt ?? e.updatedAt,
                 }))

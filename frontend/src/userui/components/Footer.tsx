@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="bg-purple-700 text-white py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Informações de Contato */}
+          {/* --- INFORMAÇÕES DE CONTATO --- */}
           <div>
             <h3 className="text-white mb-4">Karla Rodrigues Yoga</h3>
             <p className="text-purple-200 text-sm mb-4">
@@ -13,7 +13,7 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Contato */}
+          {/* --- CONTATO --- */}
           <div>
             <h4 className="text-white mb-4">Contato</h4>
             <div className="space-y-2 text-sm">
@@ -32,7 +32,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Redes Sociais */}
+          {/* --- REDES SOCIAIS --- */}
           <div>
             <h4 className="text-white mb-4">Redes Sociais</h4>
             <div className="flex gap-4">

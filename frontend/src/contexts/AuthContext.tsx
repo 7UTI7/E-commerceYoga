@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
-// Importamos getMe para validar a sessão com o servidor e User para tipagem
 import { getMyFavoriteVideos, toggleFavoriteVideo, getMe, type Video, type User } from "../lib/api";
 
 type AuthContextType = {
@@ -34,7 +33,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Recupera a sessão ao carregar a página
   useEffect(() => {
     const initSession = async () => {
       try {
@@ -44,18 +42,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (t) {
           setToken(t);
 
-          // Tenta buscar dados frescos do backend (incluindo avatar novo)
           try {
             const freshUser = await getMe();
             setUser(freshUser);
             storage.setItem("auth_user", JSON.stringify(freshUser));
           } catch (err) {
-            // Se falhar (backend off ou token expirado), tenta usar o cache
             const cachedUser = storage.getItem("auth_user");
             if (cachedUser) {
               setUser(JSON.parse(cachedUser));
             } else {
-              // Se não tem cache nem backend, limpa tudo
               localStorage.clear();
               sessionStorage.clear();
               setUser(null);
@@ -78,11 +73,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initSession();
   }, [fetchFavorites]);
 
-  // Salva a sessão (com o Avatar novo)
   const setSession = (u: User, t: string, remember = true) => {
     const storage = remember ? localStorage : sessionStorage;
     storage.setItem("auth_token", t);
-    storage.setItem("auth_user", JSON.stringify(u)); // Salva o objeto completo
+    storage.setItem("auth_user", JSON.stringify(u));
     setUser(u);
     setToken(t);
     fetchFavorites();

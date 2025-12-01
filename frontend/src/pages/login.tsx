@@ -7,7 +7,6 @@ export default function Login() {
   const navigate = useNavigate();
   const { setSession } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  // const [remember, setRemember] = useState(true); // <-- REMOVIDO
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -35,11 +34,8 @@ export default function Login() {
 
       if (!token || !user) throw new Error("Resposta de login inválida.");
 
-      // salva sessão via contexto
-      // +++ ATUALIZADO: 'remember' foi removido e trocado por 'false' +++
-      setSession(user, token, false); // <-- Sempre usará sessionStorage
+      setSession(user, token, false);
 
-      // ✅ Admin NÃO vai direto para /admin — todo mundo cai em /user
       navigate("/user");
     } catch (err: any) {
       console.error("LOGIN ERROR:", err);
@@ -123,9 +119,7 @@ export default function Login() {
               </div>
             </div>
 
-            {/* +++ ATUALIZADO: "Lembrar" removido, "Esqueceu" alinhado à direita +++ */}
-            <div className="flex items-center justify-end text-sm"> {/* <-- 'justify-between' mudou para 'justify-end' */}
-              {/* O label "Lembrar de mim" foi completamente removido daqui */}
+            <div className="flex items-center justify-end text-sm">
               <button
                 type="button"
                 onClick={() => navigate('/esqueceu-senha')}
@@ -151,7 +145,7 @@ export default function Login() {
               {loading ? "Entrando…" : "Entrar"}
             </button>
 
-            {/* separador */}
+            {/* Separador */}
             <div className="relative my-2 text-center">
               <span className="relative z-10 bg-purple-50 px-3 text-sm text-gray-600">ou</span>
               <span className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-gray-300" />

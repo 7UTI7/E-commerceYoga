@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; // Removi useNavigate pois não vamos redirecionar imediatamente
+import { Link } from "react-router-dom";
 import { register as apiRegister } from "../lib/api";
-// import { useAuth } from "../contexts/AuthContext"; // Não precisamos mais logar direto no cadastro
 
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -23,13 +22,9 @@ function isStrongPassword(pw: string) {
 }
 
 export default function Cadastro() {
-  // const navigate = useNavigate();
-  // const { setSession } = useAuth(); 
-
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Novo estado para controlar se o cadastro foi sucesso
   const [isSuccess, setIsSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
 
@@ -66,14 +61,10 @@ export default function Cadastro() {
     try {
       setLoading(true);
 
-      // Backend Sprint 5: Apenas cria o usuário e envia e-mail. Não retorna token de login.
       await apiRegister(name, email, password);
 
-      // Se passou daqui, deu certo
       setRegisteredEmail(email);
       setIsSuccess(true);
-
-      // NÃO logamos mais automaticamente. O usuário deve verificar o e-mail.
 
     } catch (err: any) {
       const msg =
@@ -110,7 +101,7 @@ export default function Cadastro() {
             />
           </div>
 
-          {/* CARD PRINCIPAL (Alterna entre Formulário e Sucesso) */}
+          {/* CARD PRINCIPAL */}
           <div className="rounded-2xl bg-purple-50 p-6 shadow-lg">
 
             {isSuccess ? (

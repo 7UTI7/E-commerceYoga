@@ -14,10 +14,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// --- TIPAGENS ESTRITAS ---
+
 
 export type UserRole = "STUDENT" | "ADMIN" | "USER";
-// ADICIONADO: Tipo estrito para Nível
+
 export type Level = 'Iniciante' | 'Intermediário' | 'Avançado' | 'Todos';
 
 export type User = {
@@ -63,7 +63,7 @@ export type Video = {
   updatedAt: string;
   youtubeUrl?: string;
   category?: string;
-  level?: Level; // <--- AGORA É ESTRITO
+  level?: Level; 
   comments?: Comment[];
   author?: User;
 };
@@ -87,7 +87,7 @@ export type ClassSlot = {
   dateTime: string;
   durationMinutes?: number;
   maxStudents?: number;
-  level?: Level; // <--- AGORA É ESTRITO
+  level?: Level; 
   modality?: string;
   weekday?: number;
   time?: string;
@@ -106,7 +106,7 @@ export type WhatsAppGroup = {
   updatedAt: string;
 };
 
-// --- FUNÇÕES (SEM ALTERAÇÃO DE LÓGICA, SÓ DE TIPO) ---
+// --- FUNÇÕES ---
 
 export async function register(name: string, email: string, password: string) {
   const { data } = await api.post("/api/auth/register", { name, email, password });

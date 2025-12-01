@@ -18,7 +18,7 @@ export default function VideoTab() {
   const [loadingList, setLoadingList] = useState(true);
 
   const ytId = useMemo(() => ytIdFrom(url), [url]);
-  const urlValida = !url || Boolean(ytId); // se preencheu, precisa ser youtube válido
+  const urlValida = !url || Boolean(ytId);
 
   async function loadList() {
     setLoadingList(true);
@@ -56,7 +56,7 @@ export default function VideoTab() {
     try {
       setSubmitting(true);
       await createVideo({ title: title.trim(), url: url.trim(), description: description.trim() || undefined });
-      // limpa e recarrega a lista
+      
       setTitle("");
       setUrl("");
       setDescription("");
@@ -121,7 +121,7 @@ export default function VideoTab() {
           />
         </div>
 
-        {/* Preview do player */}
+        {/* --- PREVIEW DO PLAYER --- */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Preview</label>
           <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-100">
@@ -153,7 +153,7 @@ export default function VideoTab() {
         </button>
       </form>
 
-      {/* Lista de vídeos cadastrados */}
+      {/* --- LISTA DE VÍDEOS CADASTRADOS --- */}
       <div className="rounded-xl border p-4 sm:p-6 bg-white shadow-sm">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Vídeos publicados</h3>
         {loadingList ? (

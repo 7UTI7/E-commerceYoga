@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import { ArrowLeft, Phone, User as UserIcon, Lock, Camera, Loader2, ZoomIn } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { ArrowLeft, Camera, User as UserIcon, Lock, Loader2, ZoomIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Cropper from "react-easy-crop";
 import { getMe, updateMe, updatePassword, uploadImage, type User } from "../lib/api";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "../userui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "../userui/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../userui/components/ui/dialog";
 
 function formatPhone(value: string) {
   const digits = value.replace(/\D/g, "").slice(0, 11);
@@ -42,7 +42,7 @@ export default function ProfilePage() {
   const [openConfirmInfo, setOpenConfirmInfo] = useState(false);
   const [openConfirmPassword, setOpenConfirmPassword] = useState(false);
 
-  // Crop States
+  // --- CROP STATES ---
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -112,13 +112,12 @@ export default function ProfilePage() {
         name: name.trim(),
         phone: phone.replace(/\D/g, ""),
         email: me?.email,
-        avatar: avatar // Envia URL
+        avatar: avatar
       };
 
       const updatedUser = await updateMe(payload);
       setMe(updatedUser);
 
-      // ATUALIZA A SESSÃO - Importante para refletir no Header na hora
       const currentToken = localStorage.getItem("auth_token") || sessionStorage.getItem("auth_token") || "";
       setSession(updatedUser, currentToken, true);
 
@@ -161,7 +160,7 @@ export default function ProfilePage() {
         {errorMsg && <div className="bg-red-50 text-red-700 p-3 rounded border border-red-200">{errorMsg}</div>}
         {successMsg && <div className="bg-green-50 text-green-700 p-3 rounded border border-green-200">{successMsg}</div>}
 
-        {/* CARD DADOS */}
+        {/* --- CARD DADOS --- */}
         <div className="bg-white shadow p-6 rounded-2xl">
           <h2 className="text-lg font-medium mb-6">Dados Pessoais</h2>
           <div className="flex flex-col md:flex-row gap-8">
@@ -187,7 +186,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* CARD SENHA */}
+        {/* --- CARD SENHA --- */}
         <div className="bg-white shadow p-6 rounded-2xl">
           <h2 className="text-lg font-medium mb-4">Trocar Senha</h2>
           <div className="grid gap-4 md:grid-cols-2">
@@ -201,7 +200,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* MODAL CROP */}
+      {/* --- MODAL CROP --- */}
       <Dialog open={openCropModal} onOpenChange={setOpenCropModal}>
         <DialogContent>
           <DialogHeader><DialogTitle>Ajustar Foto</DialogTitle><DialogDescription>Arraste e zoom.</DialogDescription></DialogHeader>
@@ -219,7 +218,7 @@ export default function ProfilePage() {
         </DialogContent>
       </Dialog>
 
-      {/* MODAIS CONFIRMAÇÃO */}
+      {/* --- MODAIS CONFIRMAÇÃO --- */}
       <Dialog open={openConfirmInfo} onOpenChange={setOpenConfirmInfo}>
         <DialogContent>
           <DialogHeader><DialogTitle>Salvar?</DialogTitle></DialogHeader>
@@ -236,7 +235,7 @@ export default function ProfilePage() {
   );
 }
 
-// UTILS
+// --- UTILS ---
 const createImage = (url: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => {
   const image = new Image();
   image.addEventListener('load', () => resolve(image));

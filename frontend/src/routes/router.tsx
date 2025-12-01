@@ -1,12 +1,9 @@
-// src/routes/router.tsx
 import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 
-// layouts / guards
-import App from "../App"; // layout com Header/Footer e <Outlet/>
+import App from "../App";
 import { ProtectedRoute, AdminRoute } from "./ProtectedRoute";
 
-// páginas
 import Home from "../pages/home";
 import Login from "../pages/login";
 import Cadastro from "../pages/cadastro";
@@ -14,7 +11,6 @@ import User from "../pages/user";
 import Admin from "../pages/admin";
 import VerificacaoCadastro from "../pages/verificacaoCadastro";
 
-// 404 simples
 function NotFound() {
   return (
     <div className="min-h-dvh flex items-center justify-center text-center p-8">
@@ -26,22 +22,18 @@ function NotFound() {
   );
 }
 
-// Rotas que usam o layout App (com Header/Footer)
 const appRoutes = {
   path: "/",
   element: <App />,
   children: [
-    { index: true, element: <Home /> }, // "/"
-    // se quiser outras páginas com header/footer, coloque aqui
+    { index: true, element: <Home /> },
   ],
 };
 
-// Rotas sem layout (login, cadastro, área do usuário, admin)
 const bareRoutes = [
   { path: "/login", element: <Login /> },
   { path: "/cadastro", element: <Cadastro /> },
 
-  // protegido: precisa estar logado
   {
     path: "/user",
     element: (
@@ -52,11 +44,10 @@ const bareRoutes = [
   },
 
   {
-  path: "/verify-email/:token", // <--- O link do e-mail aponta pra cá
-  element: <VerificacaoCadastro />
-},
+    path: "/verify-email/:token",
+    element: <VerificacaoCadastro />
+  },
 
-  // admin: precisa estar logado e ter role ADMIN
   {
     path: "/admin",
     element: (
