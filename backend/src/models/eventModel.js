@@ -11,11 +11,11 @@ const eventSchema = new mongoose.Schema(
       required: [true, 'A descrição é obrigatória.'],
     },
     date: {
-      type: Date, // Armazena a data e a hora do evento
+      type: Date, 
       required: [true, 'A data do evento é obrigatória.'],
     },
     location: {
-      type: String, // Ex: "Online (Zoom)" ou "Estúdio Yoga, Rua X"
+      type: String, 
       required: [true, 'O local é obrigatório.'],
     },
     author: {

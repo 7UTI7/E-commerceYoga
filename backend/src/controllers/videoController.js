@@ -1,14 +1,10 @@
 const Video = require('../models/videoModel');
 const User = require('../models/userModel');
 
-// --- ROTAS PÚBLICAS ---
 
-// @desc    Buscar todos os vídeos
-// @route   GET /api/videos
-// @access  Public
 const getVideos = async (req, res) => {
   try {
-    // Ordena pelos mais recentes
+    
     const videos = await Video.find({}).sort({ createdAt: -1 });
     res.status(200).json(videos);
   } catch (error) {
@@ -16,12 +12,10 @@ const getVideos = async (req, res) => {
   }
 };
 
-// @desc    Buscar um único vídeo pelo ID
-// @route   GET /api/videos/:id
-// @access  Public
+
 const getVideoById = async (req, res) => {
   try {
-    // ATUALIZAÇÃO AQUI: Use .populate()
+ 
     const video = await Video.findById(req.params.id)
       .populate('author', 'name')
       .populate('comments.author', 'name avatar');
@@ -34,11 +28,7 @@ const getVideoById = async (req, res) => {
   } catch (error) { /*...*/ }
 };
 
-// --- ROTAS DE ADMIN ---
 
-// @desc    Criar um novo vídeo
-// @route   POST /api/videos
-// @access  Private/Admin
 const createVideo = async (req, res) => {
   try {
     const { title, description, youtubeUrl, category, level } = req.body;
@@ -59,9 +49,7 @@ const createVideo = async (req, res) => {
   }
 };
 
-// @desc    Atualizar um vídeo
-// @route   PUT /api/videos/:id
-// @access  Private/Admin
+
 const updateVideo = async (req, res) => {
   try {
     const { title, description, youtubeUrl, category, level } = req.body;
@@ -83,9 +71,7 @@ const updateVideo = async (req, res) => {
   }
 };
 
-// @desc    Deletar um vídeo
-// @route   DELETE /api/videos/:id
-// @access  Private/Admin
+
 const deleteVideo = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
@@ -101,35 +87,32 @@ const deleteVideo = async (req, res) => {
   }
 };
 
-// NOVO: Função de Favoritar
-// @desc    Adicionar/Remover um vídeo dos favoritos do usuário
-// @route   POST /api/videos/:id/favorite
-// @access  Private (Qualquer usuário logado)
+
 const toggleFavorite = async (req, res) => {
   try {
-    // 1. Pega o ID do usuário (do token 'protect') e o ID do vídeo (da URL)
+    
     const userId = req.user._id;
     const videoId = req.params.id;
 
-    // 2. Verifica se o vídeo existe
+    
     const video = await Video.findById(videoId);
     if (!video) {
       return res.status(404).json({ message: 'Vídeo não encontrado.' });
     }
 
-    // 3. Busca o usuário
+   
     const user = await User.findById(userId);
 
-    // 4. Verifica se o vídeo JÁ ESTÁ nos favoritos
+   
     const isFavorited = user.favorites.includes(videoId);
 
     if (isFavorited) {
-      // Se já estiver, REMOVE (pull)
+      
       user.favorites.pull(videoId);
       await user.save();
       res.status(200).json({ message: 'Vídeo removido dos favoritos.' });
     } else {
-      // Se não estiver, ADICIONA (push)
+      
       user.favorites.push(videoId);
       await user.save();
       res.status(200).json({ message: 'Vídeo adicionado aos favoritos.' });
@@ -152,7 +135,7 @@ const createVideoComment = async (req, res) => {
     if (video) {
       const comment = {
         content: content,
-        author: req.user._id, // Vem do middleware 'protect'
+        author: req.user._id, 
       };
 
       video.comments.unshift(comment);

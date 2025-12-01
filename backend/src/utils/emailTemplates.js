@@ -1,4 +1,3 @@
-// Template genérico para manter o estilo consistente
 const baseTemplate = (content) => `
 <!DOCTYPE html>
 <html>
@@ -64,7 +63,7 @@ const baseTemplate = (content) => `
 </html>
 `;
 
-// Template de Verificação de E-mail
+
 const verifyEmailTemplate = (name, url) => {
   const content = `
     <h2>Bem-vindo(a), ${name}!</h2>
@@ -77,7 +76,6 @@ const verifyEmailTemplate = (name, url) => {
   return baseTemplate(content);
 };
 
-// Template de Recuperação de Senha
 const forgotPasswordTemplate = (url) => {
   const content = `
     <h2>Recuperação de Senha</h2>

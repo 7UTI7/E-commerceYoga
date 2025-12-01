@@ -4,9 +4,6 @@ const sendEmail = require('../utils/sendEmail');
 const { verifyEmailTemplate, forgotPasswordTemplate } = require('../utils/emailTemplates');
 const jwt = require('jsonwebtoken');
 
-// @desc    Registrar um novo usuário
-// @route   POST /api/auth/register
-// @access  Public
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -29,13 +26,9 @@ const registerUser = async (req, res) => {
     const verificationToken = user.getVerificationToken();
     await user.save({ validateBeforeSave: false });
 
-    // 4. Link de Verificação
-    
-    // Pega a URL do .env ou usa o padrão, e remove a barra do final se tiver
     const rawFrontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-    const frontendUrl = rawFrontendUrl.replace(/\/$/, ''); // <--- O SEGREDO ESTÁ AQUI
+    const frontendUrl = rawFrontendUrl.replace(/\/$/, '');
     
-    // Agora o link sempre terá apenas uma barra
     const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
     
     const htmlMessage = verifyEmailTemplate(user.name, verifyUrl);
@@ -68,9 +61,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-// @desc    Verificar E-mail
-// @route   GET /api/auth/verifyemail/:token
-// @access  Public
 const verifyEmail = async (req, res) => {
   try {
     const verificationToken = crypto
@@ -102,9 +92,6 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-// @desc    Esqueci a senha
-// @route   POST /api/auth/forgotpassword
-// @access  Public
 const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
@@ -141,9 +128,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// @desc    Redefinir Senha
-// @route   PUT /api/auth/resetpassword/:resettoken
-// @access  Public
 const resetPassword = async (req, res) => {
   try {
     const resetPasswordToken = crypto
@@ -180,8 +164,6 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// @desc    Login
-// @route   POST /api/auth/login
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -207,7 +189,7 @@ const loginUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      avatar: user.avatar, // <--- CORREÇÃO: Retornando o avatar no login
+      avatar: user.avatar,
       token: token,
       message: 'Login realizado com sucesso!'
     });
@@ -217,9 +199,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// @desc    Buscar os dados do usuário logado
-// @route   GET /api/auth/me
-// @access  Private (Qualquer usuário logado)
 const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -233,16 +212,13 @@ const getMe = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      avatar: user.avatar, // <--- CORREÇÃO: Retornando o avatar no GetMe (Refresh)
+      avatar: user.avatar,
     });
   } catch (error) {
     res.status(500).json({ message: 'Erro no servidor.' });
   }
 };
 
-// @desc    Atualizar dados do usuário logado
-// @route   PUT /api/auth/me
-// @access  Private (Qualquer usuário logado)
 const updateMe = async (req, res) => {
   try {
     const { name, email, avatar } = req.body;
@@ -276,7 +252,7 @@ const updateMe = async (req, res) => {
       name: updatedUser.name,
       email: updatedUser.email,
       role: updatedUser.role,
-      avatar: updatedUser.avatar, // Retorna a foto atualizada
+      avatar: updatedUser.avatar,
     });
   } catch (error) {
     console.error(error);
@@ -284,9 +260,6 @@ const updateMe = async (req, res) => {
   }
 };
 
-// @desc    Atualizar a senha do usuário logado
-// @route   PUT /api/auth/updatepassword
-// @access  Private (Qualquer usuário logado)
 const updatePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -316,9 +289,6 @@ const updatePassword = async (req, res) => {
   }
 };
 
-// @desc    Buscar os vídeos favoritos
-// @route   GET /api/auth/me/favorites
-// @access  Private (Qualquer usuário logado)
 const getMyFavorites = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).populate('favorites');
