@@ -1,8 +1,8 @@
 # 🧘‍♀️ PLATAFORMA DIGITAL DE YOGA & WELLNESS (PROF. KARLA)
 
 ## Status do Projeto
-[![Status](https://img.shields.io/badge/Status-Desenvolvimento%20Concluído-success.svg)](https://github.com/SEU_USUARIO/SEU_REPOSITORIO)
-[![Última Sprint](https://img.shields.io/badge/Sprint-5%20(Finalizada)-blue.svg)](https://github.com/SEU_USUARIO/SEU_REPOSITORIO)
+[![Status](https://img.shields.io/badge/Status-Desenvolvimento%20Concluído-success.svg)](https://github.com/7UTI7/E-commerceYoga)
+[![Última Sprint](https://img.shields.io/badge/Sprint-5%20(Finalizada)-blue.svg)](https://github.com/7UTI7/E-commerceYoga)
 
 ---
 
@@ -16,31 +16,32 @@ O principal objetivo da arquitetura foi garantir a **modularidade, segurança (v
 ## ✨ Funcionalidades Entregues (MVP)
 
 ### 🛡️ Segurança e Autenticação
-* **Ciclo de Usuário Completo:** Registro, Login e Gerenciamento de Perfil.
+* **Ciclo de Usuário Completo:** Registro, Login, Verificação de E-mail e Recuperação de Senha.
 * **Autenticação JWT:** Uso de JSON Web Tokens (JWT) para proteger todas as rotas sensíveis.
-* **Segurança de Senha:** Senhas armazenadas com **criptografia bcrypt** e validação de força (Regex) no lado do servidor.
-* **Autorização por Papel:** Middlewares (`protect` e `admin`) garantem que apenas a professora (Role: ADMIN) possa acessar rotas de criação/edição.
+* **Segurança de Senha:** Senhas armazenadas com **criptografia bcrypt** e validação de força (Regex).
+* **Autorização por Papel:** Middlewares (`protect` e `admin`) garantem controle de acesso (RBAC).
 
 ### 🖼️ Gerenciamento de Mídia & Conteúdo
-* **Upload para Nuvem:** Implementação de um sistema de upload de imagens genérico para **Cloudinary**, garantindo que as imagens não sejam perdidas no deploy (Render).
-* **Publicação:** CRUD (Create, Read, Update, Delete) completo para **Artigos**, **Vídeos (YouTube)** e **Eventos (Workshops)**.
-* **QoL Admin:** **Geração automática de Slug** para Artigos, simplificando o trabalho da Admin.
+* **Upload para Nuvem:** Integração com **Cloudinary** para upload de imagens (Perfil e Posts), garantindo persistência em deploy serverless.
+* **Publicação:** CRUD completo para **Artigos**, **Vídeos (YouTube)** e **Eventos**.
+* **QoL Admin:** **Geração automática de Slug** para Artigos e Dashboard administrativo com gráficos.
 * **Níveis:** Classificação de Aulas e Vídeos por Nível (Iniciante, Avançado, etc.).
 
 ### 🤝 Interação do Usuário
-* **Favoritos:** Usuários logados podem favoritar/desfavoritar vídeos, com uma rota para listar seus favoritos.
-* **Comentários:** Usuários logados podem postar comentários em Artigos e Vídeos.
-* **Comunidade:** Rota protegida para visualizar links de **Grupos de WhatsApp** (comunidade).
+* **Favoritos:** Usuários logados podem favoritar vídeos.
+* **Comentários:** Sistema de comentários em Artigos e Vídeos.
+* **Comunidade:** Acesso restrito a links de **Grupos de WhatsApp**.
 
 ---
 
 ## ⚙️ Arquitetura e Padrões Aplicados
 
-* **Arquitetura:** **API RESTful Desacoplada** (Frontend e Backend independentes, comunicando-se via JSON). O Backend segue a arquitetura **MVC** (Model-Controller-Route).
+* **Arquitetura:** **API RESTful Desacoplada**. O Backend segue a arquitetura **MVC** (Model-Controller-Route).
 * **Padrões de Projeto (Backend):**
-    * **Decorator / Chain of Responsibility:** Implementado através dos **Middlewares** do Express.js (ex: `protect`, `admin`) para adicionar camadas de segurança (autenticação e autorização) às rotas.
-    * **Singleton:** Aplicado na gestão da conexão do banco de dados (`dbConnect.js`) para otimizar recursos e evitar o gasto desnecessário de pools de conexão.
-* **Deploy (CI/CD):** Configuração de Integração Contínua/Entrega Contínua. O código é atualizado e implantado (deployed) automaticamente no Render a cada `git push` no repositório.
+    * **Decorator / Middleware:** Utilizado para adicionar camadas de validação e segurança às rotas.
+    * **Singleton:** Aplicado na gestão da conexão do banco de dados (`dbConnect.js`).
+    * **Factory:** Utilizado indiretamente na arquitetura de componentes do Frontend para renderização dinâmica.
+* **Deploy (CI/CD):** Integração Contínua com **Render.com** (Backend) e **MongoDB Atlas**.
 
 ---
 
@@ -48,51 +49,72 @@ O principal objetivo da arquitetura foi garantir a **modularidade, segurança (v
 
 | Módulo | Tecnologia | Função |
 | :--- | :--- | :--- |
-| **Backend** | Node.js / Express.js | Servidor web e roteamento da API. |
-| **Database** | MongoDB (Mongoose) | Banco de dados NoSQL flexível e persistência de dados. |
-| **Deploy** | Render.com | Hospedagem contínua (CI/CD) do servidor. |
-| **Autenticação**| JWT (JSON Web Tokens) | Geração de tokens de sessão seguros. |
-| **Segurança** | bcryptjs / crypto | Hash de senhas e geração de tokens de uso único. |
-| **Mídia/Upload** | Multer, Cloudinary | Processamento de arquivos e armazenamento de imagens na nuvem. |
-| **Front** (Ref.) | React.js / Vite | Construção da interface de usuário reativa. |
+| **Backend** | Node.js / Express.js | Servidor web e API. |
+| **Database** | MongoDB (Mongoose) | Banco de dados NoSQL. |
+| **Deploy** | Render.com | Hospedagem em nuvem. |
+| **Email** | Nodemailer / SendGrid | Envio de e-mails transacionais. |
+| **Mídia** | Multer / Cloudinary | Upload e armazenamento de imagens. |
+| **Front** | React.js / Vite | Interface do usuário SPA. |
 
 ---
 
 ## 💻 Configuração e Execução Local
 
-Para rodar o projeto localmente, você precisará de um servidor MongoDB local (Community Server) e credenciais válidas.
+Para rodar o projeto completo (Full-Stack), siga os passos abaixo.
 
-1.  **Clone o Repositório:**
+### 1. Backend (API)
+
+1.  **Clone o Repositório e instale:**
     ```bash
-    git clone https://github.com/7UTI7/E-commerceYoga
+    git clone [https://github.com/7UTI7/E-commerceYoga](https://github.com/7UTI7/E-commerceYoga)
     cd E-commerceYoga/backend
-    ```
-
-2.  **Instale Dependências e Configure o Ambiente:**
-    ```bash
     npm install
     ```
-    Crie o arquivo `.env` na raiz da pasta `backend/` e adicione as variáveis mínimas:
+
+2.  **Configure o arquivo `.env`:**
+    Crie um arquivo `.env` na pasta `backend/` com as seguintes chaves:
     ```env
     PORT=3001
-    JWT_SECRET=UM_SEGREDO_LONGO
-    MONGODB_URI=mongodb://127.0.0.1:27017/yogadb # Para rodar localmente
-    CLOUDINARY_CLOUD_NAME=seu_nome_aqui
-    CLOUDINARY_API_KEY=sua_chave_aqui
-    CLOUDINARY_API_SECRET=seu_segredo_aqui
+    JWT_SECRET=SEU_SEGREDO_SUPER_SEGURO
+    MONGODB_URI=mongodb://127.0.0.1:27017/yogadb
+    
+    # Cloudinary (Imagens)
+    CLOUDINARY_CLOUD_NAME=seu_cloud_name
+    CLOUDINARY_API_KEY=sua_api_key
+    CLOUDINARY_API_SECRET=sua_api_secret
+
+    # SendGrid (E-mails) - Opcional (sem isso usa Ethereal Fake)
+    SMTP_HOST=smtp.sendgrid.net
+    SMTP_PORT=587
+    SMTP_EMAIL=apikey
+    SMTP_PASSWORD=sua_chave_sendgrid
+    SMTP_FROM_EMAIL=seu_email_verificado@exemplo.com
     ```
 
-3.  **Inicie o Banco de Dados Local:**
-    * Garanta que o serviço **MongoDB Community Server** esteja ativo em segundo plano.
-
-4.  **Inicie o Backend:**
+3.  **Inicie o Servidor:**
     ```bash
     npm run dev
     ```
-    O servidor estará ativo em `http://localhost:3001`.
 
-5.  **Inicie o Frontend:**
-    * (Navegue até a pasta `frontend/`) e rode o comando de desenvolvimento (ex: `npm run dev`).
+### 2. Frontend (React)
+
+1.  **Instale as dependências:**
+    ```bash
+    cd ../frontend
+    npm install
+    ```
+
+2.  **Configure o ambiente:**
+    Crie um arquivo `.env` na pasta `frontend/`:
+    ```env
+    VITE_API_URL=http://localhost:3001
+    ```
+
+3.  **Inicie o React:**
+    ```bash
+    npm run dev
+    ```
+    Acesse o projeto em `http://localhost:5173`.
 
 ---
 
