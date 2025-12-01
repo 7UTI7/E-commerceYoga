@@ -88,3 +88,7 @@ coverage/
 *.bak
 *.old
 *.backup
+
+
+# DOC DE API
+doc-api.md
